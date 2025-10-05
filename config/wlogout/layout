@@ -1,36 +1,36 @@
 {
     "label" : "lock",
-    "action" : "loginctl lock-session",
-    "text" : "lock",
+    "action" : "~/.config/hypr/scripts/power.sh lock",
+    "text" : "Lock",
     "keybind" : "l"
 }
 {
-    "label" : "hibernate",
-    "action" : "systemctl hibernate || loginctl hibernate",
-    "text" : "downloading",
-    "keybind" : "h"
-}
-{
     "label" : "logout",
-    "action" : "hyprctl clients -j | jq -r '.[].pid' | xargs kill; pkill Hyprland || pkill sway || pkill niri || loginctl terminate-user $USER",
-    "text" : "logout",
+    "action" : "~/.config/hypr/scripts/power.sh exit",
+    "text" : "Log Out",
     "keybind" : "e"
 }
 {
-    "label" : "shutdown",
-    "action" : "hyprctl clients -j | jq -r '.[].pid' | xargs kill; systemctl poweroff || loginctl poweroff",
-    "text" : "power_settings_new",
-    "keybind" : "s"
-}
-{
     "label" : "suspend",
-    "action" : "systemctl suspend || loginctl suspend",
-    "text" : "bedtime",
+    "action" : "~/.config/hypr/scripts/power.sh suspend",
+    "text" : "Suspend",
     "keybind" : "u"
 }
 {
     "label" : "reboot",
-    "action" : "hyprctl clients -j | jq -r '.[].pid' | xargs kill; systemctl reboot || loginctl reboot",
-    "text" : "restart_alt",
+    "action" : "~/.config/hypr/scripts/power.sh reboot",
+    "text" : "Restart",
     "keybind" : "r"
+}
+{
+    "label" : "shutdown",
+    "action" : "~/.config/hypr/scripts/power.sh shutdown",
+    "text" : "Power Off",
+    "keybind" : "s"
+}
+{
+    "label" : "hibernate",
+    "action" : "systemctl hibernate || loginctl hibernate",
+    "text" : "Hibernate",
+    "keybind" : "h"
 }

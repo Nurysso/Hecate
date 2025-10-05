@@ -1,26 +1,83 @@
+/* Wlogout Dynamic Theme - Generated from Pywal */
+/* Generated: 2025-10-05 21:46:27 */
+
 * {
-	all: unset;
-	background-image: none;
-	transition: 400ms cubic-bezier(0.05, 0.7, 0.1, 1);
+    font-family: "Fira Sans Semibold", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+    background-image: none;
+    transition: 20ms;
+    box-shadow: none;
 }
 
 window {
-	background: rgba(0, 0, 0, 0.5);
+    background: url("../../.cache/wlogout/blurred_wallpaper.png");
+    background-size: cover;
+    font-size: 16pt;
 }
 
 button {
-	font-family: 'Material Symbols Outlined';
-	font-size: 10rem;
-	background-color: rgba(11, 11, 11, 0.4);
-	color: #FFFFFF;
-	margin: 2rem;
-	border-radius: 2rem;
-	padding: 3rem;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20%;
+    animation: gradient_f 20s ease-in infinite;
+    border-radius: 80px;
+    border: 0px;
+    transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    color: #15151c;
+    background-color: alpha(#4B7DC2, 0.2);
 }
 
-button:focus,
-button:active,
+button:focus {
+    background-color: alpha(#4B7DC2, 0.5);
+    background-size: 25%;
+    border: 0px;
+}
+
 button:hover {
-	background-color: rgba(51, 51, 51, 0.5);
-	border-radius: 4rem;
+    background-color: alpha(#4B7DC2, 0.9);
+    opacity: 0.8;
+    color: #15151c;
+    background-size: 30%;
+    margin: 30px;
+    border-radius: 80px;
+    box-shadow: 0 0 50px #15151c;
+}
+
+button span {
+    font-size: 1.2em;
+}
+
+#lock {
+    margin: 10px;
+    border-radius: 20px;
+    background-image: image(url("icons/lock.svg"));
+}
+
+#logout {
+    margin: 10px;
+    border-radius: 20px;
+    background-image: image(url("icons/logout.svg"));
+}
+
+#suspend {
+    margin: 10px;
+    border-radius: 20px;
+    background-image: image(url("icons/suspend.svg"));
+}
+
+#hibernate {
+    margin: 10px;
+    border-radius: 20px;
+    background-image: image(url("icons/hibernate.svg"));
+}
+
+#shutdown {
+    margin: 10px;
+    border-radius: 20px;
+    background-image: image(url("icons/shutdown.svg"));
+}
+
+#reboot {
+    margin: 10px;
+    border-radius: 20px;
+    background-image: image(url("icons/reboot.svg"));
 }
