@@ -250,7 +250,7 @@ build_package_list() {
     gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
     # Base packages
-    INSTALL_PACKAGES+=(git wget curl unzip hyprland wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch python-pywal btop app2unit )
+    INSTALL_PACKAGES+=(git wget curl unzip hyprland wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel git)
 
     # Terminal
     INSTALL_PACKAGES+=("$USER_TERMINAL")
@@ -356,6 +356,7 @@ install_packages() {
             if ! command -v paru &> /dev/null; then
                 gum style --foreground 220 "Installing paru AUR helper..."
                 cd /tmp
+                sudo pacman -S --needed base-devel git
                 git clone https://aur.archlinux.org/paru.git
                 cd paru
                 makepkg -si --noconfirm
@@ -531,43 +532,53 @@ set_default_shell() {
 
 # Install Hyprland plugins
 install_hyprland_plugins() {
-    if ! gum confirm "Install Hyprland plugins?"; then
-        return
-    fi
-
     gum style --border double --padding "1 2" --border-foreground 212 "Installing Hyprland Plugins"
 
     if ! command -v hyprpm &> /dev/null; then
-        gum style --foreground 220 "hyprpm not available, skipping plugins..."
+        gum style --foreground 220 "hyprpm not found, skipping plugins..."
         return
     fi
 
-    local plugins=$(gum choose --no-limit --header "Select Hyprland plugins:" \
+    if ! gum confirm "Install Hyprland plugins?"; then
+        gum style --foreground 220 "Skipping plugins installation"
+        return
+    fi
+
+    local plugins=$(gum choose --no-limit --header "Select plugins:" \
         "hyprexpo" \
         "border-plus-plus" \
-        "hyprfocus" \
-        "Skip")
+        "hyprfocus")
 
-    if echo "$plugins" | grep -q "Skip"; then
+    if [ -z "$plugins" ]; then
+        gum style --foreground 220 "No plugins selected"
         return
     fi
 
-    echo "$plugins" | while read -r plugin; do
-        [ -z "$plugin" ] && continue
+    # Convert to array
+    local plugin_array=()
+    while IFS= read -r line; do
+        [ -n "$line" ] && plugin_array+=("$line")
+    done <<< "$plugins"
+
+    for plugin in "${plugin_array[@]}"; do
+        gum style --foreground 220 "Installing: $plugin"
 
         case "$plugin" in
             hyprexpo|border-plus-plus)
-                gum spin --spinner dot --title "Installing $plugin..." -- \
-                    hyprpm add https://github.com/hyprwm/hyprland-plugins
+                hyprpm add https://github.com/hyprwm/hyprland-plugins && \
+                hyprpm enable "$plugin" && \
+                gum style --foreground 82 "✓ $plugin installed!"
                 ;;
             hyprfocus)
-                gum spin --spinner dot --title "Installing $plugin..." -- \
-                    hyprpm add https://github.com/pyt0xic/hyprfocus
+                hyprpm add https://github.com/pyt0xic/hyprfocus && \
+                hyprpm enable hyprfocus && \
+                gum style --foreground 82 "✓ hyprfocus installed!"
                 ;;
         esac
     done
 
-    gum style --foreground 82 "✓ Hyprland plugins installed!"
+    echo ""
+    gum style --foreground 82 "✓ Plugin installation complete!"
 }
 
 # Set SDDM
