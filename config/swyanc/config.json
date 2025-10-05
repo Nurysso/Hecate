@@ -1,0 +1,103 @@
+//  _   _ _____ ____    _  _____ _____
+// | | | | ____/ ___|  / \|_   _| ____|     /\_/\
+// | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+// |  _  | |__| |___ / ___ \| | | |___      > ^ <
+// |_| |_|_____\____/_/   \_\_| |_____|
+
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+  "positionX": "right",
+  "positionY": "top",
+  "layer": "overlay",
+  "control-center-layer": "top",
+  "layer-shell": true,
+  "ignore-gtk-theme": true,
+  "cssPriority": "user",
+  "control-center-margin-top": 8,
+  "control-center-margin-bottom": 8,
+  "control-center-margin-right": 8,
+  "control-center-margin-left": 0,
+  "notification-2fa-action": true,
+  "notification-inline-replies": false,
+  "notification-window-width": 450,
+  "relative-timestamps": true,
+  "timeout": 6,
+  "timeout-low": 3,
+  "timeout-critical": 0,
+  "fit-to-screen": false,
+  "control-center-width": 420,
+  "control-center-height": 740,
+  "keyboard-shortcuts": true,
+  "image-visibility": "when-available",
+  "transition-time": 200,
+  "hide-on-clear": false,
+  "hide-on-action": false,
+  "script-fail-notify": true,
+  "notification-body-image-height": 120,
+  "notification-body-image-width": 200,
+"notification-visibility": {
+    "theme-update": {
+        "state": "enabled",
+        "app-name": ".*",
+        "summary": ".*SwayNC theme updated.*",
+        "body": ".*",
+        "urgency": "Normal",
+        "category": ".*"
+    }
+},
+  "widgets": [
+    "title",
+    "dnd",
+    "buttons-grid",
+    "volume",
+    "notifications"
+  ],
+  "widget-config": {
+    "title": {
+      "text": "Notifications",
+      "clear-all-button": true,
+      "button-text": "Clear All"
+    },
+    "dnd": {
+      "text": "Do Not Disturb"
+    },
+    "label": {
+      "max-lines": 1,
+      "text": "All caught up!"
+    },
+    "volume": {
+      "label": "󰕾",
+      "show-per-app": false
+    },
+    "backlight": {
+      "label": "󰃟"
+    },
+    "buttons-grid": {
+      "actions": [
+        {
+          "label": "󰐥",
+          "command": "bash -c $HOME/.config/hypr/scripts/Wlogout.sh"
+        },
+        {
+          "label": "󰌾",
+          "command": "bash -c $HOME/.config/hypr/scripts/LockScreen.sh"
+        },
+        {
+          "label": "󰍃",
+          "command": "hyprctl dispatch exit"
+        },
+        {
+          "label": "󰝟",
+          "command": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+        },
+        {
+          "label": "󰂯",
+          "command": "blueman-manager"
+        }
+      ]
+    },
+    "notifications": {
+      "vexpand": true
+    }
+  }
+}

@@ -1,3 +1,10 @@
+//  _   _ _____ ____    _  _____ _____
+// | | | | ____/ ___|  / \|_   _| ____|     /\_/\
+// | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+// |  _  | |__| |___ / ___ \| | | |___      > ^ <
+// |_| |_|_____\____/_/   \_\_| |_____|
+//
+
 {
 "custom/dMenu":{
     "format": "󰣙",
@@ -319,10 +326,8 @@
   "custom/menu": {
     "format": "󰣇",
     "on-click": "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window",
-    "on-click-middle": "$HOME/.config/hypr/UserScripts/WallpaperSelect.sh",
-    "on-click-right": "$HOME/.config/hypr/scripts/WaybarLayout.sh",
     "tooltip": true,
-    "tooltip-format": "Left: App Launcher\nMiddle: Wallpaper\nRight: Layout Menu"
+    "tooltip-format": "App Launcher"
   },
   "battery": {
     "interval": 60,

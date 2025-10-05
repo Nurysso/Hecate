@@ -1,0 +1,17 @@
+#  _   _ _____ ____    _  _____ _____
+# | | | | ____/ ___|  / \|_   _| ____|     /\_/\
+# | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+# |  _  | |__| |___ / ___ \| | | |___      > ^ <
+# |_| |_|_____\____/_/   \_\_| |_____|
+
+# Wallust Configuration
+backend = "resized"
+color_space = "lch"
+threshold = 10
+palette = "dark16"
+check_contrast = true
+saturation = 15
+brightness = 5
+
+[templates]
+hyprland = { template = "hyprland.conf", target = "~/.config/hypr/wallust/wallust-hyprland.conf" }

@@ -1,19 +1,30 @@
+/*
+ _   _ _____ ____    _  _____ _____
+| | | | ____/ ___|  / \|_   _| ____|     /\_/\
+| |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+|  _  | |__| |___ / ___ \| | | |___      > ^ <
+|_| |_|_____\____/_/   \_\_| |_____|
+*/
+
+/* ==================== FONT & BASE SETTINGS ==================== */
+/* Waybar Dynamic Theme - Generated from Pywal */
+/* Generated: 05-10-25 18:38:15 */
+
 /* ==================== FONT & BASE SETTINGS ==================== */
 * {
-	font-family: "JetBrainsMono Nerd Font";
+	font-family: "Inter", "Noto Sans", sans-serif;
 	font-weight: 500;
 	min-height: 0;
-	font-size: 95%;
-	font-feature-settings: '"zero", "ss01", "ss02", "ss03", "ss04", "ss05", "cv31"';
+	font-size: 13px;
 }
 
 /* ==================== WAYBAR WINDOW ==================== */
 window#waybar {
-	background: #1a110f;
-	/* border-radius: 10px; */
-	color: #e5e9f0;
-	border: 1px solid rgba(136, 192, 208, 0.15);
-	padding: 6px 10px;
+	background: #15151c;
+	color: #c4c4c6;
+	border: none;
+	border-bottom: 2px solid rgba(75, 125, 194, 0.15);
+	padding: 4px 12px;
 }
 
 window#waybar.hidden {
@@ -22,43 +33,47 @@ window#waybar.hidden {
 
 window#waybar.empty,
 window#waybar.empty #window {
-	border: 0px;
-	background-color: #1a110f;
+	border: none;
+	background-color: #101012;
 }
 
 /* ==================== WORKSPACES ==================== */
 #workspaces {
 	background: transparent;
-	padding: 0px;
-    padding-left: 8px;
+	padding: 0px 4px;
 }
 
 #workspaces button {
-	color: #4c566a;
-	border-radius: 8px;
-	padding: 4px 10px;
-	margin: 0px 2px;
+	color: #59596d;
+	border-radius: 10px;
+	padding: 4px 12px;
+	margin: 0px 3px;
 	background: transparent;
-	border: none;
-	transition: all 0.2s ease;
+	border: 2px solid transparent;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	font-size: 11px;
 }
 
 #workspaces button:hover {
-	color: #88c0d0;
+	color: #B1A589;
 }
 
 #workspaces button.active {
-	color: #eceff4;
-	background: rgba(136, 192, 208, 0.15);
-	border-radius: 8px;
-    margin-top: 2px;   /* 2px margin on top */
-    margin-bottom: 4px; /* 4px margin on bottom */
-    margin-left: 0px;   /* 0px margin on left */
-    margin-right: 0px;  /* 0px margin on right */
+	color: #c3c3c3;
+	font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#workspaces button.active:hover {
+	color: #B1A589;
+	font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #workspaces button.urgent {
-	color: #bf616a;
+	color: #847B66;
+	background: rgba(132, 123, 102, 0.4);
+	border: 2px solid #847B66;
+	animation: urgent-pulse 1s ease-in-out infinite;
 }
 
 /* ==================== MODULE STYLES ==================== */
@@ -72,149 +87,185 @@ window#waybar.empty #window {
 #tray,
 #window,
 #idle_inhibitor,
-#custom-swaync {
-	padding: 6px 12px;
-	margin: 0px 3px;
+#custom-swaync,
+#bluetooth,
+#network {
+	padding: 4px 10px;
+	margin: 0px 2px;
 	border-radius: 8px;
 	background: transparent;
-	transition: color 0.2s ease;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #bluetooth:hover,
-#clock:hover,
 #cpu:hover,
 #disk:hover,
 #memory:hover,
 #mode:hover,
-#power-profiles-daemon:hover,
-#pulseaudio:hover,
 #temperature:hover,
 #tray:hover,
 #window:hover,
 #idle_inhibitor:hover,
-#custom-swaync:hover {
-	color: #4c566a;
+#pulseaudio:hover,
+#custom-swaync:hover,
+#network:hover {
+	color: #B1A589;
+    background-color: transparent;
+}
+
+/* ==================== APP DRAWER ==================== */
+#custom-dMenu {
+	margin-left: 8px;
+	padding: 4px 12px;
+	font-size: 18px;
+	color: #c3c3c3;
+	border-radius: 10px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#custom-dMenu:hover {
+	color: #B1A589;
 }
 
 /* ==================== CLOCK ==================== */
 #clock {
-	color: #eceff4;
+	color: #c3c3c3;
 	font-weight: 600;
-	padding: 6px 16px;
+	padding: 4px 16px;
+	margin: 0px 8px;
 }
 
 /* ==================== CPU & MEMORY ==================== */
 #cpu {
-	color: #e5e9f0;
+	color: #c3c3c3;
+	font-weight: 500;
 }
 
 #cpu.warning {
-	color: #ebcb8b;
+	color: #EDED2D;
 }
 
 #cpu.critical {
-	color: #bf616a;
+	color: #B01E1E;
+	animation: critical-blink 1s ease-in-out infinite;
 }
 
 #memory {
-	color: #e5e9f0;
+	color: #c3c3c3;
+	font-weight: 500;
 }
 
 #memory.warning {
-	color: #ebcb8b;
+	color: #EDED2D;
 }
 
 #memory.critical {
-	color: #bf616a;
+	color: #B01E1E;
+	animation: critical-blink 1s ease-in-out infinite;
+}
+
+
+/* ==================== DISK ==================== */
+#disk {
+	color: #c3c3c3;
 }
 
 /* ==================== TEMPERATURE ==================== */
 #temperature {
-	color: #e5e9f0;
+	color: #c3c3c3;
 }
 
 #temperature.critical {
-	color: #bf616a;
+	color: #B01E1E;
+	animation: critical-blink 1s ease-in-out infinite;
 }
 
 /* ==================== AUDIO ==================== */
 #pulseaudio {
-	color: #e5e9f0;
-    padding: 3px 9px;
+	color: #c3c3c3;
+	padding: 4px 10px;
+	font-size: 16px;
 }
 
 #pulseaudio.muted {
-	color: #4c566a;
+	color: #59596d;
+	opacity: 0.6;
 }
 
 #pulseaudio#microphone {
-	color: #e5e9f0;
+	color: #c3c3c3;
+	font-size: 14px;
 }
 
 #pulseaudio#microphone.source-muted {
-	color: #4c566a;
+	color: #59596d;
+	opacity: 0.6;
 }
 
 /* ==================== IDLE INHIBITOR ==================== */
 #idle_inhibitor {
-	color: #4c566a;
+	color: #59596d;
 }
 
 #idle_inhibitor.activated {
-	color: #a3be8c;
+	color: #78837B;
+	background: rgba(177, 165, 137, 0.15);
 }
 
 /* ==================== POWER PROFILES ==================== */
 #power-profiles-daemon {
-	color: #e5e9f0;
+	color: #c3c3c7;
 }
 
 #power-profiles-daemon.performance {
-	color: #d08770;
+	color: #3b9bff;
 }
 
 #power-profiles-daemon.power-saver {
-	color: #a3be8c;
+	color: #e1992a;
 }
 
 /* ==================== WINDOW TITLE ==================== */
 #window {
-	color: #88c0d0;
-	font-weight: 500;
+	color: #B1A589;
+	font-weight: 600;
+	padding: 4px 16px;
 }
 
 #window.empty {
 	padding: 0px;
 	margin: 0px;
 }
-#custom-app_drawer_button {
-    padding: 6px 12px;
-    margin-left: 3px;
-}
 
+#custom-app_drawer_button {
+	padding: 4px 12px;
+	margin-left: 3px;
+}
 
 /* ==================== NOTIFICATIONS ==================== */
 #custom-swaync {
-	color: #e5e9f0;
+	color: #c3c3c3;
+	font-size: 16px;
 }
 
 /* ==================== POWER BUTTON ==================== */
 #custom-power {
-	color: #e5e9f0;
-	padding: 6px 14px;
-	margin: 0px 3px;
+	color: #c3c3c3;
+	padding: 4px 12px;
+	margin: 0px 4px;
+	font-size: 16px;
 	font-weight: 600;
 	border-radius: 8px;
-	transition: color 0.2s ease;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #custom-power:hover {
-	color: #bf616a;
+	color: #847B66;
 }
 
 /* ==================== TRAY ==================== */
 #tray {
-	padding: 6px 12px;
+	padding: 4px 8px;
 }
 
 #tray > .passive {
@@ -223,163 +274,108 @@ window#waybar.empty #window {
 
 #tray > .needs-attention {
 	-gtk-icon-effect: highlight;
+	background: rgba(132, 123, 102, 0.4);
+	border-radius: 6px;
 }
 
-/* ==================== APP DRAWER ==================== */
-#custom-dMenu {
-	margin-left: 12px;
+#tray menu {
+	background: #101012;
+	color: #c3c3c3;
+	border: 1px solid rgba(177, 165, 137, 0.15);
+	border-radius: 8px;
+	padding: 4px;
 }
 
 /* ==================== NETWORK ==================== */
-
 #network {
-    padding-left: 10px; /* Space on the left */
-    padding-right: 10px; /* Space on the right */
+	color: #c3c3c3;
+	font-size: 16px;
+	padding: 4px 10px;
 }
 
-#network .icon {
-    color: #ffffff; /* Default color for the network icon */
-    transition: color 0.3s ease-in-out;
+#network.connected {
+	color: #78837B;
 }
 
-/* When connected */
-#network.connected .icon {
-    color: #4caf50; /* Green when connected */
+#network.disconnected {
+	color: #847B66;
+	opacity: 0.6;
 }
 
-/* When disconnected */
-#network.disconnected .icon {
-    color: #f44336; /* Red when disconnected */
+#network.disabled {
+	color: #59596d;
+	opacity: 0.5;
 }
 
-/* When disabled */
-#network.disabled .icon {
-    color: #9e9e9e; /* Grey when disabled */
-}
-
-/* Wi-Fi signal strength */
-#network .icon-wifi {
-    color: #ff9800; /* Yellow for signal strength */
-}
-
-#network .icon-wifi-strong {
-    color: #4caf50; /* Green for strong signal */
-}
-
-#network .icon-wifi-weak {
-    color: #f44336; /* Red for weak signal */
-}
-
-#network .tooltip {
-    font-size: 12px;
-    color: #ffffff;
-    background-color: rgba(0, 0, 0, 0.8);
-    border-radius: 4px;
-    padding: 8px;
-}
-
-/* Tooltip for Ethernet */
-#network.ethernet .tooltip {
-    background-color: rgba(0, 0, 0, 0.7);
-}
-
-
-/* ==================== BULETOOTH ==================== */
+/* ==================== BLUETOOTH ==================== */
 #bluetooth {
-    padding-left: 10px; /* Space on the left */
-    padding-right: 10px; /* Space on the right */
+	color: #c3c3c3;
+	font-size: 16px;
+	padding: 4px 10px;
 }
 
-#bluetooth .icon {
-    color: #ffffff; /* Default color for the Bluetooth icon */
-    transition: color 0.3s ease-in-out;
+#bluetooth.connected {
+	color: #B1A589;
 }
 
-/* When Bluetooth is connected */
-#bluetooth.connected .icon {
-    color: #2196f3; /* Blue when connected */
-}
-
-/* When Bluetooth is disabled */
-#bluetooth.disabled .icon {
-    color: #9e9e9e; /* Grey when disabled */
-}
-
-/* When there are multiple connections */
-#bluetooth.connected .num_connections {
-    color: #ffeb3b; /* Yellow for multiple connections */
-}
-
-/* Tooltip */
-#bluetooth .tooltip {
-    font-size: 12px;
-    color: #ffffff;
-    background-color: rgba(0, 0, 0, 0.8);
-    border-radius: 4px;
-    padding: 8px;
-}
-
-/* Tooltip for enumerating connected devices */
-#bluetooth .tooltip-enumerate {
-    color: #ff9800; /* Orange for enumerated devices */
+#bluetooth.disabled {
+	color: #59596d;
+	opacity: 0.5;
 }
 
 /* ==================== TASKBAR (DOCK) ==================== */
 #taskbar {
-    padding: 2px 8px;
-    background: #2b1e18;
-    border-radius: 12px;
-    margin-top: 2px;
-    margin-bottom: 4px;
-    margin-left: 0px;
-    margin-right: 2px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+	padding: 2px 8px;
+	border-radius: 10px;
+	margin: 2px 4px;
+	box-shadow: 0 2px 8px rgba(16, 16, 18, 0.2);
 }
 
 #taskbar button {
-    padding: 6px 12px;
-    margin: 0px 2px;
-}
-
-#taskbar button:hover {
-    /* background: rgba(140, 135, 140, 0.2); */
-    border: 1px solid rgba(140, 135, 140, 0.4);
-}
-
-#taskbar button.active {
-    border: 1px solid rgba(140, 135, 140, 0.4);
-    /* background: linear-gradient(135deg, rgba(137, 98, 93, 0.1), rgba(115, 78, 71, 0.1)); */
+	padding: 4px 10px;
+	margin: 0px 2px;
+	border-radius: 6px;
+	background: transparent;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #taskbar button.urgent {
-    /* color: #eceff4;  */
-    background: linear-gradient(135deg, rgba(191, 97, 106, 0.4), rgba(208, 135, 112, 0.4));
-    border: 1px solid rgba(191, 97, 106, 0.6);
-    /* animation: urgent-pulse 1.5s ease-in-out infinite; */
+	background: rgba(132, 123, 102, 0.4);
+	border: 2px solid #847B66;
+	animation: urgent-pulse 1s ease-in-out infinite;
 }
 
 #taskbar button.minimized {
-    opacity: 0.6;
-    /* color: rgba(216, 222, 233, 0.5); */
-    background: rgba(0, 0, 0, 0.2);
-}
-#taskbar.empty {
-    background: transparent;
-    box-shadow: none;
+	opacity: 0.5;
+	background: rgba(16, 16, 18, 0.2);
 }
 
-/* @keyframes for urgent pulse */
-/* @keyframes urgent-pulse {
-    0% {
-        transform: scale(1);
-        opacity: 0.7;
-    }
-    50% {
-        transform: scale(1.05);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 0.7;
-    }
-} */
+#taskbar.empty {
+	background: transparent;
+	box-shadow: none;
+	border: none;
+}
+
+/* ==================== DRAWER GROUPS ==================== */
+.drawer-child {
+	opacity: 0.8;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-child:hover {
+	opacity: 1;
+}
+
+/* ==================== TOOLTIPS ==================== */
+tooltip {
+	background: #101012;
+	color: #c3c3c3;
+	border: 1px solid rgba(177, 165, 137, 0.4);
+	border-radius: 8px;
+	padding: 8px 12px;
+	font-size: 12px;
+}
+
+tooltip label {
+	color: #c3c3c3;
+}

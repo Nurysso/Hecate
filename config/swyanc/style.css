@@ -1,0 +1,461 @@
+/*
+ _   _ _____ ____    _  _____ _____
+| | | | ____/ ___|  / \|_   _| ____|     /\_/\
+| |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+|  _  | |__| |___ / ___ \| | | |___      > ^ <
+|_| |_|_____\____/_/   \_\_| |_____|
+*/
+
+
+/* SwayNC Dynamic Theme - Generated from Pywal */
+/* Generated: 2025-10-04 14:24:51 */
+@define-color cc-bg rgba(21, 21, 28, 0.85);
+
+* {
+  all: unset;
+  font-family: "FiraCode Nerd Font", monospace;
+  font-size: 14px;
+  transition: 200ms;
+}
+
+/* Main notification window */
+.notification-row {
+  outline: none;
+  margin: 8px;
+}
+
+.notification-row:focus,
+.notification-row:hover {
+  background: rgba(235, 157, 126, 0.1);
+}
+
+.notification {
+  background: rgba(21, 21, 28, 0.7);
+  border-radius: 16px;
+  margin: 0px;
+  padding: 0;
+  border: 2px solid rgba(75, 125, 194, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.notification-content {
+  background: transparent;
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.close-button {
+  background: rgba(235, 157, 126, 0.3);
+  color: #c4c4c6;
+  text-shadow: none;
+  padding: 0;
+  border-radius: 50%;
+  margin-top: 8px;
+  margin-right: 8px;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.close-button:hover {
+  background: #EB9D7E;
+  color: #15151c;
+}
+
+.notification-default-action {
+  margin: 0;
+  padding: 0;
+  border-radius: 16px;
+}
+
+/* Notification content */
+.summary {
+  font-size: 15px;
+  font-weight: bold;
+  color: #4B7DC2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.time {
+  font-size: 12px;
+  font-weight: normal;
+  color: #5e5e72;
+}
+
+.body {
+  font-size: 13px;
+  font-weight: normal;
+  color: #c4c4c6;
+  margin-top: 6px;
+}
+
+/* Notification icon */
+.notification-default-action .notification-content .image {
+  margin-right: 10px;
+}
+
+.notification-default-action .notification-content .app-icon {
+  margin-right: 10px;
+}
+
+/* Control Center */
+.control-center {
+  background: @cc-bg;
+  border-radius: 20px;
+  margin: 8px;
+  border: 2px solid rgba(75, 125, 194, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.control-center-list {
+  background: transparent;
+}
+
+.control-center-list-placeholder {
+  opacity: 0.5;
+  color: #c4c4c6;
+  font-size: 16px;
+  margin: 20px;
+}
+
+/* Widgets */
+.widget-title {
+  background: transparent;
+  color: #4B7DC2;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 16px;
+  margin: 8px 8px 4px 8px;
+  border-radius: 12px;
+}
+
+.widget-title > button {
+  background: rgba(235, 157, 126, 0.3);
+  color: #c4c4c6;
+  border-radius: 8px;
+  padding: 6px 12px;
+  border: 1px solid rgba(75, 125, 194, 0.3);
+}
+
+.widget-title > button:hover {
+  background: rgba(75, 125, 194, 0.4);
+  border: 1px solid #4B7DC2;
+}
+
+/* DND Widget */
+.widget-dnd {
+  background: rgba(21, 21, 28, 0.5);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px;
+  border: 1px solid rgba(75, 125, 194, 0.3);
+  color: #4B7DC2;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.widget-dnd > switch {
+  background: rgba(235, 157, 126, 0.4);
+  border-radius: 20px;
+  border: none;
+  min-width: 50px;
+  min-height: 26px;
+}
+
+.widget-dnd > switch:checked {
+  background: #4B7DC2;
+}
+
+.widget-dnd > switch slider {
+  background: #c4c4c6;
+  border-radius: 50%;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+/* Label Widget */
+.widget-label {
+  background: transparent;
+  color: #5e5e72;
+  font-size: 13px;
+  margin: 8px;
+  padding: 8px;
+}
+
+/* Buttons Grid */
+.widget-buttons-grid {
+  background: rgba(21, 21, 28, 0.5);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px;
+  border: 1px solid rgba(75, 125, 194, 0.3);
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button {
+  background: rgba(235, 157, 126, 0.4);
+  border-radius: 10px;
+  color: #c4c4c6;
+  font-size: 40px;
+  padding: 2px;
+  margin: 4px;
+  border: 1px solid rgba(75, 125, 194, 0.2);
+  min-width: 60px;
+  min-height: 60px;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+  background: rgba(75, 125, 194, 0.4);
+  border: 1px solid #4B7DC2;
+  color: #4B7DC2;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:active {
+  background: #4B7DC2;
+  color: #15151c;
+}
+
+/* MPRIS Widget */
+.widget-mpris {
+  background: rgba(21, 21, 28, 0.5);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px;
+  border: 1px solid rgba(75, 125, 194, 0.3);
+}
+
+.widget-mpris-player {
+  background: transparent;
+  padding: 8px;
+}
+
+.widget-mpris-title {
+  color: #4B7DC2;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.widget-mpris-subtitle {
+  color: #5e5e72;
+  font-size: 12px;
+}
+
+.widget-mpris > box > button {
+  background: rgba(235, 157, 126, 0.4);
+  color: #c4c4c6;
+  border-radius: 8px;
+  border: 1px solid rgba(75, 125, 194, 0.2);
+  padding: 8px;
+  margin: 2px;
+}
+
+.widget-mpris > box > button:hover {
+  background: rgba(75, 125, 194, 0.4);
+  color: #4B7DC2;
+}
+
+.widget-mpris-album-art {
+  border-radius: 8px;
+}
+
+/* Volume Widget */
+.widget-volume {
+  background: rgba(21, 21, 28, 0.5);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px;
+  border: 1px solid rgba(75, 125, 194, 0.3);
+  color: #c4c4c6;
+}
+
+.widget-volume > box > label {
+  color: #4B7DC2;
+  font-size: 18px;
+  margin-right: 12px;
+  min-width: 24px;
+}
+
+.widget-volume > box > scale {
+  background: transparent;
+}
+
+.widget-volume > box > scale trough {
+  background: rgba(235, 157, 126, 0.4);
+  border-radius: 8px;
+  min-height: 8px;
+  min-width: 200px;
+}
+
+.widget-volume > box > scale trough highlight {
+  background: #4B7DC2;
+  border-radius: 8px;
+}
+
+.widget-volume > box > scale trough slider {
+  background: #c4c4c6;
+  border-radius: 50%;
+  min-height: 18px;
+  min-width: 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  border: 2px solid #4B7DC2;
+}
+
+/* Backlight Widget */
+.widget-backlight {
+  background: rgba(21, 21, 28, 0.5);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px;
+  border: 1px solid rgba(75, 125, 194, 0.3);
+  color: #c4c4c6;
+}
+
+.widget-backlight > box > label {
+  color: #4B7DC2;
+  font-size: 18px;
+  margin-right: 12px;
+  min-width: 24px;
+}
+
+.widget-backlight > box > scale trough {
+  background: rgba(235, 157, 126, 0.4);
+  border-radius: 8px;
+  min-height: 8px;
+  min-width: 200px;
+}
+
+.widget-backlight > box > scale trough highlight {
+  background: #5B6697;
+  border-radius: 8px;
+}
+
+.widget-backlight > box > scale trough slider {
+  background: #c4c4c6;
+  border-radius: 50%;
+  min-height: 18px;
+  min-width: 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  border: 2px solid #5B6697;
+}
+
+/* Notification actions */
+.notification-action {
+  background: rgba(235, 157, 126, 0.4);
+  color: #c4c4c6;
+  border-radius: 8px;
+  margin: 4px;
+  padding: 8px 16px;
+  border: 1px solid rgba(75, 125, 194, 0.2);
+}
+
+.notification-action:hover {
+  background: rgba(75, 125, 194, 0.4);
+  border: 1px solid #4B7DC2;
+}
+
+.notification-action:active {
+  background: #4B7DC2;
+  color: #15151c;
+}
+
+/* Inline reply */
+.inline-reply {
+  background: rgba(235, 157, 126, 0.4);
+  color: #c4c4c6;
+  border-radius: 8px;
+  padding: 8px;
+  margin: 4px;
+  border: 1px solid rgba(75, 125, 194, 0.2);
+}
+
+.inline-reply:focus {
+  border: 1px solid #4B7DC2;
+}
+
+.inline-reply-button {
+  background: #4B7DC2;
+  color: #15151c;
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-left: 4px;
+}
+
+.inline-reply-button:hover {
+  background: #4B7DC2;
+}
+
+/* Scrollbar */
+scrollbar {
+  background: transparent;
+  min-width: 8px;
+}
+
+scrollbar trough {
+  background: rgba(235, 157, 126, 0.1);
+  border-radius: 8px;
+}
+
+scrollbar slider {
+  background: rgba(75, 125, 194, 0.5);
+  border-radius: 8px;
+  min-height: 40px;
+}
+
+scrollbar slider:hover {
+  background: #4B7DC2;
+}
+
+/* Critical notifications */
+.critical {
+  border: 2px solid #EB9D7E;
+}
+
+.critical .notification-action {
+  border: 1px solid #EB9D7E;
+}
+
+/* Low priority */
+.low {
+  border: 2px solid #5e5e72;
+}
+
+/* Notification groups */
+.notification-group {
+  margin: 8px;
+}
+
+.notification-group-headers {
+  background: rgba(21, 21, 28, 0.5);
+  border-radius: 12px 12px 0 0;
+  padding: 8px;
+  border: 1px solid rgba(75, 125, 194, 0.3);
+  border-bottom: none;
+  color: #4B7DC2;
+  font-weight: bold;
+}
+
+.notification-group-icon {
+  color: #4B7DC2;
+}
+
+.notification-group-collapse-button {
+  background: rgba(235, 157, 126, 0.4);
+  color: #c4c4c6;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.notification-group-collapse-button:hover {
+  background: rgba(75, 125, 194, 0.4);
+}
+
+.notification-group-close-all-button {
+  background: rgba(235, 157, 126, 0.4);
+  color: #c4c4c6;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-left: 4px;
+}
+
+.notification-group-close-all-button:hover {
+  background: #EB9D7E;
+  color: #15151c;
+}
