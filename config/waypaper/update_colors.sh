@@ -5,6 +5,7 @@
 # |  _  | |__| |___ / ___ \| | | |___      > ^ <
 # |_| |_|_____\____/_/   \_\_| |_____|
 
+
 CONFIG="$HOME/.config/waypaper/config.ini"
 COLOR_CACHE="$HOME/.cache/wal/colors.json"
 
@@ -23,8 +24,9 @@ echo "Generating color scheme..."
 # Ensure cache directory exists
 mkdir -p "$HOME/.cache/wal"
 
+# Try running wal - using wal backend (default, most compatible)
 # You can also try: --backend colorthief, schemer2, or haishoku
-# -n flag prevents terminal theme changes, so your terminal colors arent effected
+# -n flag prevents terminal theme changes, so "Remote control is disabled" is expected
 if ! wal -n -i "$WP_PATH" -q -t -s 2>&1 | grep -v "Remote control is disabled" | tee /tmp/wal_error.log; then
     # Check if there were actual errors (not just the remote control warning)
     if grep -qv "Remote control is disabled" /tmp/wal_error.log 2>/dev/null; then
@@ -85,6 +87,11 @@ if ~/.config/waybar/update_colors.sh; then
 else
     notify-send "✗ Waybar theme update failed"
 fi
-
+echo "Updating Wlogout theme..."
+if ~/.config/wlogout/update_colors.sh; then
+    notify-send "✓ wlogout theme updated"
+else
+    notify-send "✗ wlogout theme update failed"
+fi
 echo ""
 notify-send "✓ All themes updated successfully!"
