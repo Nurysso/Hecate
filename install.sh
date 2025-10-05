@@ -250,7 +250,7 @@ build_package_list() {
     gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
     # Base packages
-    INSTALL_PACKAGES+=(git wget curl unzip hyprland waybar rofi-wayland dunst fastfetch btop)
+    INSTALL_PACKAGES+=(git wget curl unzip hyprland wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch python-pywal btop app2unit )
 
     # Terminal
     INSTALL_PACKAGES+=("$USER_TERMINAL")
@@ -506,6 +506,13 @@ move_config() {
     gum style --foreground 82 "✓ Configuration files installed successfully!"
 }
 
+build_preferd_app_keybind(){
+mkdir -p ~/.config/hypr/configs && cat <<EOF > ~/.config/hypr/configs/app-names.conf
+# Set your default editor here uncomment and reboot to take effect.
+$term = $USER_TERMINAL
+$browser = $USER_BROWSER
+EOF
+}
 # Setup Waybar
 setup_Waybar(){
     gum style --foreground 220 "Configuring waybar..."
@@ -689,6 +696,7 @@ main() {
     # Install configuration files
     move_config
     setup_Waybar
+    build_preferd_app_keybind
 
     # Set default shell
     set_default_shell
