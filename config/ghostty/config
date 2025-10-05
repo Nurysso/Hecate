@@ -1,0 +1,22 @@
+theme = "Catppuccin Mocha"
+# Or for auto light/dark switching
+theme = "light:Catppuccin Latte,dark:Catppuccin Mocha"
+
+background = "#000000"
+foreground = "#dddddd"
+background-opacity = 0.70
+background-blur = 10
+window-padding-x = 16
+window-padding-y = 16
+window-padding-balance = true
+window-padding-color = background
+
+window-decoration = true
+gtk-titlebar = true
+
+# Font settings
+font-family = "JetBrains Mono"
+font-size = 14
+
+# Cursor
+cursor-style = block

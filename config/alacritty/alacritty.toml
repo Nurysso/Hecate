@@ -1,0 +1,51 @@
+#  _   _ _____ ____    _  _____ _____
+# | | | | ____/ ___|  / \|_   _| ____|     /\_/\
+# | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+# |  _  | |__| |___ / ___ \| | | |___      > ^ <
+# |_| |_|_____\____/_/   \_\_| |_____|
+
+[colors.cursor]
+cursor = "0xdddddd"
+text = "0x000000"
+
+[colors.primary]
+background = "0x000000"
+foreground = "0xdddddd"
+
+[colors.selection]
+background = "0x555555"
+text = "0x000000"
+
+[cursor]
+blink_interval = 600
+style = "Block"
+unfocused_hollow = false
+
+[font]
+size = 14.0
+
+[font.bold]
+style = "Bold"
+
+[font.italic]
+style = "Italic"
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+style = "Bold"
+
+[mouse]
+hide_when_typing = false
+
+[scrolling]
+history = 5000
+multiplier = 1
+
+[window]
+decorations = "full"
+dynamic_title = true
+opacity = 0.9
+
+[window.padding]
+x = 8
+y = 8
