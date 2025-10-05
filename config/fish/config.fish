@@ -1,4 +1,8 @@
-# ~/.config/fish/config.fish
+#  _   _ _____ ____    _  _____ _____
+# | | | | ____/ ___|  / \|_   _| ____|     /\_/\
+# | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+# |  _  | |__| |___ / ___ \| | | |___      > ^ <
+# |_| |_|_____\____/_/   \_\_| |_____|
 
 # === PATH Configuration ===
 set -gx PATH $PATH /snap/bin
@@ -15,7 +19,7 @@ set -gx STARSHIP_CONFIG ~/.config/starship.toml
 starship init fish | source
 
 # === Plugins (via fisher) ===
-# Install fisher if not yet installed: 
+# Install fisher if not yet installed:
 # curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher
 
 # Install equivalent plugins:
@@ -26,6 +30,7 @@ starship init fish | source
 # fisher install oh-my-fish/plugin-thefuck
 # fisher install PatrickF1/fzf.fish
 # fisher install decors/fish-colored-man
+# set -eU fish_history
 
 # === TheFuck setup ===
 thefuck --alias | source
@@ -54,8 +59,9 @@ alias cpuinfo "cat /proc/cpuinfo"
 alias ports "sudo netstat -tulanp"
 
 # === History Settings ===
-set -Ux fish_history ~/.local/share/fish/fish_history
+# Fish automatically stores history under ~/.local/share/fish/fish_history
 set -g fish_history_limit 100000
+
 
 # === FZF Config ===
 # These variables customize keybindings
