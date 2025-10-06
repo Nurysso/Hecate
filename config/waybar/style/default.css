@@ -4,11 +4,9 @@
 | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
 |  _  | |__| |___ / ___ \| | | |___      > ^ <
 |_| |_|_____\____/_/   \_\_| |_____|
-*/
 
-/* ==================== FONT & BASE SETTINGS ==================== */
-/* Waybar Dynamic Theme - Generated from Pywal */
-/* Generated: 05-10-25 18:38:15 */
+ Waybar Dynamic Theme - Generated from Pywal
+ Generated: $(date '+%d-%m-%y %H:%M:%S') */
 
 /* ==================== FONT & BASE SETTINGS ==================== */
 * {
@@ -34,7 +32,7 @@ window#waybar.hidden {
 window#waybar.empty,
 window#waybar.empty #window {
 	border: none;
-	background-color: #101012;
+	background-color: #1b0c11;
 }
 
 /* ==================== WORKSPACES ==================== */
@@ -44,7 +42,7 @@ window#waybar.empty #window {
 }
 
 #workspaces button {
-	color: #59596d;
+	color: #6f5b62;
 	border-radius: 10px;
 	padding: 4px 12px;
 	margin: 0px 3px;
@@ -55,24 +53,24 @@ window#waybar.empty #window {
 }
 
 #workspaces button:hover {
-	color: #B1A589;
+	color: #E36039;
 }
 
 #workspaces button.active {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 #workspaces button.active:hover {
-	color: #B1A589;
+	color: #E36039;
 	font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #workspaces button.urgent {
-	color: #847B66;
-	background: rgba(132, 123, 102, 0.4);
-	border: 2px solid #847B66;
+	color: #8D242A;
+	background: rgba(141, 36, 42, 0.4);
+	border: 2px solid #8D242A;
 	animation: urgent-pulse 1s ease-in-out infinite;
 }
 
@@ -109,7 +107,7 @@ window#waybar.empty #window {
 #pulseaudio:hover,
 #custom-swaync:hover,
 #network:hover {
-	color: #B1A589;
+	color: #E36039;
     background-color: transparent;
 }
 
@@ -118,18 +116,18 @@ window#waybar.empty #window {
 	margin-left: 8px;
 	padding: 4px 12px;
 	font-size: 18px;
-	color: #c3c3c3;
+	color: #c6c2c3;
 	border-radius: 10px;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #custom-dMenu:hover {
-	color: #B1A589;
+	color: #E36039;
 }
 
 /* ==================== CLOCK ==================== */
 #clock {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	font-weight: 600;
 	padding: 4px 16px;
 	margin: 0px 8px;
@@ -137,7 +135,7 @@ window#waybar.empty #window {
 
 /* ==================== CPU & MEMORY ==================== */
 #cpu {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	font-weight: 500;
 }
 
@@ -151,7 +149,7 @@ window#waybar.empty #window {
 }
 
 #memory {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	font-weight: 500;
 }
 
@@ -167,12 +165,12 @@ window#waybar.empty #window {
 
 /* ==================== DISK ==================== */
 #disk {
-	color: #c3c3c3;
+	color: #c6c2c3;
 }
 
 /* ==================== TEMPERATURE ==================== */
 #temperature {
-	color: #c3c3c3;
+	color: #c6c2c3;
 }
 
 #temperature.critical {
@@ -182,34 +180,34 @@ window#waybar.empty #window {
 
 /* ==================== AUDIO ==================== */
 #pulseaudio {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	padding: 4px 10px;
 	font-size: 16px;
 }
 
 #pulseaudio.muted {
-	color: #59596d;
+	color: #6f5b62;
 	opacity: 0.6;
 }
 
 #pulseaudio#microphone {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	font-size: 14px;
 }
 
 #pulseaudio#microphone.source-muted {
-	color: #59596d;
+	color: #6f5b62;
 	opacity: 0.6;
 }
 
 /* ==================== IDLE INHIBITOR ==================== */
 #idle_inhibitor {
-	color: #59596d;
+	color: #6f5b62;
 }
 
 #idle_inhibitor.activated {
-	color: #78837B;
-	background: rgba(177, 165, 137, 0.15);
+	color: #A9232E;
+	background: rgba(227, 96, 57, 0.15);
 }
 
 /* ==================== POWER PROFILES ==================== */
@@ -227,7 +225,7 @@ window#waybar.empty #window {
 
 /* ==================== WINDOW TITLE ==================== */
 #window {
-	color: #B1A589;
+	color: #E36039;
 	font-weight: 600;
 	padding: 4px 16px;
 }
@@ -244,13 +242,13 @@ window#waybar.empty #window {
 
 /* ==================== NOTIFICATIONS ==================== */
 #custom-swaync {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	font-size: 16px;
 }
 
 /* ==================== POWER BUTTON ==================== */
 #custom-power {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	padding: 4px 12px;
 	margin: 0px 4px;
 	font-size: 16px;
@@ -260,7 +258,7 @@ window#waybar.empty #window {
 }
 
 #custom-power:hover {
-	color: #847B66;
+	color: #8D242A;
 }
 
 /* ==================== TRAY ==================== */
@@ -274,52 +272,52 @@ window#waybar.empty #window {
 
 #tray > .needs-attention {
 	-gtk-icon-effect: highlight;
-	background: rgba(132, 123, 102, 0.4);
+	background: rgba(141, 36, 42, 0.4);
 	border-radius: 6px;
 }
 
 #tray menu {
-	background: #101012;
-	color: #c3c3c3;
-	border: 1px solid rgba(177, 165, 137, 0.15);
+	background: #1b0c11;
+	color: #c6c2c3;
+	border: 1px solid rgba(227, 96, 57, 0.15);
 	border-radius: 8px;
 	padding: 4px;
 }
 
 /* ==================== NETWORK ==================== */
 #network {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	font-size: 16px;
 	padding: 4px 10px;
 }
 
 #network.connected {
-	color: #78837B;
+	color: #A9232E;
 }
 
 #network.disconnected {
-	color: #847B66;
+	color: #8D242A;
 	opacity: 0.6;
 }
 
 #network.disabled {
-	color: #59596d;
+	color: #6f5b62;
 	opacity: 0.5;
 }
 
 /* ==================== BLUETOOTH ==================== */
 #bluetooth {
-	color: #c3c3c3;
+	color: #c6c2c3;
 	font-size: 16px;
 	padding: 4px 10px;
 }
 
 #bluetooth.connected {
-	color: #B1A589;
+	color: #E36039;
 }
 
 #bluetooth.disabled {
-	color: #59596d;
+	color: #6f5b62;
 	opacity: 0.5;
 }
 
@@ -328,7 +326,7 @@ window#waybar.empty #window {
 	padding: 2px 8px;
 	border-radius: 10px;
 	margin: 2px 4px;
-	box-shadow: 0 2px 8px rgba(16, 16, 18, 0.2);
+	box-shadow: 0 2px 8px rgba(27, 12, 17, 0.2);
 }
 
 #taskbar button {
@@ -340,14 +338,14 @@ window#waybar.empty #window {
 }
 
 #taskbar button.urgent {
-	background: rgba(132, 123, 102, 0.4);
-	border: 2px solid #847B66;
+	background: rgba(141, 36, 42, 0.4);
+	border: 2px solid #8D242A;
 	animation: urgent-pulse 1s ease-in-out infinite;
 }
 
 #taskbar button.minimized {
 	opacity: 0.5;
-	background: rgba(16, 16, 18, 0.2);
+	background: rgba(27, 12, 17, 0.2);
 }
 
 #taskbar.empty {
@@ -368,14 +366,14 @@ window#waybar.empty #window {
 
 /* ==================== TOOLTIPS ==================== */
 tooltip {
-	background: #101012;
-	color: #c3c3c3;
-	border: 1px solid rgba(177, 165, 137, 0.4);
+	background: #1b0c11;
+	color: #c6c2c3;
+	border: 1px solid rgba(227, 96, 57, 0.4);
 	border-radius: 8px;
 	padding: 8px 12px;
 	font-size: 12px;
 }
 
 tooltip label {
-	color: #c3c3c3;
+	color: #c6c2c3;
 }

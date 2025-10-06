@@ -1,10 +1,3 @@
-//  _   _ _____ ____    _  _____ _____
-// | | | | ____/ ___|  / \|_   _| ____|     /\_/\
-// | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
-// |  _  | |__| |___ / ___ \| | | |___      > ^ <
-// |_| |_|_____\____/_/   \_\_| |_____|
-//
-
 {
 "custom/dMenu":{
     "format": "󰣙",
@@ -44,7 +37,7 @@
 	"on-scroll-down": "hyprctl dispatch workspace e-1",
 	"show-special": false,
     "persistent-workspaces": {
-      "*": 3
+      "*": 5
 	},
 	"format-icons": {
             "active": "<span font='12'>󰮯</span>",
@@ -326,8 +319,10 @@
   "custom/menu": {
     "format": "󰣇",
     "on-click": "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window",
+    "on-click-middle": "$HOME/.config/hypr/UserScripts/WallpaperSelect.sh",
+    "on-click-right": "$HOME/.config/hypr/scripts/WaybarLayout.sh",
     "tooltip": true,
-    "tooltip-format": "App Launcher"
+    "tooltip-format": "Left: App Launcher\nMiddle: Wallpaper\nRight: Layout Menu"
   },
   "battery": {
     "interval": 60,

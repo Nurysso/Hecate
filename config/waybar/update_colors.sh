@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-#  _   _ _____ ____    _  _____ _____
-# | | | | ____/ ___|  / \|_   _| ____|     /\_/\
-# | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
-# |  _  | |__| |___ / ___ \| | | |___      > ^ <
-# |_| |_|_____\____/_/   \_\_| |_____|
-
 COLOR_FILE="$HOME/.cache/wal/colors.json"
 OUTPUT_FILE="$HOME/.config/waybar/style/default.css"
 
@@ -86,8 +80,15 @@ fi
 
 # Generate the CSS file
 cat > "$OUTPUT_FILE" <<EOF
-/* Waybar Dynamic Theme - Generated from Pywal */
-/* Generated: $(date '+%d-%m-%y %H:%M:%S') */
+/*
+ _   _ _____ ____    _  _____ _____
+| | | | ____/ ___|  / \|_   _| ____|     /\_/\
+| |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+|  _  | |__| |___ / ___ \| | | |___      > ^ <
+|_| |_|_____\____/_/   \_\_| |_____|
+
+ Waybar Dynamic Theme - Generated from Pywal
+ Generated: $(date '+%d-%m-%y %H:%M:%S') */
 
 /* ==================== FONT & BASE SETTINGS ==================== */
 * {

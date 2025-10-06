@@ -1,13 +1,31 @@
-#!/usr/bin/env bash
-#  _   _ _____ ____    _  _____ _____
-# | | | | ____/ ___|  / \|_   _| ____|     /\_/\
-# | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
-# |  _  | |__| |___ / ___ \| | | |___      > ^ <
-# |_| |_|_____\____/_/   \_\_| |_____|
+#!/bin/bash
 
+# Waypaper Color Update Script
+# Updates system-wide colors based on wallpaper
+# Respects Hecate theme mode (dynamic/static)
 
 CONFIG="$HOME/.config/waypaper/config.ini"
 COLOR_CACHE="$HOME/.cache/wal/colors.json"
+HECATE_CONFIG="$HOME/.config/hecate.toml"
+
+# Check theme mode from hecate.toml
+get_theme_mode() {
+    if [ -f "$HECATE_CONFIG" ]; then
+        local mode=$(grep "^mode" "$HECATE_CONFIG" | cut -d '=' -f2 | tr -d ' "')
+        echo "$mode"
+    else
+        echo "dynamic"  # Default to dynamic if config not found
+    fi
+}
+
+THEME_MODE=$(get_theme_mode)
+
+# If theme is static, exit without updating
+if [ "$THEME_MODE" = "static" ]; then
+    echo "Theme mode is set to static. Skipping color update."
+    notify-send "Wallpaper Changed" "Theme mode: Static (colors not updated)" -u low
+    exit 0
+fi
 
 # Extract wallpaper path
 WP_PATH=$(grep '^wallpaper' "$CONFIG" | cut -d '=' -f2 | tr -d ' ')
@@ -19,7 +37,7 @@ if [ ! -f "$WP_PATH" ]; then
 fi
 
 echo "Wallpaper changed to: $WP_PATH"
-echo "Generating color scheme..."
+echo "Theme mode: $THEME_MODE - Generating color scheme..."
 
 # Ensure cache directory exists
 mkdir -p "$HOME/.cache/wal"
@@ -64,34 +82,82 @@ echo "✓ Color scheme generated successfully"
 # Small delay to ensure file is fully written
 sleep 0.3
 
+# Track update status
+FAILED_UPDATES=()
+SUCCESSFUL_UPDATES=()
+
 # Generate Rofi colors
 echo "Updating Rofi theme..."
-if ~/.config/rofi/generate_colors.sh; then
-    notify-send "✓ Rofi colors updated"
+if [ -f "$HOME/.config/rofi/generate_colors.sh" ]; then
+    if ~/.config/rofi/generate_colors.sh; then
+        SUCCESSFUL_UPDATES+=("Rofi")
+    else
+        FAILED_UPDATES+=("Rofi")
+    fi
 else
-    notify-send "✗ Rofi color update failed"
+    echo "⚠ Rofi color script not found, skipping..."
 fi
 
 # Generate SwayNC theme
 echo "Updating SwayNC theme..."
-if ~/.config/swaync/update_colors.sh; then
-    notify-send "✓ SwayNC theme updated"
+if [ -f "$HOME/.config/swaync/update_colors.sh" ]; then
+    if ~/.config/swaync/update_colors.sh; then
+        SUCCESSFUL_UPDATES+=("SwayNC")
+    else
+        FAILED_UPDATES+=("SwayNC")
+    fi
 else
-    notify-send "✗ SwayNC theme update failed"
+    echo "⚠ SwayNC color script not found, skipping..."
 fi
 
 # Generate Waybar theme
 echo "Updating Waybar theme..."
-if ~/.config/waybar/update_colors.sh; then
-    notify-send "✓ Waybar theme updated"
+if [ -f "$HOME/.config/waybar/update_colors.sh" ]; then
+    if ~/.config/waybar/update_colors.sh; then
+        SUCCESSFUL_UPDATES+=("Waybar")
+    else
+        FAILED_UPDATES+=("Waybar")
+    fi
 else
-    notify-send "✗ Waybar theme update failed"
+    echo "⚠ Waybar color script not found, skipping..."
 fi
+
+# Generate Wlogout theme
 echo "Updating Wlogout theme..."
-if ~/.config/wlogout/update_colors.sh; then
-    notify-send "✓ wlogout theme updated"
+if [ -f "$HOME/.config/wlogout/update_colors.sh" ]; then
+    if ~/.config/wlogout/update_colors.sh; then
+        SUCCESSFUL_UPDATES+=("Wlogout")
+    else
+        FAILED_UPDATES+=("Wlogout")
+    fi
 else
-    notify-send "✗ wlogout theme update failed"
+    echo "⚠ Wlogout color script not found, skipping..."
 fi
+
+# Summary
 echo ""
-notify-send "✓ All themes updated successfully!"
+echo "═══════════════════════════════════"
+echo "Theme Update Summary"
+echo "═══════════════════════════════════"
+
+if [ ${#SUCCESSFUL_UPDATES[@]} -gt 0 ]; then
+    echo "✓ Successfully updated:"
+    printf '  • %s\n' "${SUCCESSFUL_UPDATES[@]}"
+fi
+
+if [ ${#FAILED_UPDATES[@]} -gt 0 ]; then
+    echo "✗ Failed to update:"
+    printf '  • %s\n' "${FAILED_UPDATES[@]}"
+fi
+
+echo "═══════════════════════════════════"
+
+# Send notification
+if [ ${#FAILED_UPDATES[@]} -eq 0 ]; then
+    notify-send "✓ Theme Updated" "All components updated successfully!" -u normal
+else
+    notify-send "⚠ Theme Partially Updated" "${#SUCCESSFUL_UPDATES[@]} succeeded, ${#FAILED_UPDATES[@]} failed" -u normal
+fi
+
+echo ""
+echo "✓ Color update complete!"
