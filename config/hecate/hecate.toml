@@ -1,0 +1,14 @@
+# Hecate Dotfiles Configuration
+# This file manages your Hecate installation settings
+
+[metadata]
+version = "0.3.0"
+install_date = "2025-01-01"
+last_update = "2025-01-01"
+repo_url = "https://github.com/Aelune/Hecate.git"
+
+[theme]
+# Theme mode: "dynamic" or "static"
+# dynamic: Automatically updates system colors when wallpaper changes
+# static: Keeps colors unchanged regardless of wallpaper
+mode = "dynamic"
