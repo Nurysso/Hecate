@@ -389,8 +389,6 @@ case "${1:-help}" in
         show_help
         exit 1
         ;;
-esactoggle_theme
-        ;;
     info)
         show_info
         ;;

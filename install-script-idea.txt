@@ -9,7 +9,7 @@ packageManager= output of get package manager
 check_OS() -> checks for user os and returns os string, if os is not Arch,fedora,ubuntu
              returns error os not supported and exit shell script
 get_packageManager() -> takes input of os and based on os find package manager supported package
-                manager [pacman, paru, dnf,nala]  
+                manager [pacman, paru, dnf,nala]
 download-Deps() -> takes input of package manager supported package manager [paru, dnf, nala] if apt found download nala and use
                 that, if pacman dound use paru to install depes, if any error show error and exit gracefully.
 
@@ -17,7 +17,7 @@ clone_dotfiles() -> clone repo from github at home
 
 backup_config() -> cd into cloned-repo/config/ and based on folders here create a backup of .config folders with timestamp to avoid overwrite if used again
 
-move config() -> mv folders in cloned-repo/config/ to CONFIGDIR except zsh,bash,fish 
+move config() -> mv folders in cloned-repo/config/ to CONFIGDIR except zsh,bash,fish
                 which will be moved to HOME/.zshrc, HOME/.bashrc, CONFIGDIR/fish
 
 setup_Shell()-> ask user for there shell of choice zsh,bash,fish
@@ -33,7 +33,7 @@ User_Profile() -> ask user for profile minimal(default), gamer, developer, madla
 
 developer_setup() -> ask for what type of development work they do likr aiml,web dev, server,db etc and download necessary packages
                      allows user to add or remove packages
-gamer_setup() -> add necessary packages that a gamer may need then ask if they want to have emulatore to play games if yes then install emulators 
+gamer_setup() -> add necessary packages that a gamer may need then ask if they want to have emulatore to play games if yes then install emulators
 
 madlad_Setup() -> both developer_setup and gamer_setup
 

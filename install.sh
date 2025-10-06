@@ -19,6 +19,7 @@ CONFIGDIR="$HOME/.config"
 REPO_URL="https://github.com/Aelune/Hecate.git"
 OS=""
 PACKAGE_MANAGER=""
+HYPRLAND_NEWLY_INSTALLED=false
 
 # User preferences
 USER_TERMINAL=""
@@ -41,34 +42,35 @@ check_gum() {
         echo "Fedora:"
         echo "  sudo dnf install gum"
         echo ""
-        echo "Ubuntu/Debian:"
-        echo "  sudo mkdir -p /etc/apt/keyrings"
-        echo "  curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg"
-        echo "  echo \"deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *\" | sudo tee /etc/apt/sources.list.d/charm.list"
-        echo "  sudo apt update && sudo apt install gum"
-        echo ""
         echo "Or visit: https://github.com/charmbracelet/gum"
         exit 1
     fi
 }
 
-# Check OS
+# Checks user OS runs only in arch shows warning in fedora and quits in ubuntu or other any other OS
 check_OS() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         case "$ID" in
             arch|manjaro|endeavouros)
                 OS="arch"
+                gum style --foreground 82 "✓ Detected OS: $OS"
                 ;;
             fedora)
+                gum style --foreground 220 --bold "⚠️ Warning: Script has not been tested on Fedora!"
+                gum style --foreground 220 "Proceed at your own risk or follow the Fedora guide if available at https://github.com/Aelune/Hecate/tree/main/documentation/install-fedora.md"
                 OS="fedora"
                 ;;
             ubuntu|debian|pop|linuxmint)
-                OS="ubuntu"
+                gum style --foreground 196 --bold "Error: Ubuntu/Debian-based OS detected!"
+                gum style --foreground 220 "Hecate installer does not support Ubuntu automatically."
+                gum style --foreground 220 "Please follow manual installation instructions:"
+                gum style --foreground 220 "https://github.com/Aelune/Hecate/tree/main/documentation/install-ubuntu.md"
+                exit 1
                 ;;
             *)
                 gum style --foreground 196 --bold "Error: OS '$ID' is not supported!"
-                gum style --foreground 220 "Supported: Arch Linux, Fedora, Ubuntu/Debian"
+                gum style --foreground 220 "Supported: Arch Linux, Manjaro, EndeavourOS"
                 exit 1
                 ;;
         esac
@@ -76,8 +78,8 @@ check_OS() {
         gum style --foreground 196 --bold "Error: Cannot detect OS!"
         exit 1
     fi
-    gum style --foreground 82 "✓ Detected OS: $OS"
 }
+
 
 # Get package manager
 get_packageManager() {
@@ -92,14 +94,20 @@ get_packageManager() {
             fi
             ;;
         fedora)
-            PACKAGE_MANAGER="dnf"
-            ;;
-        ubuntu)
-            if command -v nala &> /dev/null; then
-                PACKAGE_MANAGER="nala"
-            elif command -v apt &> /dev/null; then
-                PACKAGE_MANAGER="apt"
+            gum style --foreground 220 --bold "⚠️ Warning: Script has not been tested on Fedora!"
+            gum style --foreground 220 "Proceed at your own risk."
+
+            if ! gum confirm "Do you want to continue on Fedora?"; then
+                gum style --foreground 196 "Aborting installation on Fedora."
+                exit 1
             fi
+
+    PACKAGE_MANAGER="dnf"
+    ;;
+
+        *)
+            gum style --foreground 196 --bold "Error: No supported OS detected for package management!"
+            exit 1
             ;;
     esac
 
@@ -110,6 +118,7 @@ get_packageManager() {
 
     gum style --foreground 82 "✓ Package Manager: $PACKAGE_MANAGER"
 }
+
 
 # Clone dotfiles
 clone_dotfiles() {
@@ -187,7 +196,7 @@ backup_config() {
     fi
 }
 
-# Ask user preferences
+# Ask user preferences to customize installation
 ask_preferences() {
     gum style --border double --padding "1 2" --border-foreground 212 "User Preferences"
 
@@ -249,8 +258,18 @@ ask_preferences() {
 build_package_list() {
     gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
-    # Base packages
-    INSTALL_PACKAGES+=(git wget curl unzip hyprland wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel)
+    # Check if Hyprland is already installed
+    if command -v Hyprland &> /dev/null; then
+        gum style --foreground 82 "✓ Hyprland is already installed"
+         # Base packages
+        INSTALL_PACKAGES+=(git wget curl unzip wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel)
+    else
+        gum style --foreground 220 "Hyprland not found - will be installed"
+        # Base packages
+        INSTALL_PACKAGES+=(git wget curl unzip hyprland wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel)
+        HYPRLAND_NEWLY_INSTALLED=true
+    fi
+
 
     # Hyprland plugin dependencies
     INSTALL_PACKAGES+=(cmake meson cpio pkg-config)
@@ -414,21 +433,6 @@ install_packages() {
         dnf)
             sudo dnf install -y "${INSTALL_PACKAGES[@]}"
             ;;
-        apt)
-            # Install nala if not present
-            if ! command -v nala &> /dev/null; then
-                gum style --foreground 220 "Installing nala..."
-                sudo apt update
-                sudo apt install -y nala
-                PACKAGE_MANAGER="nala"
-            fi
-            sudo nala update
-            sudo nala install -y "${INSTALL_PACKAGES[@]}"
-            ;;
-        nala)
-            sudo nala update
-            sudo nala install -y "${INSTALL_PACKAGES[@]}"
-            ;;
     esac
 
     echo ""
@@ -551,18 +555,21 @@ move_config() {
         gum style --foreground 82 "Installing hecate CLI tool..."
         cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
         chmod +x "$HOME/.local/bin/hecate"
-
-        # Ensure ~/.local/bin is in PATH for the current shell session
-        if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-            export PATH="$HOME/.local/bin:$PATH"
-        fi
-
         gum style --foreground 82 "✓ hecate command installed to ~/.local/bin/hecate"
-        gum style --foreground 220 "  You can now run 'hecate' from anywhere!"
     fi
 
+    # Install Hyprland plugin installer
+    if [ -f "$HECATEDIR/config/install-hyprland-plugins" ]; then
+        gum style --foreground 82 "Installing Hyprland plugin installer..."
+        cp "$HECATEDIR/config/install-hyprland-plugins" "$HOME/.local/bin/install-hyprland-plugins"
+        chmod +x "$HOME/.local/bin/install-hyprland-plugins"
+        gum style --foreground 82 "✓ Plugin installer available: install-hyprland-plugins"
+    fi
+
+    gum style --foreground 220 "  Run 'hecate' or 'install-hyprland-plugins' from anywhere!"
     gum style --foreground 82 "✓ Configuration files installed successfully!"
 }
+
 
 # Build preferred app keybind
 build_preferd_app_keybind(){
@@ -579,7 +586,7 @@ create_hecate_config() {
 
     local config_dir="$HOME/.config/hecate"
     local config_file="$config_dir/hecate.toml"
-    local version="0.3.0"
+    local version="0.3.1 blind owl"
     local install_date=$(date +%Y-%m-%d)
 
     # Create config directory
@@ -616,256 +623,8 @@ EOF
 
     gum style --foreground 82 "✓ Hecate config created at: $config_file"
     gum style --foreground 220 "Theme mode: $theme_mode"
-
-    # Create hecate management script
-    create_hecate_script
 }
 
-# Create hecate management script
-create_hecate_script() {
-    local script_path="$HOME/.local/bin/hecate"
-    mkdir -p "$HOME/.local/bin"
-
-    cat > "$script_path" << 'HECATE_SCRIPT'
-#!/bin/bash
-
-# Hecate Dotfiles Manager
-# Manages updates, configuration, and theme settings
-
-set -e
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-CONFIG_FILE="$HOME/.config/hecate.toml"
-HECATE_DIR="$HOME/Hecate"
-REPO_URL="https://github.com/Aelune/Hecate.git"
-
-# Check if config exists
-if [ ! -f "$CONFIG_FILE" ]; then
-    echo -e "${RED}Error: Hecate config not found!${NC}"
-    echo "Please run the Hecate installer first."
-    exit 1
-fi
-
-# Parse TOML value
-get_config_value() {
-    local key="$1"
-    grep "^$key" "$CONFIG_FILE" | cut -d '=' -f2 | tr -d ' "' || echo ""
-}
-
-# Update TOML value
-set_config_value() {
-    local key="$1"
-    local value="$2"
-    sed -i "s|^$key.*|$key = \"$value\"|" "$CONFIG_FILE"
-}
-
-# Get current version
-get_current_version() {
-    get_config_value "version"
-}
-
-# Get remote version
-get_remote_version() {
-    local remote_version=$(curl -s "https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt" 2>/dev/null || echo "")
-    echo "$remote_version"
-}
-
-# Check for updates
-check_updates() {
-    echo -e "${BLUE}Checking for updates...${NC}"
-
-    local current_version=$(get_current_version)
-    local remote_version=$(get_remote_version)
-
-    if [ -z "$remote_version" ]; then
-        echo -e "${YELLOW}Unable to check for updates. Network error.${NC}"
-        return 1
-    fi
-
-    echo "Current version: $current_version"
-    echo "Latest version: $remote_version"
-
-    if [ "$current_version" != "$remote_version" ]; then
-        echo -e "${GREEN}New version available!${NC}"
-
-        # Send notification if in Hyprland
-        if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
-            notify-send "Hecate Update Available" "New version $remote_version is available!\nRun: hecate update" -u normal
-        fi
-        return 0
-    else
-        echo -e "${GREEN}You are on the latest version.${NC}"
-        return 1
-    fi
-}
-
-# Update Hecate
-update_hecate() {
-    echo -e "${BLUE}Updating Hecate dotfiles...${NC}"
-
-    # Backup current config
-    local timestamp=$(date +%Y%m%d_%H%M%S)
-    local backup_dir="$HOME/.config/Hecate-backup-$timestamp"
-
-    echo "Creating backup at: $backup_dir"
-    mkdir -p "$backup_dir"
-
-    # Backup important configs
-    [ -d "$HOME/.config/hypr" ] && cp -r "$HOME/.config/hypr" "$backup_dir/"
-    [ -d "$HOME/.config/waybar" ] && cp -r "$HOME/.config/waybar" "$backup_dir/"
-    [ -f "$CONFIG_FILE" ] && cp "$CONFIG_FILE" "$backup_dir/"
-
-    # Update repository
-    if [ -d "$HECATE_DIR" ]; then
-        cd "$HECATE_DIR"
-        echo "Pulling latest changes..."
-        git pull origin main
-    else
-        echo "Cloning repository..."
-        git clone "$REPO_URL" "$HECATE_DIR"
-    fi
-
-    # Copy new configs (preserving user settings)
-    echo "Updating configuration files..."
-
-    # Update only specific configs, not everything
-    [ -d "$HECATE_DIR/config/waybar" ] && cp -r "$HECATE_DIR/config/waybar/"* "$HOME/.config/waybar/"
-    [ -d "$HECATE_DIR/config/rofi" ] && cp -r "$HECATE_DIR/config/rofi/"* "$HOME/.config/rofi/"
-    [ -d "$HECATE_DIR/config/swaync" ] && cp -r "$HECATE_DIR/config/swaync/"* "$HOME/.config/swaync/"
-
-    # Update version and date in config
-    local new_version=$(get_remote_version)
-    local current_date=$(date +%Y-%m-%d)
-
-    set_config_value "version" "$new_version"
-    set_config_value "last_update" "$current_date"
-
-    echo -e "${GREEN}✓ Update complete!${NC}"
-    echo "Backup saved at: $backup_dir"
-
-    # Send notification
-    if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
-        notify-send "Hecate Updated" "Successfully updated to version $new_version" -u normal
-    fi
-}
-
-# Toggle theme mode
-toggle_theme() {
-    local current_mode=$(get_config_value "mode")
-
-    echo "Current theme mode: $current_mode"
-
-    if [ "$current_mode" = "dynamic" ]; then
-        set_config_value "mode" "static"
-        echo -e "${GREEN}✓ Theme mode set to: static${NC}"
-        notify-send "Hecate Theme" "Theme mode: Static\nColors won't auto-update" -u normal
-    else
-        set_config_value "mode" "dynamic"
-        echo -e "${GREEN}✓ Theme mode set to: dynamic${NC}"
-        notify-send "Hecate Theme" "Theme mode: Dynamic\nColors will auto-update from wallpaper" -u normal
-    fi
-}
-
-# Show info
-show_info() {
-    local version=$(get_config_value "version")
-    local install_date=$(get_config_value "install_date")
-    local last_update=$(get_config_value "last_update")
-    local theme_mode=$(get_config_value "mode")
-    local terminal=$(get_config_value "terminal")
-    local shell=$(get_config_value "shell")
-    local browser=$(get_config_value "browser")
-
-    echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║${NC}        ${GREEN}Hecate Dotfiles Info${NC}          ${BLUE}║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
-    echo ""
-    echo -e "${YELLOW}Version:${NC}        $version"
-    echo -e "${YELLOW}Installed:${NC}      $install_date"
-    echo -e "${YELLOW}Last Update:${NC}    $last_update"
-    echo -e "${YELLOW}Theme Mode:${NC}     $theme_mode"
-    echo ""
-    echo -e "${BLUE}Preferences:${NC}"
-    echo -e "  Terminal:     $terminal"
-    echo -e "  Shell:        $shell"
-    echo -e "  Browser:      $browser"
-    echo ""
-}
-
-# Show help
-show_help() {
-    echo -e "${GREEN}Hecate Dotfiles Manager${NC}"
-    echo ""
-    echo "Usage: hecate [command]"
-    echo ""
-    echo "Commands:"
-    echo "  check         Check for updates"
-    echo "  update        Update Hecate dotfiles"
-    echo "  theme         Toggle theme mode (dynamic/static)"
-    echo "  info          Show installation info"
-    echo "  help          Show this help message"
-    echo ""
-    echo "Examples:"
-    echo "  hecate check      # Check if updates are available"
-    echo "  hecate update     # Update to latest version"
-    echo "  hecate theme      # Switch between dynamic/static theme"
-    echo ""
-}
-
-# Main command handler
-case "${1:-help}" in
-    check)
-        check_updates
-        ;;
-    update)
-        check_updates
-        echo ""
-        read -p "Do you want to update? [y/N]: " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            update_hecate
-        else
-            echo "Update cancelled."
-        fi
-        ;;
-    theme)
-        toggle_theme
-        ;;
-    info)
-        show_info
-        ;;
-    help|--help|-h)
-        show_help
-        ;;
-    *)
-        echo -e "${RED}Unknown command: $1${NC}"
-        echo ""
-        show_help
-        exit 1
-        ;;
-esac
-HECATE_SCRIPT
-
-    chmod +x "$script_path"
-
-    # Add update checker to Hyprland autostart if enabled
-    local autostart_file="$HOME/.config/hypr/configs/AutoStart.conf"
-    if [ -f "$autostart_file" ]; then
-        if ! grep -q "hecate startup" "$autostart_file"; then
-            echo "" >> "$autostart_file"
-            echo "# Hecate startup checker (network + updates)" >> "$autostart_file"
-            echo "exec-once = bash -c 'sleep 5 && hecate startup'" >> "$autostart_file"
-        fi
-    fi
-
-    gum style --foreground 82 "✓ Hecate manager installed at: $script_path"
-    gum style --foreground 220 "Usage: hecate [check|update|theme|info|help]"
-}
 
 # Setup Waybar
 setup_Waybar(){
@@ -883,162 +642,31 @@ set_default_shell() {
     fi
 }
 
-# Create post-install script for Hyprland plugins
-create_plugin_installer() {
-    gum style --border double --padding "1 2" --border-foreground 212 "Creating Plugin Installer Script"
+run_plugin_installer_if_in_hyprland() {
+    # Only run if user is currently in Hyprland session
+    if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+        gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
 
-    local script_path="$HOME/.local/bin/install-hyprland-plugins.sh"
-    local flag_file="$HOME/.config/hypr/.plugins_installed"
-    mkdir -p "$HOME/.local/bin"
-
-    cat > "$script_path" << 'PLUGIN_SCRIPT'
-#!/bin/bash
-
-# Hyprland Plugin Installer
-# Run this script after logging into Hyprland
-
-set -e
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-FLAG_FILE="$HOME/.config/hypr/.plugins_installed"
-
-# Check if plugins were already installed
-if [ -f "$FLAG_FILE" ]; then
-    exit 0
-fi
-
-# Check if running in Hyprland
-if [ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
-    echo -e "${RED}Error: This script must be run inside a Hyprland session!${NC}"
-    exit 1
-fi
-
-# Check if gum is installed
-if ! command -v gum &> /dev/null; then
-    echo -e "${RED}Error: gum is not installed!${NC}"
-    exit 1
-fi
-
-# Check if hyprpm is available
-if ! command -v hyprpm &> /dev/null; then
-    gum style --foreground 196 "Error: hyprpm not found!"
-    touch "$FLAG_FILE"
-    exit 1
-fi
-
-gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Installer"
-gum style --foreground 220 "First-time Hyprland setup detected!"
-echo ""
-
-if ! gum confirm "Would you like to install Hyprland plugins now?"; then
-    gum style --foreground 220 "You can run this script later manually: install-hyprland-plugins.sh"
-    touch "$FLAG_FILE"
-    exit 0
-fi
-
-# Update hyprpm headers
-gum style --foreground 220 "Updating hyprpm headers..."
-if hyprpm update; then
-    gum style --foreground 82 "✓ Headers updated successfully!"
-else
-    gum style --foreground 196 "✗ Failed to update headers!"
-    touch "$FLAG_FILE"
-    exit 1
-fi
-
-# Ask which plugins to install
-plugins=$(gum choose --no-limit --header "Select plugins to install:" \
-    "hyprexpo" \
-    "border-plus-plus" \
-    "hyprfocus" \
-    "Skip")
-
-if echo "$plugins" | grep -q "Skip" || [ -z "$plugins" ]; then
-    gum style --foreground 220 "No plugins selected."
-    touch "$FLAG_FILE"
-    exit 0
-fi
-
-# Install selected plugins
-echo "$plugins" | while IFS= read -r plugin; do
-    [ -z "$plugin" ] && continue
-
-    gum style --foreground 220 "Installing: $plugin"
-
-    case "$plugin" in
-        hyprexpo|border-plus-plus)
-            if hyprpm add https://github.com/hyprwm/hyprland-plugins; then
-                if hyprpm enable "$plugin"; then
-                    gum style --foreground 82 "✓ $plugin installed and enabled!"
-                else
-                    gum style --foreground 196 "✗ Failed to enable $plugin"
-                fi
+        if gum confirm "You're currently in Hyprland. Install plugins now?"; then
+            if [ -x "$HOME/.local/bin/install-hyprland-plugins" ]; then
+                gum style --foreground 220 "Running plugin installer..."
+                "$HOME/.local/bin/install-hyprland-plugins"
             else
-                gum style --foreground 196 "✗ Failed to add hyprland-plugins repository"
+                gum style --foreground 196 "Error: Plugin installer not found!"
             fi
-            ;;
-        hyprfocus)
-            if hyprpm add https://github.com/pyt0xic/hyprfocus; then
-                if hyprpm enable hyprfocus; then
-                    gum style --foreground 82 "✓ hyprfocus installed and enabled!"
-                else
-                    gum style --foreground 196 "✗ Failed to enable hyprfocus"
-                fi
-            else
-                gum style --foreground 196 "✗ Failed to add hyprfocus repository"
-            fi
-            ;;
-    esac
-
-    sleep 1
-done
-
-echo ""
-gum style --foreground 82 "✓ Plugin installation complete!"
-gum style --foreground 220 "Reloading Hyprland configuration..."
-
-# Mark as installed
-touch "$FLAG_FILE"
-
-# Reload Hyprland
-hyprctl reload
-
-gum style --foreground 82 "✓ All done! This script will not run automatically again."
-sleep 3
-PLUGIN_SCRIPT
-
-    chmod +x "$script_path"
-
-    # Add to Hyprland autostart
-    local autostart_file="$HOME/.config/hypr/configs/AutoStart.conf"
-    if [ -f "$autostart_file" ]; then
-        # Check if it's not already added
-        if ! grep -q "install-hyprland-plugins.sh" "$autostart_file"; then
-            echo "" >> "$autostart_file"
-            echo "# First-time plugin installer (auto-runs once)" >> "$autostart_file"
-            echo "exec-once = $USER_TERMINAL -e bash -c 'install-hyprland-plugins.sh; exec bash'" >> "$autostart_file"
-            gum style --foreground 82 "✓ Added to Hyprland autostart"
+        else
+            gum style --foreground 220 "You can run 'install-hyprland-plugins' later"
         fi
+    elif [ "$HYPRLAND_NEWLY_INSTALLED" = true ]; then
+        gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
+        gum style --foreground 220 "Hyprland was just installed."
+        gum style --foreground 220 "After reboot, log into Hyprland and run:"
+        gum style --foreground 82 "  install-hyprland-plugins"
     else
-        # Create AutoStart.conf if it doesn't exist
-        mkdir -p "$HOME/.config/hypr/configs"
-        cat > "$autostart_file" << EOF
-# Hyprland AutoStart Configuration
-
-# First-time plugin installer (auto-runs once)
-exec-once = $USER_TERMINAL -e bash -c 'install-hyprland-plugins.sh; exec bash'
-EOF
-        gum style --foreground 82 "✓ Created AutoStart.conf with plugin installer"
+        gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
+        gum style --foreground 220 "When you're in Hyprland, run: install-hyprland-plugins"
     fi
-
-    gum style --foreground 82 "✓ Plugin installer configured!"
-    gum style --foreground 220 "Will run automatically on first Hyprland login"
 }
-
 # Set SDDM
 set_Sddm() {
     if ! gum confirm "Install SDDM login manager?"; then
@@ -1054,9 +682,7 @@ set_Sddm() {
         dnf)
             sudo dnf install -y sddm
             ;;
-        nala|apt)
-            sudo $PACKAGE_MANAGER install -y sddm
-            ;;
+
     esac
 
     sudo systemctl enable sddm
@@ -1181,26 +807,45 @@ main() {
     # Set default shell
     set_default_shell
 
-    # Create post-install plugin installer script
-    create_plugin_installer
-
     # Optional components
     set_Sddm
     # setGrub_Theme
+# Runs hyperland plugin install script if user is already in hyperland and skips if hyperland is newly installed or not loged in
+    run_plugin_installer_if_in_hyprland
 
     # Completion message
     gum style \
-        --foreground 82 --border-foreground 82 --border double \
-        --align center --width 60 --margin "1 2" --padding "2 4" \
-        '✓ Installation Complete!' '' \
-        'IMPORTANT: After reboot and logging into Hyprland,' \
-        'run: install-hyprland-plugins.sh' \
-        'to install Hyprland plugins' '' \
-        'Please reboot your system now.'
+    --foreground 82 --border-foreground 82 --border double \
+    --align center --width 70 --margin "1 2" --padding "2 4" \
+    '✓ Installation Complete!' \
+    '(surprisingly, nothing exploded)' '' \
+    'Your Hyprland rice is now 99% complete!' \
+    'The remaining 1% is tweaking it at 3 AM for the next 6 months' '' \
+    'Post-Install TODO:' \
+    '1. Reboot (or live dangerously and just re-login)' \
+    '2. Log into Hyprland' \
+    '3. Run: install-hyprland-plugins' \
+    '4. Take screenshot' \
+    '5. Post to r/unixporn' \
+    '6. Profit???' '' \
+    # 'hecate --help    (for mere mortals)' \
+    # 'hecate update    (for the brave)' \
+    # 'hecate theme     (for the indecisive)' '' \
+    'May your wallpapers be dynamic and your RAM usage low.'
 
-    if gum confirm "Reboot now?"; then
-        sudo reboot
-    fi
+echo ""
+gum style --foreground 220 ""Fun fact: You're now legally required to mention 'I use Arch Hyprland btw' in conversations""
+
+echo ""
+
+if gum confirm "Reboot now? (Recommended unless you enjoy living on the edge)"; then
+    gum style --foreground 82 "See you on the other side..."
+    sleep 2
+    sudo reboot
+else
+    gum style --foreground 220 "Bold choice. Remember to reboot eventually!"
+    gum style --foreground 220 "Your computer will judge you silently until you do."
+fi
 }
 
 # Run main function
