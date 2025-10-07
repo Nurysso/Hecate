@@ -1,0 +1,52 @@
+/* Rofi Colors - Generated from Pywal */
+/* Generated: 2025-10-07 21:39:08 */
+
+* {
+    /* Special colors */
+    background:     #0e0d1e;
+    foreground:     #c2c2c6;
+    cursor:         #c2c2c6;
+    
+    /* Base16 color palette */
+    color0:         #0e0d1e;
+    color1:         #196A95;
+    color2:         #5A6698;
+    color3:         #A6739C;
+    color4:         #259DB0;
+    color5:         #A78DB8;
+    color6:         #FBAF9A;
+    color7:         #c2c2c6;
+    color8:         #5e5c70;
+    color9:         #196A95;
+    color10:        #5A6698;
+    color11:        #A6739C;
+    color12:        #259DB0;
+    color13:        #A78DB8;
+    color14:        #FBAF9A;
+    color15:        #c2c2c6;
+    
+    /* Semantic color aliases */
+    bg:             @background;
+    fg:             @foreground;
+    bg-alt:         @color1;
+    bg-dim:         @color0;
+    fg-dim:         @color8;
+    fg-bright:      @color15;
+    
+    accent:         @color4;
+    accent-alt:     @color12;
+    
+    red:            @color1;
+    green:          @color2;
+    yellow:         @color3;
+    blue:           @color4;
+    magenta:        @color5;
+    cyan:           @color6;
+    
+    red-bright:     @color9;
+    green-bright:   @color10;
+    yellow-bright:  @color11;
+    blue-bright:    @color12;
+    magenta-bright: @color13;
+    cyan-bright:    @color14;
+}

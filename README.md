@@ -119,7 +119,7 @@ Hecate stores your preferences in `~/.config/hecate/hecate.toml`:
 
 ```toml
 [metadata]
-version = "0.3.0"
+version = "0.3.4"
 install_date = "2025-01-01"
 last_update = "2025-01-01"
 repo_url = "https://github.com/Aelune/Hecate.git"

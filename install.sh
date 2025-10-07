@@ -25,7 +25,9 @@ HYPRLAND_NEWLY_INSTALLED=false
 USER_TERMINAL=""
 USER_SHELL=""
 USER_BROWSER=""
+USER_BROWSER_DISPLAY=""
 USER_PROFILE=""
+INSTALL_SDDM=false
 INSTALL_PACKAGES=()
 
 # Check if gum is installed
@@ -102,8 +104,8 @@ get_packageManager() {
                 exit 1
             fi
 
-    PACKAGE_MANAGER="dnf"
-    ;;
+            PACKAGE_MANAGER="dnf"
+            ;;
 
         *)
             gum style --foreground 196 --bold "Error: No supported OS detected for package management!"
@@ -256,6 +258,16 @@ ask_preferences() {
     fi
     echo ""
 
+    # SDDM preference
+    if gum confirm "Install SDDM login manager?"; then
+        INSTALL_SDDM=true
+        gum style --foreground 82 "✓ SDDM will be installed"
+    else
+        INSTALL_SDDM=false
+        gum style --foreground 220 "Skipping SDDM installation"
+    fi
+    echo ""
+
     # User profile
     USER_PROFILE=$(gum choose --header "Select your profile:" \
         "minimal" \
@@ -270,6 +282,7 @@ ask_preferences() {
     gum style --foreground 220 "Terminal: $USER_TERMINAL"
     gum style --foreground 220 "Shell: $USER_SHELL"
     [ -n "$USER_BROWSER" ] && gum style --foreground 220 "Browser: $USER_BROWSER_DISPLAY"
+    gum style --foreground 220 "SDDM: $([ "$INSTALL_SDDM" = true ] && echo "Yes" || echo "No")"
     gum style --foreground 220 "Profile: $USER_PROFILE"
     echo ""
 
@@ -279,36 +292,21 @@ ask_preferences() {
     fi
 }
 
-# Also update build_preferd_app_keybind function to use the display name
-build_preferd_app_keybind(){
-    mkdir -p ~/.config/hypr/configs && cat <<EOF > ~/.config/hypr/configs/app-names.conf
-# Set your default applications here
-\$term = $USER_TERMINAL
-\$browser = ${USER_BROWSER_DISPLAY:-$USER_BROWSER}
-EOF
-
-    gum style --foreground 82 "✓ App keybinds configured!"
-}
-
 # Build package list based on preferences
 build_package_list() {
     gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
+    # Base packages
+    INSTALL_PACKAGES+=(git wget curl unzip wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel cliphist jq hyprpaper inter-fonts ttf-jetbrains-mono-nerd noto-fonts-emoji)
+
     # Check if Hyprland is already installed
     if command -v Hyprland &> /dev/null; then
         gum style --foreground 82 "✓ Hyprland is already installed"
-         # Base packages
-        INSTALL_PACKAGES+=(git wget curl unzip wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel)
     else
         gum style --foreground 220 "Hyprland not found - will be installed"
-        # Base packages
-        INSTALL_PACKAGES+=(git wget curl unzip hyprland wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel)
+        INSTALL_PACKAGES+=(cmake meson cpio pkg-config hyprland)
         HYPRLAND_NEWLY_INSTALLED=true
     fi
-
-
-    # Hyprland plugin dependencies
-    INSTALL_PACKAGES+=(cmake meson cpio pkg-config)
 
     # Terminal
     INSTALL_PACKAGES+=("$USER_TERMINAL")
@@ -329,6 +327,11 @@ build_package_list() {
     # Browser
     [ -n "$USER_BROWSER" ] && INSTALL_PACKAGES+=("$USER_BROWSER")
 
+    # SDDM
+    if [ "$INSTALL_SDDM" = true ]; then
+        INSTALL_PACKAGES+=(sddm qt5-graphicaleffects qt5-quickcontrols2 qt5-svg)
+    fi
+
     # Profile-based packages
     case "$USER_PROFILE" in
         developer)
@@ -338,9 +341,9 @@ build_package_list() {
             add_gamer_packages
             ;;
         madlad)
-            gum style --foreground 220 "Its dummy function right now..."
-            # add_developer_packages
-            # add_gamer_packages
+            gum style --foreground 220 "Adding all the things..."
+            add_developer_packages
+            add_gamer_packages
             ;;
     esac
 
@@ -533,6 +536,18 @@ install_packages() {
     gum style --foreground 220 "Note: Some packages may have been skipped due to errors"
 }
 
+# Enable SDDM after installation
+enable_sddm() {
+    if [ "$INSTALL_SDDM" = true ]; then
+        gum style --border double --padding "1 2" --border-foreground 212 "Enabling SDDM"
+
+        sudo systemctl enable sddm
+        sudo systemctl set-default graphical.target
+
+        gum style --foreground 82 "✓ SDDM enabled!"
+    fi
+}
+
 # Setup shell plugins
 setup_shell_plugins() {
     gum style --border double --padding "1 2" --border-foreground 212 "Setting Up Shell Plugins"
@@ -614,25 +629,25 @@ setup_fish_plugins() {
 }
 
 setup_bash_plugins() {
-    echo -e "${YELLOW}Setting up Bash with Starship...${NC}"
+    gum style --foreground 220 "Setting up Bash with Starship..."
 
     # Check if Starship is installed
     if ! command -v starship &> /dev/null; then
-        echo -e "${YELLOW}Starship will be installed via package manager...${NC}"
+        gum style --foreground 220 "Starship will be installed via package manager..."
     else
-        echo -e "${GREEN}✓ Starship already installed${NC}"
+        gum style --foreground 82 "✓ Starship already installed"
     fi
 
     # Setup bash-completion if not already installed
     if ! [ -f /usr/share/bash-completion/bash_completion ] && ! [ -f /etc/bash_completion ]; then
-        echo -e "${YELLOW}bash-completion will be installed via package manager...${NC}"
+        gum style --foreground 220 "bash-completion will be installed via package manager..."
     else
-        echo -e "${GREEN}✓ bash-completion already installed${NC}"
+        gum style --foreground 82 "✓ bash-completion already installed"
     fi
 
     # Setup FZF for Bash (this creates ~/.fzf.bash)
     if [ ! -f "$HOME/.fzf.bash" ]; then
-        echo -e "${YELLOW}Setting up FZF for Bash...${NC}"
+        gum style --foreground 220 "Setting up FZF for Bash..."
 
         # Check if fzf package includes the bash integration
         if [ -f /usr/share/fzf/key-bindings.bash ]; then
@@ -642,15 +657,15 @@ setup_bash_plugins() {
 [ -f /usr/share/fzf/completion.bash ] && source /usr/share/fzf/completion.bash
 [ -f /usr/share/fzf/key-bindings.bash ] && source /usr/share/fzf/key-bindings.bash
 FZFEOF
-            echo -e "${GREEN}✓ FZF integration created!${NC}"
+            gum style --foreground 82 "✓ FZF integration created!"
         else
-            echo -e "${YELLOW}FZF integration will be available after FZF is installed${NC}"
+            gum style --foreground 220 "FZF integration will be available after FZF is installed"
         fi
     else
-        echo -e "${GREEN}✓ FZF already configured${NC}"
+        gum style --foreground 82 "✓ FZF already configured"
     fi
-    echo -e "${GREEN}✓ Bash setup complete!${NC}"
-    echo -e "${YELLOW}Note: Restart your terminal or run 'source ~/.bashrc' to apply changes${NC}"
+    gum style --foreground 82 "✓ Bash setup complete!"
+    gum style --foreground 220 "Note: Restart your terminal or run 'source ~/.bashrc' to apply changes"
 }
 
 # Move config files
@@ -716,7 +731,8 @@ move_config() {
     fi
 
     if [ -f "$HECATEDIR/config/starship/starship.toml" ]; then
-        gum style --foreground 82 "Installing hecate CLI tool..."
+        gum style --foreground 82 "Installing Starship config..."
+        mkdir -p "$HOME/.config"
         cp "$HECATEDIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
         gum style --foreground 82 "✓ Starship Config installed"
     fi
@@ -734,13 +750,24 @@ move_config() {
 }
 
 
-# Build preferred app keybind
+# Build preferred app keybind - FIXED VERSION
 build_preferd_app_keybind(){
-    mkdir -p ~/.config/hypr/configs && cat <<EOF > ~/.config/hypr/configs/app-names.conf
-# Set your default editor here uncomment and reboot to take effect.
+    gum style --border double --padding "1 2" --border-foreground 212 "Configuring App Keybinds"
+
+    mkdir -p ~/.config/hypr/configs/UserConfigs
+
+    # Use the display name if available, otherwise use package name
+    local browser_name="${USER_BROWSER_DISPLAY:-$USER_BROWSER}"
+
+    cat > ~/.config/hypr/configs/UserConfigs/app-names.conf << EOF
+# Set your default applications here
 \$term = $USER_TERMINAL
-\$browser = $USER_BROWSER
+\$browser = ${browser_name:-firefox}
 EOF
+
+    gum style --foreground 82 "✓ App keybinds configured!"
+    gum style --foreground 220 "Terminal: $USER_TERMINAL"
+    [ -n "$browser_name" ] && gum style --foreground 220 "Browser: $browser_name"
 }
 
 # Create Hecate configuration file
@@ -749,7 +776,7 @@ create_hecate_config() {
 
     local config_dir="$HOME/.config/hecate"
     local config_file="$config_dir/hecate.toml"
-    local version="0.3.2 blind owl"
+    local version="0.3.4 blind owl"
     local install_date=$(date +%Y-%m-%d)
 
     # Create config directory
@@ -798,7 +825,6 @@ setup_Waybar(){
 }
 
 # Set default shell
-# Fixed set_default_shell function
 set_default_shell() {
     local current_shell=$(basename "$SHELL")
 
@@ -833,6 +859,32 @@ set_default_shell() {
     fi
 }
 
+# Configure SDDM theme at the end
+configure_sddm_theme() {
+    if [ "$INSTALL_SDDM" != true ]; then
+        return
+    fi
+
+    gum style --border double --padding "1 2" --border-foreground 212 "SDDM Theme Configuration"
+
+    if gum confirm "Install SDDM Astronaut theme?"; then
+        gum style --foreground 220 "Installing SDDM theme..."
+
+        local theme_script="/tmp/sddm-astronaut-setup.sh"
+        if curl -fsSL https://raw.githubusercontent.com/keyitdev/sddm-astronaut-theme/master/setup.sh -o "$theme_script"; then
+            chmod +x "$theme_script"
+            bash "$theme_script"
+            rm -f "$theme_script"
+            gum style --foreground 82 "✓ SDDM theme installed!"
+        else
+            gum style --foreground 196 "✗ Failed to download SDDM theme installer"
+        fi
+    else
+        gum style --foreground 220 "Skipping SDDM theme installation"
+        gum style --foreground 220 "You can configure SDDM theme later manually"
+    fi
+}
+
 run_plugin_installer_if_in_hyprland() {
     # Only run if user is currently in Hyprland session
     if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
@@ -858,125 +910,6 @@ run_plugin_installer_if_in_hyprland() {
         gum style --foreground 220 "When you're in Hyprland, run: install-hyprland-plugins"
     fi
 }
-# Set SDDM
-set_Sddm() {
-    # Check if SDDM is already installed and enabled
-    local sddm_installed=false
-    local sddm_enabled=false
-
-    if command -v sddm &> /dev/null; then
-        sddm_installed=true
-        gum style --foreground 82 "✓ SDDM is already installed"
-    fi
-
-    if systemctl is-enabled sddm &> /dev/null; then
-        sddm_enabled=true
-        gum style --foreground 82 "✓ SDDM is already enabled"
-    fi
-
-    # Only prompt if not already set up
-    if [ "$sddm_installed" = true ] && [ "$sddm_enabled" = true ]; then
-        if ! gum confirm "SDDM is already installed and enabled. Reconfigure theme?"; then
-            return
-        fi
-        # Skip installation, go straight to theme
-        setup_sddm_theme
-        return
-    fi
-
-    if ! gum confirm "Install SDDM login manager?"; then
-        return
-    fi
-
-    gum style --border double --padding "1 2" --border-foreground 212 "Installing SDDM"
-
-    # Install SDDM if not already installed
-    if [ "$sddm_installed" = false ]; then
-        case "$PACKAGE_MANAGER" in
-            paru|yay|pacman)
-                sudo pacman -S --noconfirm sddm
-                ;;
-            dnf)
-                sudo dnf install -y sddm
-                ;;
-        esac
-    fi
-
-    # Enable SDDM if not already enabled
-    if [ "$sddm_enabled" = false ]; then
-        sudo systemctl enable sddm
-        sudo systemctl set-default graphical.target
-        gum style --foreground 82 "✓ SDDM installed and enabled!"
-    fi
-
-    # Install theme
-    setup_sddm_theme
-}
-
-# Helper function for SDDM theme installation
-setup_sddm_theme() {
-    if gum confirm "Install SDDM Astronaut theme?"; then
-        gum style --foreground 220 "Installing SDDM theme..."
-
-        local theme_script="/tmp/sddm-astronaut-setup.sh"
-        if curl -fsSL https://raw.githubusercontent.com/keyitdev/sddm-astronaut-theme/master/setup.sh -o "$theme_script"; then
-            chmod +x "$theme_script"
-            bash "$theme_script"
-            rm -f "$theme_script"
-            gum style --foreground 82 "✓ SDDM theme installed!"
-        else
-            gum style --foreground 196 "✗ Failed to download SDDM theme installer"
-        fi
-    fi
-}
-
-# Set GRUB theme
-# setGrub_Theme() {
-#     if [ ! -d "/boot/grub" ] && [ ! -d "/boot/grub2" ]; then
-#         return
-#     fi
-
-#     if ! gum confirm "Install a GRUB theme?"; then
-#         return
-#     fi
-
-#     gum style --border double --padding "1 2" --border-foreground 212 "GRUB Themes"
-
-#     local theme=$(gum choose --header "Select GRUB theme:" \
-#         "Catppuccin" \
-#         "Dracula" \
-#         "Nordic" \
-#         "Cyberpunk" \
-#         "Skip")
-
-#     case "$theme" in
-#         "Catppuccin")
-#             git clone https://github.com/catppuccin/grub.git /tmp/grub-theme
-#             sudo cp -r /tmp/grub-theme/src/* /boot/grub/themes/
-#             ;;
-#         "Dracula")
-#             git clone https://github.com/dracula/grub.git /tmp/grub-theme
-#             sudo mkdir -p /boot/grub/themes/dracula
-#             sudo cp -r /tmp/grub-theme/* /boot/grub/themes/dracula/
-#             ;;
-#         "Nordic")
-#             git clone https://github.com/Lxtharia/minegrub-theme.git /tmp/grub-theme
-#             cd /tmp/grub-theme
-#             sudo ./install.sh
-#             ;;
-#         "Cyberpunk")
-#             git clone https://github.com/VandalByte/grub2-cyberpunk.git /tmp/grub-theme
-#             cd /tmp/grub-theme
-#             sudo ./install.sh
-#             ;;
-#         *)
-#             return
-#             ;;
-#     esac
-
-#     sudo grub-mkconfig -o /boot/grub/grub.cfg 2>/dev/null || sudo grub2-mkconfig -o /boot/grub2/grub.cfg
-#     gum style --foreground 82 "✓ GRUB theme installed!"
-# }
 
 # Main function
 main() {
@@ -1010,14 +943,17 @@ main() {
     # Backup existing configs based on Hecate/config
     backup_config
 
-    # Ask all user preferences first
+    # Ask all user preferences first (including SDDM)
     ask_preferences
 
-    # Build complete package list
+    # Build complete package list (includes SDDM if selected)
     build_package_list
 
     # Install everything at once
     install_packages
+
+    # Enable SDDM if it was installed
+    enable_sddm
 
     # Setup shell plugins
     setup_shell_plugins
@@ -1031,14 +967,13 @@ main() {
     # Set default shell
     set_default_shell
 
-    # Optional components
-    set_Sddm
-    # setGrub_Theme
+    # Configure SDDM theme at the end
+    configure_sddm_theme
+
     # Runs hyperland plugin install script if user is already in hyperland and skips if hyperland is newly installed or not loged in
     run_plugin_installer_if_in_hyprland
 
     # Completion message
-
     gum style \
     --foreground 82 \
     --border-foreground 82 \
@@ -1056,29 +991,21 @@ main() {
     '2. Log into Hyprland' \
     '3. Run: install-hyprland-plugins' \
     '4. Take screenshot' \
-    '5. Post to r/unixporn' \
-    '6. Profit???'
-
-    # Optional extra hints (commented out)
-    # 'hecate --help    (for mere mortals)' \
-    # 'hecate update    (for the brave)' \
-    # 'hecate theme     (for the indecisive)'
-
+    '5. Post to r/unixporn'
     echo ""
     echo "May your wallpapers be dynamic and your RAM usage low."
-    echo ""
-    gum style --foreground 220 "Fun fact: You're now legally required to mention 'I use Arch Hyprland btw' in conversations"
+    # echo ""
+    # gum style --foreground 220 "Fun fact: You're now legally required to mention 'I use Arch Hyprland btw' in conversations"
     echo ""
 
     if gum confirm "Reboot now? (Recommended unless you enjoy living on the edge)"; then
-    gum style --foreground 82 "See you on the other side..."
-    sleep 2
-    sudo reboot
+        gum style --foreground 82 "See you on the other side..."
+        sleep 2
+        sudo reboot
     else
-    gum style --foreground 220 "Bold choice. Remember to reboot eventually!"
-    gum style --foreground 220 "Your computer will judge you silently until you do."
+        gum style --foreground 220 "Bold choice. Remember to reboot eventually!"
+        gum style --foreground 220 "Your computer will judge you silently until you do."
     fi
-
 }
 
 # Run main function

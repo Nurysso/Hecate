@@ -31,7 +31,7 @@ fi
 # Parse TOML value
 get_config_value() {
     local key="$1"
-    grep "^$key" "$CONFIG_FILE" | cut -d '=' -f2 | tr -d ' "' || echo ""
+    grep "^$key" "$CONFIG_FILE" | cut -d '=' -f2 | tr -d ' "' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
 }
 
 # Update TOML value
@@ -109,7 +109,7 @@ check_network() {
         if [ "$silent" = "false" ]; then
             gum style --foreground 82 "✓ Network connected"
             gum style --foreground 220 "The internet still exists. What a time to be alive."
-            send_notification "Hecate Network" "✓ Connected (sadly, can't blame network for bugs)" "low"
+        send_notification "✓ Network Connected" "Ohh internet still up WoW..." "low"
         fi
         return 0
     else
@@ -117,36 +117,11 @@ check_network() {
             gum style --foreground 196 "✗ No network connection"
             gum style --foreground 220 "Did you try unplugging it and plugging it back in?"
             gum style --foreground 220 "Or did your ISP finally give up on you?"
-            send_notification "Hecate Network" "✗ No connection (time to touch grass?)" "critical"
+       send_notification "✗ No connection" "wanna touch grass?" "critical"
         fi
         return 1
     fi
 }
-
-# Startup check (network + updates)
-startup_check() {
-    gum style \
-        --foreground 212 --border-foreground 212 --border double \
-        --align center --width 50 --margin "1 2" --padding "1 2" \
-        'HECATE STARTUP CHECK' \
-        'Booting up the magic...'
-
-    # Check network
-    if check_network "false"; then
-        echo ""
-        gum style --foreground 220 "Network is up. Now checking for updates..."
-        gum style --foreground 220 "(This is where we judge your internet speed)"
-        sleep 1
-        check_updates "silent"
-    else
-        echo ""
-        gum style --foreground 220 "No network = no updates = no problem?"
-        gum style --foreground 220 "Living in offline mode like it's 1995"
-    fi
-
-    send_notification "Hecate Startup" "Startup check complete. You may proceed." "low"
-}
-
 # Check for updates
 check_updates() {
     local mode="${1:-normal}"
@@ -198,6 +173,66 @@ check_updates() {
         fi
         send_notification "Hecate Update Check" "Already on latest version. Nothing to do here." "low"
         return 1
+    fi
+}
+# Startup check (network + updates)
+startup_check() {
+    local local_version remote_data remote_version remote_stage
+
+    local_version=$(get_current_version)
+
+    gum style \
+        --foreground 212 --border-foreground 212 --border double \
+        --align center --width 55 --margin "1 2" --padding "1 2" \
+        'HECATE STARTUP CHECK' \
+        "Local Version: $local_version" \
+        "Connecting to GitHub for remote info..."
+
+    remote_data=$(curl -fsSL --max-time 3 "https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt" 2>/dev/null)
+
+    if [ -n "$remote_data" ]; then
+        # Extract version number and stage
+        remote_version=$(echo "$remote_data" | awk '{print $1}')
+        remote_stage=$(echo "$remote_data" | cut -d' ' -f2-)
+
+        send_notification "✓ Network Connected" "Ohh internet still up WoW..." "low"
+        sleep 2
+
+        local local_num=$(echo "$local_version" | awk '{print $1}')
+        local local_stage=$(echo "$local_version" | cut -d' ' -f2-)
+
+        if [ "$remote_version" != "$local_num" ]; then
+            # Check if remote > local
+            if printf '%s\n%s\n' "$remote_version" "$local_num" | sort -V | head -n1 | grep -q "$local_num"; then
+                gum style --foreground 82 --border double --border-foreground 82 \
+                    --align center --width 60 --margin "1 2" --padding "1 2" \
+                    "🎉 NEW VERSION AVAILABLE!" \
+                    "Remote: $remote_data" \
+                    "Local:  $local_version" \
+                    "" \
+                    "Run: hecate update"
+
+                send_notification "Hecate Update Available" \
+                    "New version detected!\nRemote: $remote_data\nLocal: $local_version\nRun: hecate update" "critical"
+            else
+                gum style --foreground 196 --border double --border-foreground 196 \
+                    --align center --width 60 --margin "1 2" --padding "1 2" \
+                    "⚠️ LOCAL VERSION AHEAD" \
+                    "Local:  $local_version" \
+                    "Remote: $remote_data" \
+                    "" \
+                    "You might be running a dev build."
+
+                send_notification "Hecate Version Mismatch" \
+                    "⚠️ Local version ($local_version) is ahead of remote ($remote_data)\nPossible dev or wrong branch." "critical"
+            fi
+        else
+            gum style --foreground 82 "✓ Already on the latest version ($local_version)"
+        fi
+    else
+        gum style --foreground 196 "✗ No internet connection or GitHub unreachable"
+        gum style --foreground 220 "Skipping update check (offline mode)"
+       send_notification "✗ No connection" "wanna touch grass?" "critical"
     fi
 }
 
@@ -332,7 +367,7 @@ show_info() {
     gum style --foreground 220 "  hecate network    Check network"
 
     echo ""
-    gum style --foreground 196 "Fun fact: You've been ricing for $(( ($(date +%s) - $(date -d "$install_date" +%s)) / 86400 )) days"
+    # gum style --foreground 196 "Fun fact: You've been ricing for $(( ($(date +%s) - $(date -d "$install_date" +%s)) / 86400 )) days"
 
     send_notification "Hecate Info" "Info displayed. You're welcome." "low"
 }

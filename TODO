@@ -1,0 +1,6 @@
+Hecate 0.4 GOALS
+
+- Install script, install-hyprland-plugins, hecate script work with no error
+- add grub theme selction at installation
+- ask all questions in begining then install everything in one go even for customization
+- add gtk3 theme customization based on wallpaper
