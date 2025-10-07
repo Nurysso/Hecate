@@ -27,7 +27,7 @@ take_screenshot() {
         full)
             grim "$temp_file"
             wl-copy < "$temp_file"
-            notify-send -i "$temp_file" "Screenshot" "Fullscreen saved and copied to clipboard"
+            notify-send -i "$temp_file" "Screenshot" "Fullscreen saved"
             ;;
         window)
             # Get active window geometry
@@ -43,7 +43,7 @@ take_screenshot() {
 
             grim -g "$WIN_GEOM" "$temp_file"
             wl-copy < "$temp_file"
-            notify-send -i "$temp_file" "Screenshot" "Active window saved and copied to clipboard"
+            notify-send -i "$temp_file" "Screenshot" "Active window saved"
             ;;
         area)
             # Select area with slurp
@@ -58,7 +58,7 @@ take_screenshot() {
 
             grim -g "$AREA" "$temp_file"
             wl-copy < "$temp_file"
-            notify-send -i "$temp_file" "Screenshot" "Area screenshot saved and copied to clipboard"
+            notify-send -i "$temp_file" "Screenshot" "Area screenshot saved"
             ;;
         *)
             echo "Usage: $0 [full|window|area]"

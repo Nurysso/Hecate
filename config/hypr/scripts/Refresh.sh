@@ -49,4 +49,5 @@ if [[ "$1" == "hyprpm" ]]; then
     fi
 fi
 
+notify-send -u low "System Reloaded Successfully"
 exit 0
