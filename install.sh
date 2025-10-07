@@ -302,8 +302,9 @@ build_package_list() {
             add_gamer_packages
             ;;
         madlad)
-            add_developer_packages
-            add_gamer_packages
+            gum style --foreground 220 "Its dummy function right now..."
+            # add_developer_packages
+            # add_gamer_packages
             ;;
     esac
 
@@ -314,50 +315,54 @@ build_package_list() {
 
 # Add developer packages
 add_developer_packages() {
-    local dev_types=$(gum choose --no-limit --header "Select development areas:" \
-        "AI/ML" \
-        "Web Development" \
-        "Server/Backend" \
-        "Database" \
-        "Mobile Development" \
-        "DevOps" \
-        "Game Development" \
-        "Skip")
+     gum style --foreground 220 "Its dummy function right now..."
 
-    if echo "$dev_types" | grep -q "Skip"; then
-        return
-    fi
+    # local dev_types=$(gum choose --no-limit --header "Select development areas:" \
+    #     "AI/ML" \
+    #     "Web Development" \
+    #     "Server/Backend" \
+    #     "Database" \
+    #     "Mobile Development" \
+    #     "DevOps" \
+    #     "Game Development" \
+    #     "Skip")
 
-    echo "$dev_types" | grep -q "AI/ML" && INSTALL_PACKAGES+=(python python-pip python-numpy jupyter-notebook)
-    echo "$dev_types" | grep -q "Web Development" && INSTALL_PACKAGES+=(nodejs npm)
-    echo "$dev_types" | grep -q "Server/Backend" && INSTALL_PACKAGES+=(docker docker-compose postgresql)
-    echo "$dev_types" | grep -q "Database" && INSTALL_PACKAGES+=(postgresql mysql sqlite redis)
-    echo "$dev_types" | grep -q "Mobile Development" && INSTALL_PACKAGES+=(android-tools)
-    echo "$dev_types" | grep -q "DevOps" && INSTALL_PACKAGES+=(docker kubectl terraform ansible)
-    echo "$dev_types" | grep -q "Game Development" && INSTALL_PACKAGES+=(godot blender)
+    # if echo "$dev_types" | grep -q "Skip"; then
+    #     return
+    # fi
+
+    # echo "$dev_types" | grep -q "AI/ML" && INSTALL_PACKAGES+=(python python-pip python-numpy jupyter-notebook)
+    # echo "$dev_types" | grep -q "Web Development" && INSTALL_PACKAGES+=(nodejs npm)
+    # echo "$dev_types" | grep -q "Server/Backend" && INSTALL_PACKAGES+=(docker docker-compose postgresql)
+    # echo "$dev_types" | grep -q "Database" && INSTALL_PACKAGES+=(postgresql mysql sqlite redis)
+    # echo "$dev_types" | grep -q "Mobile Development" && INSTALL_PACKAGES+=(android-tools)
+    # echo "$dev_types" | grep -q "DevOps" && INSTALL_PACKAGES+=(docker kubectl terraform ansible)
+    # echo "$dev_types" | grep -q "Game Development" && INSTALL_PACKAGES+=(godot blender)
 }
 
 # Add gamer packages
 add_gamer_packages() {
-    INSTALL_PACKAGES+=(steam lutris wine-staging gamemode mangohud)
+     gum style --foreground 220 "Its dummy function right now..."
 
-    if gum confirm "Install Discord?"; then
-        INSTALL_PACKAGES+=(discord)
-    fi
+    # INSTALL_PACKAGES+=(steam lutris wine-staging gamemode mangohud)
 
-    if gum confirm "Install emulators?"; then
-        local emulators=$(gum choose --no-limit --header "Select emulators:" \
-            "RetroArch" \
-            "PCSX2" \
-            "Dolphin" \
-            "Skip")
+    # if gum confirm "Install Discord?"; then
+    #     INSTALL_PACKAGES+=(discord)
+    # fi
 
-        if ! echo "$emulators" | grep -q "Skip"; then
-            echo "$emulators" | grep -q "RetroArch" && INSTALL_PACKAGES+=(retroarch)
-            echo "$emulators" | grep -q "PCSX2" && INSTALL_PACKAGES+=(pcsx2)
-            echo "$emulators" | grep -q "Dolphin" && INSTALL_PACKAGES+=(dolphin-emu)
-        fi
-    fi
+    # if gum confirm "Install emulators?"; then
+    #     local emulators=$(gum choose --no-limit --header "Select emulators:" \
+    #         "RetroArch" \
+    #         "PCSX2" \
+    #         "Dolphin" \
+    #         "Skip")
+
+    #     if ! echo "$emulators" | grep -q "Skip"; then
+    #         echo "$emulators" | grep -q "RetroArch" && INSTALL_PACKAGES+=(retroarch)
+    #         echo "$emulators" | grep -q "PCSX2" && INSTALL_PACKAGES+=(pcsx2)
+    #         echo "$emulators" | grep -q "Dolphin" && INSTALL_PACKAGES+=(dolphin-emu)
+    #     fi
+    # fi
 }
 
 # Install all packages
@@ -559,9 +564,9 @@ move_config() {
     fi
 
     # Install Hyprland plugin installer
-    if [ -f "$HECATEDIR/config/install-hyprland-plugins" ]; then
+    if [ -f "$HECATEDIR/config/install-hyprland-plugins.sh" ]; then
         gum style --foreground 82 "Installing Hyprland plugin installer..."
-        cp "$HECATEDIR/config/install-hyprland-plugins" "$HOME/.local/bin/install-hyprland-plugins"
+        cp "$HECATEDIR/config/install-hyprland-plugins.sh" "$HOME/.local/bin/install-hyprland-plugins"
         chmod +x "$HOME/.local/bin/install-hyprland-plugins"
         gum style --foreground 82 "✓ Plugin installer available: install-hyprland-plugins"
     fi
@@ -834,8 +839,7 @@ main() {
     'May your wallpapers be dynamic and your RAM usage low.'
 
 echo ""
-gum style --foreground 220 ""Fun fact: You're now legally required to mention 'I use Arch Hyprland btw' in conversations""
-
+gum style --foreground 220 "Fun fact: You're now legally required to mention 'I use Arch Hyprland btw' in conversations"
 echo ""
 
 if gum confirm "Reboot now? (Recommended unless you enjoy living on the edge)"; then
