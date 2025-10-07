@@ -8,29 +8,9 @@
 set -gx PATH $PATH /snap/bin
 set -gx PATH $HOME/.local/bin $PATH
 
-# === Theme: Powerlevel10k for Fish ===
-# Requires: https://github.com/jorgebucaran/theme-pure or fish-p10k (Fish doesn’t support P10K natively)
-# For demonstration, setting prompt to a popular alternative like `fish-pure`:
-# Install with: fisher install rafaelrinaldi/pure
-# Or use Starship as universal prompt: https://starship.rs
-# Example (recommended):
 # fisher install starship/starship
 set -gx STARSHIP_CONFIG ~/.config/starship.toml
 starship init fish | source
-
-# === Plugins (via fisher) ===
-# Install fisher if not yet installed:
-# curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher
-
-# Install equivalent plugins:
-# fisher install jorgebucaran/fisher
-# fisher install jethrokuan/z       # directory jumping
-# fisher install jethrokuan/fzf     # FZF integration
-# fisher install jorgebucaran/nvm.fish  # NVM support
-# fisher install oh-my-fish/plugin-thefuck
-# fisher install PatrickF1/fzf.fish
-# fisher install decors/fish-colored-man
-# set -eU fish_history
 
 # === TheFuck setup ===
 thefuck --alias | source
@@ -102,4 +82,3 @@ end
 bind \ce 'vf'
 # Ctrl+G -> cdf
 bind \cg 'cdf'
-

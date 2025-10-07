@@ -1,0 +1,164 @@
+/* Emoji Picker Config */
+
+@import "~/.config/rofi/config.rasi"
+
+/* ---- Configuration ---- */
+configuration {
+    modi:                    "emoji";
+    show-icons:              false;
+    display-emoji:           "😀";
+}
+
+/* ---- Window ---- */
+window {
+    transparency:            "real";
+    location:                center;
+    anchor:                  center;
+    fullscreen:              false;
+    width:                   800px;
+    height:                  550px;
+    border-radius:           20px;
+    cursor:                  "default";
+    background-color:        rgba(0, 0, 0, 0.85);
+    border:                  3px;
+    border-color:            @accent;
+}
+
+/* ---- Mainbox ---- */
+mainbox {
+    enabled:                 true;
+    spacing:                 0px;
+    margin:                  0px;
+    padding:                 20px;
+    background-color:        transparent;
+    children:                [ "inputbar", "message", "listview" ];
+}
+
+/* ---- Inputbar ---- */
+inputbar {
+    enabled:                 true;
+    spacing:                 12px;
+    margin:                  0px 0px 16px 0px;
+    padding:                 16px 20px;
+    border-radius:           14px;
+    background-color:        @bg1;
+    text-color:              @fg0;
+    border:                  2px;
+    border-color:            rgba(255, 255, 255, 0.05);
+    children:                [ "prompt", "entry" ];
+}
+
+prompt {
+    enabled:                 true;
+    background-color:        transparent;
+    text-color:              @accent;
+    font:                    "FiraCode Nerd Font Bold 13";
+}
+
+/* ---- Entry ---- */
+entry {
+    enabled:                 true;
+    background-color:        transparent;
+    text-color:              @fg0;
+    cursor:                  text;
+    placeholder:             "😀 Search Emoji...";
+    placeholder-color:       rgba(255, 255, 255, 0.3);
+    font:                    "FiraCode Nerd Font 11";
+}
+
+/* ---- Listview ---- */
+listview {
+    enabled:                 true;
+    columns:                 6;
+    lines:                   6;
+    cycle:                   true;
+    dynamic:                 true;
+    scrollbar:               true;
+    layout:                  vertical;
+    reverse:                 false;
+    fixed-height:            true;
+    fixed-columns:           true;
+
+    spacing:                 6px;
+    margin:                  0px;
+    padding:                 0px;
+    background-color:        transparent;
+}
+
+/* ---- Scrollbar ---- */
+scrollbar {
+    handle-width:            6px;
+    handle-color:            @accent;
+    border-radius:           6px;
+    background-color:        rgba(255, 255, 255, 0.05);
+    margin:                  0px 0px 0px 8px;
+}
+
+/* ---- Elements ---- */
+element {
+    enabled:                 true;
+    spacing:                 0px;
+    margin:                  0px;
+    padding:                 30px 18px;
+    border-radius:           24px;
+    background-color:        @bg1;
+    text-color:              @fg0;
+    cursor:                  pointer;
+    border:                  2px;
+    orientation:             vertical;
+}
+
+element normal.normal {
+    background-color:        @bg1;
+    text-color:              @fg0;
+}
+
+element selected.normal {
+    background-color:        @accent;
+    text-color:              @bg0;
+    border:                  2px;
+}
+
+element alternate.normal {
+    background-color:        @bg1;
+    text-color:              @fg0;
+}
+
+element-icon {
+    background-color:        transparent;
+    text-color:              inherit;
+    size:                    0px;
+    cursor:                  inherit;
+}
+
+element-text {
+    background-color:        transparent;
+    text-color:              inherit;
+    cursor:                  inherit;
+    highlight:               inherit;
+    font:                    "Noto Color Emoji 22";
+    horizontal-align:        0.5;
+    vertical-align:          0.5;
+}
+
+element-text selected.normal {
+    text-color:              @bg0;
+    font:                    "Noto Color Emoji 24";
+}
+
+/* ---- Message ---- */
+message {
+    enabled:                 true;
+    margin:                  0px 0px 12px 0px;
+    padding:                 0px;
+    border-radius:           12px;
+    background-color:        transparent;
+}
+
+textbox {
+    padding:                 14px;
+    border-radius:           12px;
+    background-color:        @bg1;
+    text-color:              @accent;
+    horizontal-align:        0.0;
+}

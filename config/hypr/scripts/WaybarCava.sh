@@ -11,7 +11,7 @@ BAR_CHARS="▁▂▃▄▅▆▇█"
 FRAMERATE=30
 BAR_COUNT=10
 MAX_RANGE=7
-INPUT_METHOD="pulse"  # Options: pulse, pipewire, alsa
+INPUT_METHOD="pulse" 
 SOURCE="auto"
 
 # Advanced settings

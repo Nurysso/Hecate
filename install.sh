@@ -545,7 +545,8 @@ setup_shell_plugins() {
             setup_fish_plugins
             ;;
         bash)
-            setup_bash_plugins            ;;
+            setup_bash_plugins
+            ;;
     esac
 }
 
@@ -748,7 +749,7 @@ create_hecate_config() {
 
     local config_dir="$HOME/.config/hecate"
     local config_file="$config_dir/hecate.toml"
-    local version="0.3.1 blind owl"
+    local version="0.3.2 blind owl"
     local install_date=$(date +%Y-%m-%d)
 
     # Create config directory

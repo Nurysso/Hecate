@@ -11,7 +11,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Directories
-WAYBAR_STYLES="$HOME/.config/waybar/styles"
+WAYBAR_STYLES="$HOME/.config/waybar/style"
 WAYBAR_STYLE="$HOME/.config/waybar/style.css"
 SCRIPTSDIR="$HOME/.config/hypr/scripts"
 ROFI_CONFIG="$HOME/.config/rofi/config-waybar-style.rasi"

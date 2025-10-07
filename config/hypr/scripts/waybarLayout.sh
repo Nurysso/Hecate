@@ -62,7 +62,7 @@ main() {
     fi
 
     # Add "no panel" option
-    options=("no panel" "${options[@]}")
+    options=("no panel (Hides waybar)" "${options[@]}")
 
     # Mark and locate the active layout
     local default_row=0

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Wallust Colors Generator
 # Generates color schemes from current wallpaper (Hyprpaper)
+# dosent work switched to pywall to update all the sytem colors
 #  _   _ _____ ____    _  _____ _____
 # | | | | ____/ ___|  / \|_   _| ____|     /\_/\
 # | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
