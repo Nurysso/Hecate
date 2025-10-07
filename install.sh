@@ -613,22 +613,45 @@ setup_fish_plugins() {
 }
 
 setup_bash_plugins() {
-    # Install Oh My Bash
-    if [ ! -d "$HOME/.oh-my-bash" ]; then
-        gum style --foreground 220 "Installing Oh My Bash..."
-        bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" --unattended
+    echo -e "${YELLOW}Setting up Bash with Starship...${NC}"
+
+    # Check if Starship is installed
+    if ! command -v starship &> /dev/null; then
+        echo -e "${YELLOW}Starship will be installed via package manager...${NC}"
+    else
+        echo -e "${GREEN}✓ Starship already installed${NC}"
     fi
 
-    # Install FZF for Bash
+    # Setup bash-completion if not already installed
+    if ! [ -f /usr/share/bash-completion/bash_completion ] && ! [ -f /etc/bash_completion ]; then
+        echo -e "${YELLOW}bash-completion will be installed via package manager...${NC}"
+    else
+        echo -e "${GREEN}✓ bash-completion already installed${NC}"
+    fi
+
+    # Setup FZF for Bash (this creates ~/.fzf.bash)
     if [ ! -f "$HOME/.fzf.bash" ]; then
-        gum style --foreground 220 "Setting up FZF for Bash..."
-        if [ -d "$HOME/.fzf" ]; then
-            "$HOME/.fzf/install" --key-bindings --completion --no-update-rc
-        fi
-    fi
+        echo -e "${YELLOW}Setting up FZF for Bash...${NC}"
 
-    gum style --foreground 82 "✓ Bash plugins installed!"
+        # Check if fzf package includes the bash integration
+        if [ -f /usr/share/fzf/key-bindings.bash ]; then
+            # Create fzf.bash file that sources system fzf files
+            cat > "$HOME/.fzf.bash" << 'FZFEOF'
+# FZF Bash Integration
+[ -f /usr/share/fzf/completion.bash ] && source /usr/share/fzf/completion.bash
+[ -f /usr/share/fzf/key-bindings.bash ] && source /usr/share/fzf/key-bindings.bash
+FZFEOF
+            echo -e "${GREEN}✓ FZF integration created!${NC}"
+        else
+            echo -e "${YELLOW}FZF integration will be available after FZF is installed${NC}"
+        fi
+    else
+        echo -e "${GREEN}✓ FZF already configured${NC}"
+    fi
+    echo -e "${GREEN}✓ Bash setup complete!${NC}"
+    echo -e "${YELLOW}Note: Restart your terminal or run 'source ~/.bashrc' to apply changes${NC}"
 }
+
 # Move config files
 move_config() {
     gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
@@ -689,6 +712,12 @@ move_config() {
         cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
         chmod +x "$HOME/.local/bin/hecate"
         gum style --foreground 82 "✓ hecate command installed to ~/.local/bin/hecate"
+    fi
+
+    if [ -f "$HECATEDIR/config/starship/starship.toml" ]; then
+        gum style --foreground 82 "Installing hecate CLI tool..."
+        cp "$HECATEDIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
+        gum style --foreground 82 "✓ Starship Config installed"
     fi
 
     # Install Hyprland plugin installer
@@ -1004,51 +1033,50 @@ main() {
     # Optional components
     set_Sddm
     # setGrub_Theme
-# Runs hyperland plugin install script if user is already in hyperland and skips if hyperland is newly installed or not loged in
+    # Runs hyperland plugin install script if user is already in hyperland and skips if hyperland is newly installed or not loged in
     run_plugin_installer_if_in_hyprland
 
     # Completion message
-#!/bin/bash
 
-gum style \
-  --foreground 82 \
-  --border-foreground 82 \
-  --border double \
-  --align center \
-  --width 70 \
-  --margin "1 2" \
-  --padding "2 4" \
-  '✓ Installation Complete!' \
-  '(surprisingly, nothing exploded)' '' \
-  'Your Hyprland rice is now 99% complete!' \
-  'The remaining 1% is tweaking it at 3 AM for the next 6 months' '' \
-  'Post-Install TODO:' \
-  '1. Reboot (or live dangerously and just re-login)' \
-  '2. Log into Hyprland' \
-  '3. Run: install-hyprland-plugins' \
-  '4. Take screenshot' \
-  '5. Post to r/unixporn' \
-  '6. Profit???'
+    gum style \
+    --foreground 82 \
+    --border-foreground 82 \
+    --border double \
+    --align center \
+    --width 70 \
+    --margin "1 2" \
+    --padding "2 4" \
+    '✓ Installation Complete!' \
+    '(surprisingly, nothing exploded)' '' \
+    'Your Hyprland rice is now 99% complete!' \
+    'The remaining 1% is tweaking it at 3 AM for the next 6 months' '' \
+    'Post-Install TODO:' \
+    '1. Reboot (or live dangerously and just re-login)' \
+    '2. Log into Hyprland' \
+    '3. Run: install-hyprland-plugins' \
+    '4. Take screenshot' \
+    '5. Post to r/unixporn' \
+    '6. Profit???'
 
-# Optional extra hints (commented out)
-# 'hecate --help    (for mere mortals)' \
-# 'hecate update    (for the brave)' \
-# 'hecate theme     (for the indecisive)'
+    # Optional extra hints (commented out)
+    # 'hecate --help    (for mere mortals)' \
+    # 'hecate update    (for the brave)' \
+    # 'hecate theme     (for the indecisive)'
 
-echo ""
-echo "May your wallpapers be dynamic and your RAM usage low."
-echo ""
-gum style --foreground 220 "Fun fact: You're now legally required to mention 'I use Arch Hyprland btw' in conversations"
-echo ""
+    echo ""
+    echo "May your wallpapers be dynamic and your RAM usage low."
+    echo ""
+    gum style --foreground 220 "Fun fact: You're now legally required to mention 'I use Arch Hyprland btw' in conversations"
+    echo ""
 
-if gum confirm "Reboot now? (Recommended unless you enjoy living on the edge)"; then
-  gum style --foreground 82 "See you on the other side..."
-  sleep 2
-  sudo reboot
-else
-  gum style --foreground 220 "Bold choice. Remember to reboot eventually!"
-  gum style --foreground 220 "Your computer will judge you silently until you do."
-fi
+    if gum confirm "Reboot now? (Recommended unless you enjoy living on the edge)"; then
+    gum style --foreground 82 "See you on the other side..."
+    sleep 2
+    sudo reboot
+    else
+    gum style --foreground 220 "Bold choice. Remember to reboot eventually!"
+    gum style --foreground 220 "Your computer will judge you silently until you do."
+    fi
 
 }
 

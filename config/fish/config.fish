@@ -89,5 +89,17 @@ function cdf
     end
 end
 
-# Bind Ctrl+G to `cdf`
-bind \cg cdf
+# === vf: Fuzzy file edit ===
+function vf
+    set file (fd --type f --hidden --exclude .git | fzf --height 40% --reverse --preview 'bat --color=always {}')
+    if test -n "$file"
+        eval $EDITOR "$file"
+    end
+end
+
+# === Key bindings ===
+# Ctrl+E -> vf
+bind \ce 'vf'
+# Ctrl+G -> cdf
+bind \cg 'cdf'
+

@@ -1,0 +1,111 @@
+# ────────────────────────────────────────────────────────────────
+# 🌟 Starship Prompt Configuration
+# Modern, clean prompt for zsh/fish/bash — Hyprland Edition
+# ────────────────────────────────────────────────────────────────
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Add a blank line between prompts for readability
+add_newline = true
+
+# Reduce lag for modules
+command_timeout = 500
+
+# Main prompt layout
+format = """
+[╭─](bold green)$username$hostname$directory$git_branch$git_status$cmd_duration$fill$time
+[╰─](bold green)$character
+"""
+
+# ─── PROMPT SYMBOLS ─────────────────────────────────────────────
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[✗](bold red)"
+vicmd_symbol = "[V](bold yellow)"
+
+# ─── USER & HOST ────────────────────────────────────────────────
+[username]
+style_user = "bold yellow"
+style_root = "bold red"
+format = "[$user]($style)"
+show_always = true
+
+[hostname]
+ssh_only = false
+format = "[@$hostname](bold blue) "
+disabled = false
+
+# ─── DIRECTORY ──────────────────────────────────────────────────
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+style = "bold cyan"
+read_only = " "
+format = "[in](dim white) [$path]($style)[$read_only]($read_only_style) "
+
+# ─── GIT ────────────────────────────────────────────────────────
+[git_branch]
+symbol = " "
+format = "on [$symbol$branch]($style) "
+style = "bold purple"
+
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style) )'
+style = "bold red"
+conflicted = "🏳 "
+ahead = "⇡${count} "
+diverged = "⇕⇡${ahead_count}⇣${behind_count} "
+behind = "⇣${count} "
+untracked = "?${count} "
+stashed = "💾${count} "
+modified = "!${count} "
+staged = "+${count} "
+renamed = "»${count} "
+deleted = "✘${count} "
+
+# ─── LANGUAGES ──────────────────────────────────────────────────
+[nodejs]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "bold green"
+
+[python]
+symbol = " "
+style = "bold yellow"
+
+[rust]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "bold red"
+
+[package]
+symbol = " "
+format = "[$symbol$version]($style)"
+style = "bold blue"
+
+# ─── MISC MODULES ───────────────────────────────────────────────
+[cmd_duration]
+min_time = 500
+format = "[took $duration](bold yellow) "
+
+[time]
+disabled = false
+format = "[$time](dim white)"
+time_format = "%R"  # 24h format
+
+[fill]
+symbol = " "
+
+# ─── Battery / OS / Extras (optional) ───────────────────────────
+[battery]
+disabled = false
+full_symbol = "🔋"
+charging_symbol = "⚡"
+discharging_symbol = "💀"
+format = "[$symbol $percentage]($style) "
+
+[os]
+disabled = false
+format = "[$symbol]($style)"
+style = "dim white"
+
+# ─── End of file ────────────────────────────────────────────────

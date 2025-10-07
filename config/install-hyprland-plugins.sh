@@ -8,6 +8,8 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
 NC='\033[0m'
 
 FLAG_FILE="$HOME/.config/hypr/.plugins_installed"
@@ -23,79 +25,69 @@ if [ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
     exit 1
 fi
 
-# Check if gum is installed
-if ! command -v gum &> /dev/null; then
-    echo -e "${RED}Error: gum is not installed!${NC}"
-    exit 1
-fi
-
 # Check if hyprpm is available
 if ! command -v hyprpm &> /dev/null; then
-    gum style --foreground 196 "Error: hyprpm not found!"
+    echo -e "${RED}Error: hyprpm not found!${NC}"
     touch "$FLAG_FILE"
     exit 1
 fi
 
-gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Installer"
-gum style --foreground 220 "First-time Hyprland setup detected!"
+echo -e "${BLUE}${BOLD}╔════════════════════════════════════╗${NC}"
+echo -e "${BLUE}${BOLD}║  Hyprland Plugin Installer        ║${NC}"
+echo -e "${BLUE}${BOLD}╚════════════════════════════════════╝${NC}"
+echo ""
+echo -e "${YELLOW}First-time Hyprland setup detected!${NC}"
 echo ""
 
-if ! gum confirm "Would you like to install Hyprland plugins now?"; then
-    gum style --foreground 220 "You can run this script later manually: install-hyprland-plugins.sh"
+# Ask for confirmation
+read -p "Would you like to install Hyprland plugins now? (y/n): " -n 1 -r
+echo ""
+
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}You can run this script later manually: install-hyprland-plugins.sh${NC}"
     touch "$FLAG_FILE"
     exit 0
 fi
 
 # Update hyprpm headers
-gum style --foreground 220 "Updating hyprpm headers..."
+echo -e "${YELLOW}Updating hyprpm headers...${NC}"
 if hyprpm update; then
-    gum style --foreground 82 "✓ Headers updated successfully!"
+    echo -e "${GREEN}✓ Headers updated successfully!${NC}"
 else
-    gum style --foreground 196 "✗ Failed to update headers!"
+    echo -e "${RED}✗ Failed to update headers!${NC}"
     touch "$FLAG_FILE"
     exit 1
 fi
 
-# Ask which plugins to install
-plugins=$(gum choose --no-limit --header "Select plugins to install:" \
-    "hyprexpo" \
-    "border-plus-plus" \
-    "hyprfocus" \
-    "Skip")
+# Define plugins to install
+plugins=("hyprexpo" "border-plus-plus" "hyprfocus")
 
-if echo "$plugins" | grep -q "Skip" || [ -z "$plugins" ]; then
-    gum style --foreground 220 "No plugins selected."
-    touch "$FLAG_FILE"
-    exit 0
-fi
-
-# Install selected plugins
-echo "$plugins" | while IFS= read -r plugin; do
-    [ -z "$plugin" ] && continue
-
-    gum style --foreground 220 "Installing: $plugin"
+# Install plugins
+for plugin in "${plugins[@]}"; do
+    echo ""
+    echo -e "${YELLOW}Installing: $plugin${NC}"
 
     case "$plugin" in
         hyprexpo|border-plus-plus)
-            if hyprpm add https://github.com/hyprwm/hyprland-plugins; then
+            if hyprpm add https://github.com/hyprwm/hyprland-plugins 2>/dev/null || true; then
                 if hyprpm enable "$plugin"; then
-                    gum style --foreground 82 "✓ $plugin installed and enabled!"
+                    echo -e "${GREEN}✓ $plugin installed and enabled!${NC}"
                 else
-                    gum style --foreground 196 "✗ Failed to enable $plugin"
+                    echo -e "${RED}✗ Failed to enable $plugin${NC}"
                 fi
             else
-                gum style --foreground 196 "✗ Failed to add hyprland-plugins repository"
+                echo -e "${RED}✗ Failed to add hyprland-plugins repository${NC}"
             fi
             ;;
         hyprfocus)
             if hyprpm add https://github.com/pyt0xic/hyprfocus; then
                 if hyprpm enable hyprfocus; then
-                    gum style --foreground 82 "✓ hyprfocus installed and enabled!"
+                    echo -e "${GREEN}✓ hyprfocus installed and enabled!${NC}"
                 else
-                    gum style --foreground 196 "✗ Failed to enable hyprfocus"
+                    echo -e "${RED}✗ Failed to enable hyprfocus${NC}"
                 fi
             else
-                gum style --foreground 196 "✗ Failed to add hyprfocus repository"
+                echo -e "${RED}✗ Failed to add hyprfocus repository${NC}"
             fi
             ;;
     esac
@@ -104,14 +96,17 @@ echo "$plugins" | while IFS= read -r plugin; do
 done
 
 echo ""
-gum style --foreground 82 "✓ Plugin installation complete!"
-gum style --foreground 220 "Reloading Hyprland configuration..."
+echo -e "${GREEN}✓ Plugin installation complete!${NC}"
+echo -e "${YELLOW}Reloading Hyprland configuration...${NC}"
 
 # Mark as installed
 touch "$FLAG_FILE"
 
 # Reload Hyprland
-hyprctl reload
+if hyprctl reload; then
+    echo -e "${GREEN}✓ All done! This script will not run automatically again.${NC}"
+else
+    echo -e "${YELLOW}⚠ Hyprland reload had issues, but plugins are installed.${NC}"
+fi
 
-gum style --foreground 82 "✓ All done! This script will not run automatically again."
-sleep 3
+sleep 2

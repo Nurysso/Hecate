@@ -103,8 +103,28 @@ compinit                                        # Load completions
 
 cdf() {
   local dir
-  dir=$(fd --type d --hidden --exclude .git . ~ | fzf) && cd "$dir"
+  dir=$(fd --type d --hidden --exclude .git . ~ | fzf --height 40% --reverse)
+  if [[ -n "$dir" ]]; then
+    cd "$dir" || return
+  fi
 }
 
-# Bind Ctrl+G to run `cdf`
-bindkey -s '^G' 'cdf\n'
+# Custom function: fuzzy file edit
+vf() {
+  local file
+  file=$(fd --type f --hidden --exclude .git | fzf --height 40% --reverse --preview 'bat --color=always {}')
+  if [[ -n "$file" ]]; then
+    ${EDITOR:-vim} "$file"
+  fi
+}
+
+# Custom function: fuzzy history search
+fh() {
+  eval "$(history | fzf --height 40% --reverse --tac | sed 's/ *[0-9]* *//')"
+}
+
+# Bind Ctrl+G to `cdf`
+bind -x '"\C-g": cdf'
+
+# Bind Ctrl+E to `vf` (edit file)
+bind -x '"\C-e": vf' 
