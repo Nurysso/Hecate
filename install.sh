@@ -217,17 +217,42 @@ ask_preferences() {
     gum style --foreground 82 "✓ Shell: $USER_SHELL"
     echo ""
 
-    # Browser preference
-    USER_BROWSER=$(gum choose --header "Select your preferred browser:" \
-        "firefox" \
-        "brave" \
-        "chromium" \
-        "skip")
-    if [ "$USER_BROWSER" != "skip" ]; then
-        gum style --foreground 82 "✓ Browser: $USER_BROWSER"
+    # Browser preference with display names
+    local browser_choice=$(gum choose --header "Select your preferred browser:" \
+        "Firefox" \
+        "Brave" \
+        "Chromium" \
+        "Google Chrome" \
+        "Skip")
+
+    # Map display names to actual package names
+    case "$browser_choice" in
+        "Firefox")
+            USER_BROWSER="firefox"
+            USER_BROWSER_DISPLAY="Firefox"
+            ;;
+        "Brave")
+            USER_BROWSER="brave-bin"
+            USER_BROWSER_DISPLAY="Brave"
+            ;;
+        "Chromium")
+            USER_BROWSER="chromium"
+            USER_BROWSER_DISPLAY="Chromium"
+            ;;
+        "Google Chrome")
+            USER_BROWSER="google-chrome"
+            USER_BROWSER_DISPLAY="Google Chrome"
+            ;;
+        "Skip")
+            USER_BROWSER=""
+            USER_BROWSER_DISPLAY=""
+            ;;
+    esac
+
+    if [ -n "$USER_BROWSER" ]; then
+        gum style --foreground 82 "✓ Browser: $USER_BROWSER_DISPLAY"
     else
         gum style --foreground 220 "Skipping browser installation"
-        USER_BROWSER=""
     fi
     echo ""
 
@@ -244,7 +269,7 @@ ask_preferences() {
     gum style --border double --padding "1 2" --border-foreground 212 "Installation Summary"
     gum style --foreground 220 "Terminal: $USER_TERMINAL"
     gum style --foreground 220 "Shell: $USER_SHELL"
-    [ -n "$USER_BROWSER" ] && gum style --foreground 220 "Browser: $USER_BROWSER"
+    [ -n "$USER_BROWSER" ] && gum style --foreground 220 "Browser: $USER_BROWSER_DISPLAY"
     gum style --foreground 220 "Profile: $USER_PROFILE"
     echo ""
 
@@ -252,6 +277,17 @@ ask_preferences() {
         gum style --foreground 196 "Installation cancelled"
         exit 0
     fi
+}
+
+# Also update build_preferd_app_keybind function to use the display name
+build_preferd_app_keybind(){
+    mkdir -p ~/.config/hypr/configs && cat <<EOF > ~/.config/hypr/configs/app-names.conf
+# Set your default applications here
+\$term = $USER_TERMINAL
+\$browser = ${USER_BROWSER_DISPLAY:-$USER_BROWSER}
+EOF
+
+    gum style --foreground 82 "✓ App keybinds configured!"
 }
 
 # Build package list based on preferences
@@ -315,54 +351,106 @@ build_package_list() {
 
 # Add developer packages
 add_developer_packages() {
-     gum style --foreground 220 "Its dummy function right now..."
+    local dev_types=$(gum choose --no-limit --header "Select development areas (Space to select, Enter to confirm):" \
+        "AI/ML" \
+        "Web Development" \
+        "Server/Backend" \
+        "Database" \
+        "Mobile Development" \
+        "DevOps" \
+        "Game Development" \
+        "Skip")
 
-    # local dev_types=$(gum choose --no-limit --header "Select development areas:" \
-    #     "AI/ML" \
-    #     "Web Development" \
-    #     "Server/Backend" \
-    #     "Database" \
-    #     "Mobile Development" \
-    #     "DevOps" \
-    #     "Game Development" \
-    #     "Skip")
+    if echo "$dev_types" | grep -q "Skip"; then
+        gum style --foreground 220 "Skipping developer packages"
+        return
+    fi
 
-    # if echo "$dev_types" | grep -q "Skip"; then
-    #     return
-    # fi
+    # AI/ML packages
+    if echo "$dev_types" | grep -q "AI/ML"; then
+        gum style --foreground 220 "Adding AI/ML packages..."
+        INSTALL_PACKAGES+=(python python-pip python-numpy python-pandas python-matplotlib python-scikit-learn)
+    fi
 
-    # echo "$dev_types" | grep -q "AI/ML" && INSTALL_PACKAGES+=(python python-pip python-numpy jupyter-notebook)
-    # echo "$dev_types" | grep -q "Web Development" && INSTALL_PACKAGES+=(nodejs npm)
-    # echo "$dev_types" | grep -q "Server/Backend" && INSTALL_PACKAGES+=(docker docker-compose postgresql)
-    # echo "$dev_types" | grep -q "Database" && INSTALL_PACKAGES+=(postgresql mysql sqlite redis)
-    # echo "$dev_types" | grep -q "Mobile Development" && INSTALL_PACKAGES+=(android-tools)
-    # echo "$dev_types" | grep -q "DevOps" && INSTALL_PACKAGES+=(docker kubectl terraform ansible)
-    # echo "$dev_types" | grep -q "Game Development" && INSTALL_PACKAGES+=(godot blender)
+    # Web Development packages
+    if echo "$dev_types" | grep -q "Web Development"; then
+        gum style --foreground 220 "Adding Web Development packages..."
+        INSTALL_PACKAGES+=(nodejs npm yarn)
+    fi
+
+    # Server/Backend packages
+    if echo "$dev_types" | grep -q "Server/Backend"; then
+        gum style --foreground 220 "Adding Server/Backend packages..."
+        INSTALL_PACKAGES+=(docker docker-compose)
+    fi
+
+    # Database packages
+    if echo "$dev_types" | grep -q "Database"; then
+        gum style --foreground 220 "Adding Database packages..."
+        INSTALL_PACKAGES+=(postgresql sqlite)
+
+        # Ask about MySQL separately as it's larger
+        if gum confirm "Install MySQL/MariaDB?"; then
+            INSTALL_PACKAGES+=(mariadb)
+        fi
+
+        if gum confirm "Install Redis?"; then
+            INSTALL_PACKAGES+=(redis)
+        fi
+    fi
+
+    # Mobile Development packages
+    if echo "$dev_types" | grep -q "Mobile Development"; then
+        gum style --foreground 220 "Adding Mobile Development packages..."
+        INSTALL_PACKAGES+=(android-tools)
+    fi
+
+    # DevOps packages
+    if echo "$dev_types" | grep -q "DevOps"; then
+        gum style --foreground 220 "Adding DevOps packages..."
+        INSTALL_PACKAGES+=(docker kubectl terraform ansible)
+    fi
+
+    # Game Development packages
+    if echo "$dev_types" | grep -q "Game Development"; then
+        gum style --foreground 220 "Adding Game Development packages..."
+        INSTALL_PACKAGES+=(godot blender)
+    fi
 }
 
 # Add gamer packages
 add_gamer_packages() {
-     gum style --foreground 220 "Its dummy function right now..."
+    gum style --foreground 220 "Adding gaming packages..."
 
-    # INSTALL_PACKAGES+=(steam lutris wine-staging gamemode mangohud)
+    # Core gaming packages
+    INSTALL_PACKAGES+=(steam lutris wine-staging winetricks gamemode lib32-gamemode mangohud lib32-mangohud)
 
-    # if gum confirm "Install Discord?"; then
-    #     INSTALL_PACKAGES+=(discord)
-    # fi
+    # Discord
+    if gum confirm "Install Discord?"; then
+        INSTALL_PACKAGES+=(discord)
+    fi
 
-    # if gum confirm "Install emulators?"; then
-    #     local emulators=$(gum choose --no-limit --header "Select emulators:" \
-    #         "RetroArch" \
-    #         "PCSX2" \
-    #         "Dolphin" \
-    #         "Skip")
+    # Emulators
+    if gum confirm "Install emulators?"; then
+        local emulators=$(gum choose --no-limit --header "Select emulators (Space to select, Enter to confirm):" \
+            "RetroArch" \
+            "PCSX2" \
+            "Dolphin" \
+            "RPCS3" \
+            "Skip")
 
-    #     if ! echo "$emulators" | grep -q "Skip"; then
-    #         echo "$emulators" | grep -q "RetroArch" && INSTALL_PACKAGES+=(retroarch)
-    #         echo "$emulators" | grep -q "PCSX2" && INSTALL_PACKAGES+=(pcsx2)
-    #         echo "$emulators" | grep -q "Dolphin" && INSTALL_PACKAGES+=(dolphin-emu)
-    #     fi
-    # fi
+        if ! echo "$emulators" | grep -q "Skip"; then
+            echo "$emulators" | grep -q "RetroArch" && INSTALL_PACKAGES+=(retroarch retroarch-assets-xmb retroarch-assets-ozone)
+            echo "$emulators" | grep -q "PCSX2" && INSTALL_PACKAGES+=(pcsx2)
+            echo "$emulators" | grep -q "Dolphin" && INSTALL_PACKAGES+=(dolphin-emu)
+            echo "$emulators" | grep -q "RPCS3" && INSTALL_PACKAGES+=(rpcs3-git)
+        fi
+    fi
+
+    # Proton-GE
+    if gum confirm "Install ProtonUp-Qt (for managing Proton-GE)?"; then
+        INSTALL_PACKAGES+=(protonup-qt)
+    fi
 }
 
 # Install all packages
@@ -457,8 +545,7 @@ setup_shell_plugins() {
             setup_fish_plugins
             ;;
         bash)
-            gum style --foreground 220 "Bash uses built-in configuration, no plugins needed"
-            ;;
+            setup_bash_plugins            ;;
     esac
 }
 
@@ -498,9 +585,50 @@ setup_fish_plugins() {
         fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
     fi
 
-    gum style --foreground 82 "✓ Fish plugins installed!"
+    # Install Starship prompt (required by config.fish)
+    if ! command -v starship &> /dev/null; then
+        gum style --foreground 220 "Installing Starship prompt..."
+        case "$PACKAGE_MANAGER" in
+            paru|yay)
+                $PACKAGE_MANAGER -S --noconfirm starship
+                ;;
+            pacman)
+                sudo pacman -S --noconfirm starship
+                ;;
+            dnf)
+                sudo dnf install -y starship
+                ;;
+        esac
+    fi
+
+    # Install useful Fish plugins
+    gum style --foreground 220 "Installing Fish plugins..."
+    fish -c "
+        fisher install jethrokuan/z 2>/dev/null
+        fisher install PatrickF1/fzf.fish 2>/dev/null
+        fisher install jorgebucaran/nvm.fish 2>/dev/null
+    " || true
+
+    gum style --foreground 82 "✓ Fish plugins and Starship installed!"
 }
 
+setup_bash_plugins() {
+    # Install Oh My Bash
+    if [ ! -d "$HOME/.oh-my-bash" ]; then
+        gum style --foreground 220 "Installing Oh My Bash..."
+        bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" --unattended
+    fi
+
+    # Install FZF for Bash
+    if [ ! -f "$HOME/.fzf.bash" ]; then
+        gum style --foreground 220 "Setting up FZF for Bash..."
+        if [ -d "$HOME/.fzf" ]; then
+            "$HOME/.fzf/install" --key-bindings --completion --no-update-rc
+        fi
+    fi
+
+    gum style --foreground 82 "✓ Bash plugins installed!"
+}
 # Move config files
 move_config() {
     gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
@@ -640,10 +768,38 @@ setup_Waybar(){
 }
 
 # Set default shell
+# Fixed set_default_shell function
 set_default_shell() {
+    local current_shell=$(basename "$SHELL")
+
+    if [ "$current_shell" = "$USER_SHELL" ]; then
+        gum style --foreground 82 "✓ $USER_SHELL is already your default shell"
+        return
+    fi
+
     if gum confirm "Set $USER_SHELL as default shell?"; then
-        chsh -s $(which $USER_SHELL)
-        gum style --foreground 82 "✓ $USER_SHELL set as default shell!"
+        local shell_path=$(which "$USER_SHELL")
+
+        if [ -z "$shell_path" ]; then
+            gum style --foreground 196 "Error: $USER_SHELL not found in PATH"
+            return
+        fi
+
+        # Check if shell is in /etc/shells
+        if ! grep -q "^${shell_path}$" /etc/shells; then
+            gum style --foreground 220 "Adding $shell_path to /etc/shells..."
+            echo "$shell_path" | sudo tee -a /etc/shells > /dev/null
+        fi
+
+        gum style --foreground 220 "Changing default shell to $USER_SHELL..."
+        gum style --foreground 220 "You may be prompted for your password..."
+
+        if sudo chsh -s "$shell_path" "$USER"; then
+            gum style --foreground 82 "✓ $USER_SHELL set as default shell!"
+            gum style --foreground 220 "Note: You need to log out and log back in for this to take effect"
+        else
+            gum style --foreground 196 "✗ Failed to change shell. Try manually: chsh -s $shell_path"
+        fi
     fi
 }
 
@@ -674,31 +830,64 @@ run_plugin_installer_if_in_hyprland() {
 }
 # Set SDDM
 set_Sddm() {
+    # Check if SDDM is already installed and enabled
+    local sddm_installed=false
+    local sddm_enabled=false
+
+    if command -v sddm &> /dev/null; then
+        sddm_installed=true
+        gum style --foreground 82 "✓ SDDM is already installed"
+    fi
+
+    if systemctl is-enabled sddm &> /dev/null; then
+        sddm_enabled=true
+        gum style --foreground 82 "✓ SDDM is already enabled"
+    fi
+
+    # Only prompt if not already set up
+    if [ "$sddm_installed" = true ] && [ "$sddm_enabled" = true ]; then
+        if ! gum confirm "SDDM is already installed and enabled. Reconfigure theme?"; then
+            return
+        fi
+        # Skip installation, go straight to theme
+        setup_sddm_theme
+        return
+    fi
+
     if ! gum confirm "Install SDDM login manager?"; then
         return
     fi
 
     gum style --border double --padding "1 2" --border-foreground 212 "Installing SDDM"
 
-    case "$PACKAGE_MANAGER" in
-        paru|yay|pacman)
-            sudo pacman -S --noconfirm sddm
-            ;;
-        dnf)
-            sudo dnf install -y sddm
-            ;;
+    # Install SDDM if not already installed
+    if [ "$sddm_installed" = false ]; then
+        case "$PACKAGE_MANAGER" in
+            paru|yay|pacman)
+                sudo pacman -S --noconfirm sddm
+                ;;
+            dnf)
+                sudo dnf install -y sddm
+                ;;
+        esac
+    fi
 
-    esac
+    # Enable SDDM if not already enabled
+    if [ "$sddm_enabled" = false ]; then
+        sudo systemctl enable sddm
+        sudo systemctl set-default graphical.target
+        gum style --foreground 82 "✓ SDDM installed and enabled!"
+    fi
 
-    sudo systemctl enable sddm
-    sudo systemctl set-default graphical.target
-    gum style --foreground 82 "✓ SDDM installed and enabled!"
+    # Install theme
+    setup_sddm_theme
+}
 
-    # SDDM theme
+# Helper function for SDDM theme installation
+setup_sddm_theme() {
     if gum confirm "Install SDDM Astronaut theme?"; then
         gum style --foreground 220 "Installing SDDM theme..."
 
-        # Download and run the script directly without gum spin
         local theme_script="/tmp/sddm-astronaut-setup.sh"
         if curl -fsSL https://raw.githubusercontent.com/keyitdev/sddm-astronaut-theme/master/setup.sh -o "$theme_script"; then
             chmod +x "$theme_script"
@@ -819,37 +1008,48 @@ main() {
     run_plugin_installer_if_in_hyprland
 
     # Completion message
-    gum style \
-    --foreground 82 --border-foreground 82 --border double \
-    --align center --width 70 --margin "1 2" --padding "2 4" \
-    '✓ Installation Complete!' \
-    '(surprisingly, nothing exploded)' '' \
-    'Your Hyprland rice is now 99% complete!' \
-    'The remaining 1% is tweaking it at 3 AM for the next 6 months' '' \
-    'Post-Install TODO:' \
-    '1. Reboot (or live dangerously and just re-login)' \
-    '2. Log into Hyprland' \
-    '3. Run: install-hyprland-plugins' \
-    '4. Take screenshot' \
-    '5. Post to r/unixporn' \
-    '6. Profit???' '' \
-    # 'hecate --help    (for mere mortals)' \
-    # 'hecate update    (for the brave)' \
-    # 'hecate theme     (for the indecisive)' '' \
-    'May your wallpapers be dynamic and your RAM usage low.'
+#!/bin/bash
 
+gum style \
+  --foreground 82 \
+  --border-foreground 82 \
+  --border double \
+  --align center \
+  --width 70 \
+  --margin "1 2" \
+  --padding "2 4" \
+  '✓ Installation Complete!' \
+  '(surprisingly, nothing exploded)' '' \
+  'Your Hyprland rice is now 99% complete!' \
+  'The remaining 1% is tweaking it at 3 AM for the next 6 months' '' \
+  'Post-Install TODO:' \
+  '1. Reboot (or live dangerously and just re-login)' \
+  '2. Log into Hyprland' \
+  '3. Run: install-hyprland-plugins' \
+  '4. Take screenshot' \
+  '5. Post to r/unixporn' \
+  '6. Profit???'
+
+# Optional extra hints (commented out)
+# 'hecate --help    (for mere mortals)' \
+# 'hecate update    (for the brave)' \
+# 'hecate theme     (for the indecisive)'
+
+echo ""
+echo "May your wallpapers be dynamic and your RAM usage low."
 echo ""
 gum style --foreground 220 "Fun fact: You're now legally required to mention 'I use Arch Hyprland btw' in conversations"
 echo ""
 
 if gum confirm "Reboot now? (Recommended unless you enjoy living on the edge)"; then
-    gum style --foreground 82 "See you on the other side..."
-    sleep 2
-    sudo reboot
+  gum style --foreground 82 "See you on the other side..."
+  sleep 2
+  sudo reboot
 else
-    gum style --foreground 220 "Bold choice. Remember to reboot eventually!"
-    gum style --foreground 220 "Your computer will judge you silently until you do."
+  gum style --foreground 220 "Bold choice. Remember to reboot eventually!"
+  gum style --foreground 220 "Your computer will judge you silently until you do."
 fi
+
 }
 
 # Run main function
