@@ -1,47 +1,78 @@
 build me the following shell script to install my hyprland dotfiles
 
 global variables
-HECATEDIR=$HOME/Hecate
-CONFIGDIR=$HOME/.config
-OS=output of check_OS
-packageManager= output of get package manager
+HECATEDIR="$HOME/Hecate"
+CONFIGDIR="$HOME/.config"
+REPO_URL="https://github.com/Aelune/Hecate.git"
+OS=""
+PACKAGE_MANAGER=""
+HYPRLAND_NEWLY_INSTALLED=false
+
+# User preferences
+USER_TERMINAL=""
+USER_SHELL=""
+USER_BROWSER=""
+USER_BROWSER_DISPLAY=""
+USER_PROFILE=""
+INSTALL_SDDM=false
+INSTALL_PACKAGES=()
 
 check_OS() -> checks for user os and returns os string, if os is not Arch,fedora,ubuntu
              returns error os not supported and exit shell script
 get_packageManager() -> takes input of os and based on os find package manager supported package
-                manager [pacman, paru, dnf,nala]
-download-Deps() -> takes input of package manager supported package manager [paru, dnf, nala] if apt found download nala and use
-                that, if pacman dound use paru to install depes, if any error show error and exit gracefully.
+                manager [pacman, paru, dnf] but preffers paru for Arch based distro
 
 clone_dotfiles() -> clone repo from github at home
 
 backup_config() -> cd into cloned-repo/config/ and based on folders here create a backup of .config folders with timestamp to avoid overwrite if used again
 
-move config() -> mv folders in cloned-repo/config/ to CONFIGDIR except zsh,bash,fish
-                which will be moved to HOME/.zshrc, HOME/.bashrc, CONFIGDIR/fish
+ask_prefrence()-> builds prefrence list for user which is used to customize the dotfiles, also allows user to selcet profiles which helps them downloading addition packages for there system
 
-setup_Shell()-> ask user for there shell of choice zsh,bash,fish
-                then execute setup_zsh,setup_bash,setup_fish
-Setup_zsh() -> install Zsh + Oh-My-Zsh, Powerlevel10k, fzf, zsh-autosuggestions & zsh-syntax-highlighting
+build_package_list() -> based on user prefrence build a package list that will download all the packages needed for the system to run smoothly,
+
+developer_setup() -> ask for what type of development work they do likr aiml,web dev, server,db etc and download necessary packages
+
+gamer_setup() -> add necessary packages that a gamer may need then ask if they want to have emulatore to play games if yes then install emulators
+
+install_user_browser()-> install browser, the sole reason this exists is because the name shown to user at prefrence is different packange name is different and lastly binary name is different so it just fixes all the issues that could occur
+is_official_package()-> checks if package is from arch official repo
+
+install_single_package()-> nstalls a single package (official/AUR) with retries
+
+install_packages()-> main logic to install packages, install all ofiical repo packages at once and aur at once
+
+install_all_packages()-> wrapper function to install all the packages
+
+
+verify_critical_packages() -> verifices important packages are installed or not and tries to install them
+
+enable_sddm()-> enable's sddm for user
+
+
+setup_shell_plugins-> Install plugins for shell to function based on user shell of choice
+
+----- All shell uses starship for ui which is download at install packages stage -----
+
+Setup_zsh() -> install Zsh + Oh-My-Zsh, fzf, zsh-autosuggestions & zsh-syntax-highlighting
                 thefuck, exa,bat,fd
 setup_bash() -> install bash curl wget git unzip fzf fd bat
                 exa kitty fastfetch thefuck net-tools
 setup_fish() -> fish,fisher,fzf,fd-find,bat,exa,thefuck,net-tools,procps,coreutils
 
-User_Profile() -> ask user for profile minimal(default), gamer, developer, madlad
-                  based on user input execute developer_setup(), gamer_setup, madlad executes both developer_setup and gamer_setup
 
-developer_setup() -> ask for what type of development work they do likr aiml,web dev, server,db etc and download necessary packages
-                     allows user to add or remove packages
-gamer_setup() -> add necessary packages that a gamer may need then ask if they want to have emulatore to play games if yes then install emulators
+move config() -> mv folders in cloned-repo/config/ to CONFIGDIR except zsh,bash,fish
+                which will be moved to HOME/.zshrc, HOME/.bashrc, CONFIGDIR/fish
 
-madlad_Setup() -> both developer_setup and gamer_setup
+build_preferd_app_keybind()-> based on user choice builds a keybind at hypr/UserConfigs/app-names
 
-set_Sddm -> ask if want to switch to sddm if yes install sddm and set sddm as default login manager
+create_hecate_config()-> will create a hecate config file that is used by hecate shell script to update and selcet theme for system
 
-set_Sddm_Theme -> ask user if they want to install sddm themes if yes run this command sh -c "$(curl -fsSL https://raw.githubusercontent.com/keyitdev/sddm-astronaut-theme/master/setup.sh)"
+setup_Waybar()-> creat symlinks for config/top and style/default.css files
 
-install_hyprland_plugins() -> install hyprpm, then install required hyprland install_hyprland_plugins
+setup_Shell()-> set default shell based  on user choice
 
-check if they use grub if yes exec this
-setGrub_Theme -> ask if they want to add grub theme? if yes show a list of grub themes they can download and after selection install the themes
+configure_sddm_theme() -> downloads and enables sddm if user selected at ask_prefrence, also ask user if they want to install themes for sddm
+
+run_plugin_installer_if_in_hyprland()-> install hyprland plugins if user is in hyprland session if not prompts useer to run install-hyprland-plugins after rebooting into hyprland session
+
+main()-> call function step by step and rost user for runing the scritp with stupid args

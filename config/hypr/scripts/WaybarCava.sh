@@ -11,7 +11,7 @@ BAR_CHARS="▁▂▃▄▅▆▇█"
 FRAMERATE=30
 BAR_COUNT=10
 MAX_RANGE=7
-INPUT_METHOD="pulse" 
+INPUT_METHOD="pulse"
 SOURCE="auto"
 
 # Advanced settings
@@ -27,47 +27,47 @@ LOCK_FILE="/tmp/cava_bar_${USER}.lock"
 
 # Cleanup function
 cleanup() {
-    rm -f "$CONFIG_FILE" "$LOCK_FILE"
-    pkill -P $$ 2>/dev/null
-    exit 0
+	rm -f "$CONFIG_FILE" "$LOCK_FILE"
+	pkill -P $$ 2>/dev/null
+	exit 0
 }
 
 # Check if already running
 check_running() {
-    if [[ -f "$LOCK_FILE" ]]; then
-        old_pid=$(cat "$LOCK_FILE")
-        if kill -0 "$old_pid" 2>/dev/null; then
-            echo "Cava is already running (PID: $old_pid)"
-            echo "Kill it? [y/N]"
-            read -r response
-            if [[ "$response" =~ ^[Yy]$ ]]; then
-                kill "$old_pid" 2>/dev/null
-                rm -f "$LOCK_FILE"
-            else
-                exit 0
-            fi
-        else
-            rm -f "$LOCK_FILE"
-        fi
-    fi
-    echo $$ > "$LOCK_FILE"
+	if [[ -f "$LOCK_FILE" ]]; then
+		old_pid=$(cat "$LOCK_FILE")
+		if kill -0 "$old_pid" 2>/dev/null; then
+			echo "Cava is already running (PID: $old_pid)"
+			echo "Kill it? [y/N]"
+			read -r response
+			if [[ "$response" =~ ^[Yy]$ ]]; then
+				kill "$old_pid" 2>/dev/null
+				rm -f "$LOCK_FILE"
+			else
+				exit 0
+			fi
+		else
+			rm -f "$LOCK_FILE"
+		fi
+	fi
+	echo $$ >"$LOCK_FILE"
 }
 
 # Build sed replacement dictionary
 build_dict() {
-    local dict="s/;//g"
-    local length=${#BAR_CHARS}
+	local dict="s/;//g"
+	local length=${#BAR_CHARS}
 
-    for ((i = 0; i < length; i++)); do
-        dict+=";s/$i/${BAR_CHARS:$i:1}/g"
-    done
+	for ((i = 0; i < length; i++)); do
+		dict+=";s/$i/${BAR_CHARS:$i:1}/g"
+	done
 
-    echo "$dict"
+	echo "$dict"
 }
 
 # Create cava configuration file
 create_config() {
-    cat > "$CONFIG_FILE" << EOF
+	cat >"$CONFIG_FILE" <<EOF
 [general]
 framerate = $FRAMERATE
 bars = $BAR_COUNT
@@ -91,11 +91,11 @@ EOF
 
 # Main visualization function
 start_visualizer() {
-    local sed_dict
-    sed_dict=$(build_dict)
+	local sed_dict
+	sed_dict=$(build_dict)
 
-    # Start cava and process output
-    cava -p "$CONFIG_FILE" 2>/dev/null | sed -u "$sed_dict"
+	# Start cava and process output
+	cava -p "$CONFIG_FILE" 2>/dev/null | sed -u "$sed_dict"
 }
 
 # ============ Main Execution ============
@@ -107,9 +107,9 @@ trap cleanup EXIT INT TERM QUIT
 check_running
 
 # Verify cava is installed
-if ! command -v cava &> /dev/null; then
-    echo "Error: cava is not installed"
-    exit 1
+if ! command -v cava &>/dev/null; then
+	echo "Error: cava is not installed"
+	exit 1
 fi
 
 # Create configuration

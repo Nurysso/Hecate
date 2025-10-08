@@ -7,7 +7,6 @@
 # |  _  | |__| |___ / ___ \| | | |___      > ^ <
 # |_| |_|_____\____/_/   \_\_| |_____|
 
-
 # Get id of an active window
 active_pid=$(hyprctl activewindow | grep -o 'pid: [0-9]*' | cut -d' ' -f2)
 

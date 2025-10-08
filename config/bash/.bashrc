@@ -1,3 +1,13 @@
+#  _   _ _____ ____    _  _____ _____
+# | | | | ____/ ___|  / \|_   _| ____|     /\_/\
+# | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+# |  _  | |__| |___ / ___ \| | | |___      > ^ <
+# |_| |_|_____\____/_/   \_\_| |_____|
+
+# ═══════════════════════════════════════════════════════════════
+# BASH Configuration with Starship and custom functions for quality of life
+# ═══════════════════════════════════════════════════════════════
+
 # Enable the subsequent settings only in interactive sessions
 case $- in
   *i*) ;;
@@ -72,27 +82,86 @@ alias gp='git push'
 alias gl='git log --oneline --graph --decorate'
 alias gd='git diff'
 
-# Custom function: fuzzy cd
+# Fuzzy cd to any directory
 cdf() {
   local dir
-  dir=$(fd --type d --hidden --exclude .git . ~ | fzf --height 40% --reverse)
+  dir=$(fd --type d --hidden --exclude .git . ~ | \
+    fzf --prompt="📁 Select directory: " \
+        --height 50% \
+        --preview 'exa --tree --level=2 --icons --color=always {}')
   if [[ -n "$dir" ]]; then
     cd "$dir" || return
+    ls  # Show contents after cd
   fi
 }
 
-# Custom function: fuzzy file edit
+# Fuzzy file edit
 vf() {
   local file
-  file=$(fd --type f --hidden --exclude .git | fzf --height 40% --reverse --preview 'bat --color=always {}')
+  file=$(fd --type f --hidden --exclude .git | \
+    fzf --prompt="✏️  Select file to edit: " \
+        --height 50% \
+        --preview 'bat --color=always --style=numbers --line-range :500 {}')
   if [[ -n "$file" ]]; then
-    ${EDITOR:-vim} "$file"
+    ${EDITOR:-nvim} "$file"
   fi
 }
 
-# Custom function: fuzzy history search
+# Fuzzy history search and execute
 fh() {
-  eval "$(history | fzf --height 40% --reverse --tac | sed 's/ *[0-9]* *//')"
+  local cmd
+  cmd=$(history | \
+    fzf --prompt="🔍 Search history: " \
+        --tac \
+        --height 50% \
+        --preview 'echo {}' \
+        --preview-window up:3:wrap | \
+    sed 's/ *[0-9]* *//')
+  if [[ -n "$cmd" ]]; then
+    eval "$cmd"
+  fi
+}
+
+# Fuzzy kill process
+fkill() {
+  local pid
+  pid=$(ps -ef | sed 1d | \
+    fzf --prompt="💀 Select process to kill: " \
+        --height 50% \
+        --preview 'echo {}' \
+        --preview-window down:3:wrap | \
+    awk '{print $2}')
+  if [[ -n "$pid" ]]; then
+    echo "Killing process $pid"
+    kill -9 "$pid"
+  fi
+}
+
+# Create and enter directory
+mkcd() {
+  mkdir -p "$1" && cd "$1"
+}
+
+# Extract various archive formats
+extract() {
+  if [ -f "$1" ]; then
+    case "$1" in
+      *.tar.bz2)   tar xjf "$1"     ;;
+      *.tar.gz)    tar xzf "$1"     ;;
+      *.bz2)       bunzip2 "$1"     ;;
+      *.rar)       unrar x "$1"     ;;
+      *.gz)        gunzip "$1"      ;;
+      *.tar)       tar xf "$1"      ;;
+      *.tbz2)      tar xjf "$1"     ;;
+      *.tgz)       tar xzf "$1"     ;;
+      *.zip)       unzip "$1"       ;;
+      *.Z)         uncompress "$1"  ;;
+      *.7z)        7z x "$1"        ;;
+      *)           echo "'$1' cannot be extracted via extract()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
 }
 
 # Bind Ctrl+G to `cdf`
@@ -101,4 +170,5 @@ bind -x '"\C-g": cdf'
 # Bind Ctrl+E to `vf` (edit file)
 bind -x '"\C-e": vf'
 
-# Note: Ctrl+R is already bound to FZF history search if FZF is installed
+# Bind Ctrl+F: fuzzy history
+bind -x '"\C-f": fh\n'

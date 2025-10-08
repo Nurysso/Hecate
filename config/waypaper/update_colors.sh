@@ -14,7 +14,7 @@ get_theme_mode() {
         local mode=$(grep "^mode" "$HECATE_CONFIG" | cut -d '=' -f2 | tr -d ' "')
         echo "$mode"
     else
-        echo "dynamic"  # Default to dynamic if config not found
+        echo "dynamic"  #  dynamic if config not found
     fi
 }
 
@@ -88,7 +88,7 @@ SUCCESSFUL_UPDATES=()
 
 # Generate Rofi colors
 echo "Updating Rofi theme..."
-if [ -f "$HOME/.config/rofi/generate_colors.sh" ]; then
+if [ -f "$HOME/.config/rofi/update_colors.sh" ]; then
     if ~/.config/rofi/generate_colors.sh; then
         SUCCESSFUL_UPDATES+=("Rofi")
     else

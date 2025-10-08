@@ -17,46 +17,46 @@ effects_wallpaper="$HOME/.config/hypr/wallpaper_effects/.wallpaper_current"
 current_monitor=$(hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}')
 
 if [[ -z "$current_monitor" ]]; then
-    echo "Error: Could not detect focused monitor"
-    exit 1
+	echo "Error: Could not detect focused monitor"
+	exit 1
 fi
 
 echo "Current monitor: $current_monitor"
 
 # Get wallpaper path from waypaper history
 if [[ -f "$waypaper_history" ]]; then
-    # Try to get wallpaper for specific monitor first
-    wallpaper_path=$(grep "$current_monitor" "$waypaper_history" | tail -n 1 | awk '{print $2}')
+	# Try to get wallpaper for specific monitor first
+	wallpaper_path=$(grep "$current_monitor" "$waypaper_history" | tail -n 1 | awk '{print $2}')
 
-    # If not found, get the last wallpaper set
-    if [[ -z "$wallpaper_path" ]]; then
-        wallpaper_path=$(tail -n 1 "$waypaper_history" | awk '{print $2}')
-    fi
+	# If not found, get the last wallpaper set
+	if [[ -z "$wallpaper_path" ]]; then
+		wallpaper_path=$(tail -n 1 "$waypaper_history" | awk '{print $2}')
+	fi
 else
-    echo "Error: Waypaper history file not found"
-    exit 1
+	echo "Error: Waypaper history file not found"
+	exit 1
 fi
 
 if [[ -z "$wallpaper_path" || ! -f "$wallpaper_path" ]]; then
-    echo "Error: Wallpaper not found: $wallpaper_path"
-    exit 1
+	echo "Error: Wallpaper not found: $wallpaper_path"
+	exit 1
 fi
 
 echo "Wallpaper: $wallpaper_path"
 
 # Create symlink for Rofi
 if ln -sf "$wallpaper_path" "$rofi_wallpaper"; then
-    echo "✓ Rofi wallpaper symlink created"
+	echo "✓ Rofi wallpaper symlink created"
 else
-    echo "Error: Failed to create Rofi symlink"
-    exit 1
+	echo "Error: Failed to create Rofi symlink"
+	exit 1
 fi
 
 # Copy wallpaper for effects
 if cp "$wallpaper_path" "$effects_wallpaper"; then
-    echo "✓ Effects wallpaper copied"
+	echo "✓ Effects wallpaper copied"
 else
-    echo "Warning: Failed to copy wallpaper for effects"
+	echo "Warning: Failed to copy wallpaper for effects"
 fi
 
 # Execute wallust
