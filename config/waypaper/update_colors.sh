@@ -4,6 +4,10 @@
 # Updates system-wide colors based on wallpaper
 # Respects Hecate theme mode (dynamic/static)
 
+# ⚠️ Script abandoned after v0.3.8 blind owl check out ~/.config/hecate/scripts/update_hecate_colors.sh
+# Now Hecate uses a centeralize css file to add colors to waybar,rofi,wlogout,rofi
+
+
 CONFIG="$HOME/.config/waypaper/config.ini"
 COLOR_CACHE="$HOME/.cache/wal/colors.json"
 HECATE_CONFIG="$HOME/.config/hecate.toml"
@@ -89,7 +93,7 @@ SUCCESSFUL_UPDATES=()
 # Generate Rofi colors
 echo "Updating Rofi theme..."
 if [ -f "$HOME/.config/rofi/update_colors.sh" ]; then
-    if ~/.config/rofi/generate_colors.sh; then
+    if ~/.config/rofi/update_colors.sh; then
         SUCCESSFUL_UPDATES+=("Rofi")
     else
         FAILED_UPDATES+=("Rofi")

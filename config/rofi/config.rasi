@@ -12,7 +12,7 @@ configuration {
 }
 
 /* ---- Load wallust colors ---- */
-@theme "~/.config/rofi/wallust/colors-rofi.rasi"
+@theme "~/.config/rofi/theme/colors-rofi.rasi"
 
 /* ---- Global Properties ---- */
 * {

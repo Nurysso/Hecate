@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════════════════════════════════
+   Hecate Theme - Centralized Color Definitions
+   Generated from Pywal on 2025-10-13 18:40:17
+
+   This file is the single source of truth for all theme colors.
+   All component CSS files import from this file.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────── */
+/* Base Colors (Pywal)                                             */
+/* ─────────────────────────────────────────────────────────────── */
+
+@define-color background #0d0e1e;
+@define-color foreground #c2c2c6;
+@define-color cursor #c2c2c6;
+
+@define-color color0  #0d0e1e;
+@define-color color1  #6A455D;
+@define-color color2  #C4493C;
+@define-color color3  #A14C58;
+@define-color color4  #F89F5B;
+@define-color color5  #FCAF4E;
+@define-color color6  #6B4785;
+@define-color color7  #c2c2c6;
+@define-color color8  #5c5e70;
+@define-color color9  #6A455D;
+@define-color color10 #C4493C;
+@define-color color11 #A14C58;
+@define-color color12 #F89F5B;
+@define-color color13 #FCAF4E;
+@define-color color14 #6B4785;
+@define-color color15 #c2c2c6;
+
+/* ─────────────────────────────────────────────────────────────── */
+/* Smart Contrast Variants                                         */
+/* ─────────────────────────────────────────────────────────────── */
+
+@define-color bg #0d0e1e;
+@define-color fg #c2c2c6;
+@define-color bg-alt #6A455D;
+@define-color bg-dim #0d0e1e;
+@define-color fg-dim #5c5e70;
+@define-color fg-bright #c2c2c6;
+
+/* ─────────────────────────────────────────────────────────────── */
+/* Semantic Colors                                                 */
+/* ─────────────────────────────────────────────────────────────── */
+
+@define-color primary #F89F5B;
+@define-color secondary #6B4785;
+@define-color accent #FCAF4E;
+@define-color accent-alt #F89F5B;
+@define-color success #C4493C;
+@define-color warning #A14C58;
+@define-color error #6A455D;
+@define-color muted #5c5e70;
+
+@define-color red #6A455D;
+@define-color green #C4493C;
+@define-color yellow #A14C58;
+@define-color blue #F89F5B;
+@define-color magenta #FCAF4E;
+@define-color cyan #6B4785;
+
+@define-color red-bright #6A455D;
+@define-color green-bright #C4493C;
+@define-color yellow-bright #A14C58;
+@define-color blue-bright #F89F5B;
+@define-color magenta-bright #FCAF4E;
+@define-color cyan-bright #6B4785;
+
+/* ─────────────────────────────────────────────────────────────── */
+/* RGBA Variants (for transparency effects)                        */
+/* ─────────────────────────────────────────────────────────────── */
+
+/* Background variants */
+@define-color bg_rgba rgba(13, 14, 30, 0.85);
+@define-color bg_rgba_light rgba(13, 14, 30, 0.7);
+@define-color bg_rgba_lighter rgba(13, 14, 30, 0.5);
+@define-color bg_dark rgba(13, 14, 30, 0.5);
+@define-color bg_rgba_dim rgba(13, 14, 30, 0.2);
+
+/* Primary/Accent variants */
+@define-color color4_rgba rgba(248, 159, 91, 0.15);
+@define-color color4_rgba_hover rgba(248, 159, 91, 0.4);
+@define-color color4_rgba_border rgba(248, 159, 91, 0.6);
+
+/* Error/Warning variants */
+@define-color color1_rgba rgba(106, 69, 93, 0.4);
+@define-color color1_rgba_border rgba(106, 69, 93, 0.6);
+@define-color color1_rgba_light rgba(106, 69, 93, 0.3);
+@define-color color1_rgba_dim rgba(106, 69, 93, 0.1);
+
+/* SwayNC specific RGBA variants */
+@define-color BG_RGBA rgba(13, 14, 30, 0.85);
+@define-color BG_RGBA_LIGHT rgba(13, 14, 30, 0.7);
+@define-color BG_RGBA_LIGHTER rgba(13, 14, 30, 0.5);
+@define-color COLOR1_RGBA rgba(106, 69, 93, 0.4);
+@define-color COLOR1_RGBA_LIGHT rgba(106, 69, 93, 0.3);
+@define-color COLOR1_RGBA_DIM rgba(106, 69, 93, 0.1);
+@define-color COLOR4_RGBA rgba(248, 159, 91, 0.5);
+@define-color COLOR4_RGBA_LIGHT rgba(248, 159, 91, 0.4);
+@define-color COLOR4_RGBA_DIM rgba(248, 159, 91, 0.3);
+@define-color COLOR4_RGBA_BORDER rgba(248, 159, 91, 0.2);
+
+/* ─────────────────────────────────────────────────────────────── */
+/* Component-Specific Aliases                                      */
+/* ─────────────────────────────────────────────────────────────── */
+
+/* Waybar */
+@define-color BACKGROUND #0d0e1e;
+@define-color FOREGROUND #c2c2c6;
+
+/* Wlogout */
+/* (uses same definitions as above) */
+
+/* ═══════════════════════════════════════════════════════════════
+   End of Hecate Theme Colors
+   ═══════════════════════════════════════════════════════════════ */

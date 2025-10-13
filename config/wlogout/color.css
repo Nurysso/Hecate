@@ -1,0 +1,30 @@
+/* Wlogout Colors - Generated from Pywal */
+/* Generated: 2025-10-13 17:47:43 */
+
+@define-color background #0d0e1e;
+@define-color foreground #c2c2c6;
+
+@define-color color0  #0d0e1e;
+@define-color color1  #6A455D;
+@define-color color2  #C4493C;
+@define-color color3  #A14C58;
+@define-color color4  #F89F5B;
+@define-color color5  #FCAF4E;
+@define-color color6  #6B4785;
+@define-color color7  #c2c2c6;
+@define-color color8  #5c5e70;
+@define-color color9  #6A455D;
+@define-color color10 #C4493C;
+@define-color color11 #A14C58;
+@define-color color12 #F89F5B;
+@define-color color13 #FCAF4E;
+@define-color color14 #6B4785;
+@define-color color15 #c2c2c6;
+
+/* Semantic color names for wlogout */
+@define-color primary #F89F5B;
+@define-color secondary #6B4785;
+@define-color accent #FCAF4E;
+@define-color success #C4493C;
+@define-color warning #A14C58;
+@define-color error #6A455D;

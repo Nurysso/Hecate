@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
+# ⚠️ Script abandoned after v0.3.8 blind owl
+# check out ~/.config/hecate/scripts/update_hecate_colors.sh
+# Now Hecate uses a centeralize css file to add colors to waybar,rofi,wlogout,rofi
 
 COLOR_FILE="$HOME/.cache/wal/colors.json"
-CSS_OUTPUT="$HOME/.config/wlogout/colors.css"
-STYLE_OUTPUT="$HOME/.config/wlogout/style.css"
+CSS_OUTPUT="$HOME/.config/wlogout/color.css"
 WALLPAPER_OUTPUT="$HOME/.cache/wlogout/blurred_wallpaper.png"
 
 # Verify colors.json exists
@@ -70,134 +72,47 @@ if [ -f "$CSS_OUTPUT" ]; then
     cp "$CSS_OUTPUT" "${CSS_OUTPUT}.backup"
 fi
 
-# Generate colors.css
+# Generate color.css with GTK color definitions
 cat > "$CSS_OUTPUT" <<EOF
 /* Wlogout Colors - Generated from Pywal */
 /* Generated: $(date '+%Y-%m-%d %H:%M:%S') */
 
-* {
-    --background: ${BACKGROUND};
-    --foreground: ${FOREGROUND};
-    --color0: ${COLOR0};
-    --color1: ${COLOR1};
-    --color2: ${COLOR2};
-    --color3: ${COLOR3};
-    --color4: ${COLOR4};
-    --color5: ${COLOR5};
-    --color6: ${COLOR6};
-    --color7: ${COLOR7};
-    --color8: ${COLOR8};
-    --color9: ${COLOR9};
-    --color10: ${COLOR10};
-    --color11: ${COLOR11};
-    --color12: ${COLOR12};
-    --color13: ${COLOR13};
-    --color14: ${COLOR14};
-    --color15: ${COLOR15};
-}
-
-/* Semantic color names for wlogout */
 @define-color background ${BACKGROUND};
 @define-color foreground ${FOREGROUND};
+
+@define-color color0  ${COLOR0};
+@define-color color1  ${COLOR1};
+@define-color color2  ${COLOR2};
+@define-color color3  ${COLOR3};
+@define-color color4  ${COLOR4};
+@define-color color5  ${COLOR5};
+@define-color color6  ${COLOR6};
+@define-color color7  ${COLOR7};
+@define-color color8  ${COLOR8};
+@define-color color9  ${COLOR9};
+@define-color color10 ${COLOR10};
+@define-color color11 ${COLOR11};
+@define-color color12 ${COLOR12};
+@define-color color13 ${COLOR13};
+@define-color color14 ${COLOR14};
+@define-color color15 ${COLOR15};
+
+/* Semantic color names for wlogout */
 @define-color primary ${COLOR4};
-@define-color on_primary ${FOREGROUND};
-@define-color shadow ${COLOR4};
-@define-color accent ${COLOR4};
+@define-color secondary ${COLOR6};
+@define-color accent ${COLOR5};
+@define-color success ${COLOR2};
+@define-color warning ${COLOR3};
+@define-color error ${COLOR1};
 EOF
 
-# Generate style.css with pywal colors (matching your original structure)
-cat > "$STYLE_OUTPUT" <<EOF
-/* Wlogout Dynamic Theme - Generated from Pywal */
-/* Generated: $(date '+%Y-%m-%d %H:%M:%S') */
-
-* {
-    font-family: "Fira Sans Semibold", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
-    background-image: none;
-    transition: 20ms;
-    box-shadow: none;
-}
-
-window {
-    background: url("../../.cache/wlogout/blurred_wallpaper.png");
-    background-size: cover;
-    font-size: 16pt;
-}
-
-button {
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 20%;
-    animation: gradient_f 20s ease-in infinite;
-    border-radius: 80px;
-    border: 0px;
-    transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
-    color: ${BACKGROUND};
-    background-color: alpha(${COLOR4}, 0.2);
-}
-
-button:focus {
-    background-color: alpha(${COLOR4}, 0.5);
-    background-size: 25%;
-    border: 0px;
-}
-
-button:hover {
-    background-color: alpha(${COLOR4}, 0.9);
-    opacity: 0.8;
-    color: ${COLOR0};
-    background-size: 30%;
-    margin: 30px;
-    border-radius: 80px;
-    box-shadow: 0 0 50px ${BACKGROUND};
-}
-
-button span {
-    font-size: 1.2em;
-}
-
-#lock {
-    margin: 10px;
-    border-radius: 20px;
-    background-image: image(url("icons/lock.svg"));
-}
-
-#logout {
-    margin: 10px;
-    border-radius: 20px;
-    background-image: image(url("icons/logout.svg"));
-}
-
-#suspend {
-    margin: 10px;
-    border-radius: 20px;
-    background-image: image(url("icons/suspend.svg"));
-}
-
-#hibernate {
-    margin: 10px;
-    border-radius: 20px;
-    background-image: image(url("icons/hibernate.svg"));
-}
-
-#shutdown {
-    margin: 10px;
-    border-radius: 20px;
-    background-image: image(url("icons/shutdown.svg"));
-}
-
-#reboot {
-    margin: 10px;
-    border-radius: 20px;
-    background-image: image(url("icons/reboot.svg"));
-}
-EOF
-
-echo "✓ Wlogout theme updated (Primary: $COLOR4)"
+echo "✓ Wlogout colors updated at $CSS_OUTPUT"
+echo "✓ Primary color: $COLOR4"
 
 # Optional: Recolor SVG icons if they exist
 SVG_DIR="$HOME/.config/wlogout/icons"
 if [ -d "$SVG_DIR" ] && command -v sed &> /dev/null; then
-    echo "Updating SVG icon colors..."
+    echo "↻ Updating SVG icon colors..."
     for svg in "$SVG_DIR"/*.svg; do
         if [ -f "$svg" ]; then
             # Replace common fill colors with foreground color
