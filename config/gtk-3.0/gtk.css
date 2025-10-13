@@ -1,0 +1,33 @@
+/*
+* GTK Colors
+* Generated with Matugen
+*/
+
+@define-color accent_color #85d2e8;
+@define-color accent_fg_color #003641;
+@define-color accent_bg_color #85d2e8;
+@define-color window_bg_color #0f1416;
+@define-color window_fg_color #dee3e6;
+@define-color headerbar_bg_color #0f1416;
+@define-color headerbar_fg_color #dee3e6;
+@define-color popover_bg_color #0f1416;
+@define-color popover_fg_color #dee3e6;
+@define-color view_bg_color #0f1416;
+@define-color view_fg_color #dee3e6;
+@define-color card_bg_color #0f1416;
+@define-color card_fg_color #dee3e6;
+@define-color sidebar_bg_color @window_bg_color;
+@define-color sidebar_fg_color @window_fg_color;
+@define-color sidebar_border_color @window_bg_color;
+@define-color sidebar_backdrop_color @window_bg_color;
+
+/* Force transparency for all eww widgets */
+window.background {
+    background-color: rgba(0, 0, 0, 0);
+    background: none;
+}
+
+* {
+    background-color: rgba(0, 0, 0, 0);
+    background: none;
+}

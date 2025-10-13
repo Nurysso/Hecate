@@ -1,0 +1,366 @@
+;; Eww Beautiful Widgets for Hyprland
+;; Include external widgets
+(include "./widgets/activate-linux/activate-linux.yuck")
+(include "./widgets/sysvli/eww.yuck")
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  TIME & DATE VARIABLES
+;; ═══════════════════════════════════════════════════════════════════
+(defpoll time :interval "1s" "date +%H:%M")
+(defpoll seconds :interval "1s" "date +%S")
+(defpoll date_full :interval "60s" "date '+%A, %B %d, %Y'")
+(defpoll day :interval "60s" "date +%d")
+(defpoll month :interval "60s" "date +%B")
+(defpoll year :interval "60s" "date +%Y")
+(defpoll day_name :interval "60s" "date +%A")
+
+;; Date for bg-panel (different format)
+(defpoll date :interval "1h" "date --utc +'{\"date\":\"%d %B, %Y\",\"day\":\"%A\"}'")
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  SYSTEM STATS VARIABLES
+;; ═══════════════════════════════════════════════════════════════════
+(defpoll brightness :interval "1s" "brightnessctl g 2>/dev/null | awk '{print int($1/255*100)}' || echo '100'")
+
+(defpoll cpu :interval "2s" "top -bn1 | grep 'Cpu(s)' | awk '{print int($2 + $4)}'")
+(defpoll ram :interval "2s" "free -m | awk 'NR==2{printf \"%.0f\", $3*100/$2}'")
+(defpoll ram_used :interval "2s" "free -h | awk 'NR==2{print $3}'")
+(defpoll ram_total :interval "2s" "free -h | awk 'NR==2{print $2}'")
+
+(defpoll disk_used :interval "60s" "df -h / | awk 'NR==2{print $3}'")
+(defpoll disk_total :interval "60s" "df -h / | awk 'NR==2{print $2}'")
+(defpoll disk_percent :interval "60s" "df -h / | awk 'NR==2{print int($5)}'")
+
+(defpoll uptime_simple :interval "60s" "uptime -p | sed 's/up //'")
+(defpoll uptime :interval "30s" "awk '{d=int($1/86400);h=int(($1%86400)/3600);m=int(($1%3600)/60);} END {if(d>0) printf \"%d days %d hrs %d min\", d,h,m; else if(h>0) printf \"%d hrs %d min\", h,m; else if(m>0) printf \"%d min\", m; else print \"0 min\"}' /proc/uptime")
+
+(defpoll kernel :interval "600s" "uname -r")
+(defpoll hostname :interval "600s" "hostname")
+
+(defpoll temp :interval "5s" "sensors 2>/dev/null | grep 'Package id 0:' | awk '{print int($4)}' || sensors 2>/dev/null | grep 'Tctl:' | awk '{print int($2)}' || echo '0'")
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  NETWORK VARIABLES
+;; ═══════════════════════════════════════════════════════════════════
+(defpoll net_up :interval "2s" "~/.config/eww/scripts/network.sh up")
+(defpoll net_down :interval "2s" "~/.config/eww/scripts/network.sh down")
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  WEATHER VARIABLES
+;; ═══════════════════════════════════════════════════════════════════
+(defpoll weather_temp :interval "1800s" "curl -s 'wttr.in/?format=%t' | tr -d '+' 2>/dev/null || echo 'N/A'")
+(defpoll weather_cond :interval "1800s" "curl -s 'wttr.in/?format=%C' 2>/dev/null || echo 'N/A'")
+(defpoll weather :interval "3h" "./widgets/bg-panel/scripts/weather.sh")
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  MUSIC VARIABLES
+;; ═══════════════════════════════════════════════════════════════════
+(defpoll music_title :interval "2s" "playerctl metadata title 2>/dev/null || echo 'No Music'")
+(defpoll music_artist :interval "2s" "playerctl metadata artist 2>/dev/null || echo ''")
+(defpoll music_status :interval "1s" "playerctl status 2>/dev/null || echo 'Stopped'")
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  QUOTE VARIABLES
+;; ═══════════════════════════════════════════════════════════════════
+(defpoll quote :interval "1h" "~/.config/eww/scripts/quote.sh")
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  PYWAL COLORS
+;; ═══════════════════════════════════════════════════════════════════
+(defpoll color_bg :interval "5s" "cat ~/.cache/wal/colors | sed -n '1p'")
+(defpoll color_fg :interval "5s" "cat ~/.cache/wal/colors | sed -n '8p'")
+(defpoll color_accent :interval "5s" "cat ~/.cache/wal/colors | sed -n '2p'")
+(defpoll color_accent2 :interval "5s" "cat ~/.cache/wal/colors | sed -n '3p'")
+(defpoll color_accent3 :interval "5s" "cat ~/.cache/wal/colors | sed -n '4p'")
+(defpoll color_accent4 :interval "5s" "cat ~/.cache/wal/colors | sed -n '5p'")
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  VARIABLES FOR BG-PANEL
+;; ═══════════════════════════════════════════════════════════════════
+(defvar y true)
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  WINDOW DEFINITIONS
+;; ═══════════════════════════════════════════════════════════════════
+
+;; Clock Widget (Top Right)
+(defwindow clock
+  :monitor 0
+  :geometry (geometry :x "20px"
+                      :y "20px"
+                      :width "300px"
+                      :height "180px"
+                      :anchor "top right")
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  (clock_widget))
+
+;; Calendar Widget (Below Clock)
+(defwindow calendar
+  :monitor 0
+  :geometry (geometry :x "20px"
+                      :y "220px"
+                      :width "300px"
+                      :height "200px"
+                      :anchor "top right")
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  (calendar_widget))
+
+;; System Stats Widget (Left Side)
+(defwindow system
+  :monitor 0
+  :geometry (geometry :x "20px"
+                      :y "20px"
+                      :width "320px"
+                      :height "400px"
+                      :anchor "top left")
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  (system_widget))
+
+;; Weather Widget (Below Calendar)
+(defwindow weather
+  :monitor 0
+  :geometry (geometry :x "20px"
+                      :y "440px"
+                      :width "300px"
+                      :height "150px"
+                      :anchor "top right")
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  (weather_widget))
+
+;; Music Player Widget (Bottom Right)
+(defwindow music
+  :monitor 0
+  :geometry (geometry :x "20px"
+                      :y "20px"
+                      :width "350px"
+                      :height "120px"
+                      :anchor "bottom right")
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  (music_widget))
+
+;; Network Widget (Below System)
+(defwindow network
+  :monitor 0
+  :geometry (geometry :x "20px"
+                      :y "440px"
+                      :width "320px"
+                      :height "120px"
+                      :anchor "top left")
+  :stacking "bg"
+  :exclusive false
+  :focusable false
+  (network_widget))
+
+;; Background Panel Widget
+(defwindow bg-panel
+  :namespace "bg-panel"
+  :monitor 0
+  :stacking "bg"
+  :geometry (geometry
+              :anchor "top left"
+              :x "1%"
+              :y "3%"
+              :width "20%"
+              :height "20%")
+  (bg_panel_widget))
+
+;; ═══════════════════════════════════════════════════════════════════
+;;  WIDGET DEFINITIONS
+;; ═══════════════════════════════════════════════════════════════════
+
+;; Clock Widget - Elegant Time Display
+(defwidget clock_widget []
+  (box :class "widget clock-widget"
+       :orientation "v"
+       :space-evenly false
+    (box :class "time-display"
+         :orientation "v"
+         :space-evenly false
+         :valign "center"
+         :halign "center"
+      (label :class "time-large"
+             :text time
+             :style "color: ${color_fg}; font-size: 64px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);"))))
+
+;; Calendar Widget - Month view style
+(defwidget calendar_widget []
+  (box :class "widget calendar-widget"
+       :orientation "v"
+       :space-evenly false
+    (box :class "calendar-header"
+         :orientation "h"
+         :space-evenly true
+      (label :text month
+             :style "color: ${color_accent2}; font-size: 18px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);")
+      (label :text year
+             :style "color: ${color_fg}; font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"))
+    (box :class "calendar-body"
+         :orientation "v"
+         :space-evenly false
+         :valign "center"
+         :halign "center"
+      (label :class "day-number"
+             :text day
+             :style "color: ${color_fg}; font-size: 72px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);")
+      (label :class "day-name"
+             :text day_name
+             :style "color: ${color_accent2}; font-size: 20px; margin-top: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"))))
+
+;; System Stats Widget
+(defwidget system_widget []
+  (box :class "widget system-widget"
+       :orientation "v"
+       :space-evenly false
+    (label :text "SYSTEM"
+           :class "widget-title"
+           :halign "start"
+           :style "color: ${color_accent3}; font-size: 16px; font-weight: bold; margin-bottom: 15px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);")
+
+    ;; CPU
+    (box :class "stat-item" :orientation "v" :space-evenly false
+      (box :orientation "h" :space-evenly false
+        (label :text "CPU" :style "color: ${color_fg}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);" :halign "start" :hexpand true)
+        (label :text "${cpu}%" :style "color: ${color_accent3}; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"))
+      (progress :class "stat-bar"
+                :value cpu
+                :style "color: ${color_accent3};"))
+
+    ;; RAM
+    (box :class "stat-item" :orientation "v" :space-evenly false
+      (box :orientation "h" :space-evenly false
+        (label :text "MEMORY" :style "color: ${color_fg}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);" :halign "start" :hexpand true)
+        (label :text "${ram_used}/${ram_total}" :style "color: ${color_accent3}; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"))
+      (progress :class "stat-bar"
+                :value ram
+                :style "color: ${color_accent3};"))
+
+    ;; Disk
+    (box :class "stat-item" :orientation "v" :space-evenly false
+      (box :orientation "h" :space-evenly false
+        (label :text "STORAGE" :style "color: ${color_fg}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);" :halign "start" :hexpand true)
+        (label :text "${disk_used}/${disk_total}" :style "color: ${color_accent3}; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"))
+      (progress :class "stat-bar"
+                :value disk_percent
+                :style "color: ${color_accent3};"))
+
+    ;; Temperature
+    (box :class "stat-item" :orientation "h" :space-evenly false
+      (label :text "TEMPERATURE" :style "color: ${color_fg}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);" :halign "start" :hexpand true)
+      (label :text "${temp}°C" :style "color: ${color_accent3}; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"))
+
+    ;; Uptime
+    (box :class "stat-item" :orientation "h" :space-evenly false
+      (label :text "UPTIME" :style "color: ${color_fg}; font-size: 12px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);" :halign "start" :hexpand true)
+      (label :text uptime_simple :style "color: ${color_fg}; opacity: 0.8; font-size: 11px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);" :limit-width 20))))
+
+;; Weather Widget
+(defwidget weather_widget []
+  (box :class "widget weather-widget"
+       :orientation "v"
+       :space-evenly false
+    (label :text "WEATHER"
+           :class "widget-title"
+           :halign "start"
+           :style "color: ${color_accent4}; font-size: 16px; font-weight: bold; margin-bottom: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);")
+    (box :orientation "h"
+         :space-evenly false
+         :valign "center"
+      (label :text weather_temp
+             :style "color: ${color_fg}; font-size: 48px; font-weight: bold; margin-right: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);")
+      (label :text weather_cond
+             :style "color: ${color_fg}; font-size: 16px; opacity: 0.9; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"
+             :wrap true
+             :limit-width 15))))
+
+;; Music Player Widget
+(defwidget music_widget []
+  (box :class "widget music-widget"
+       :orientation "v"
+       :space-evenly false
+       :visible {music_title != "No Music"}
+    (label :text "NOW PLAYING"
+           :class "widget-title"
+           :halign "start"
+           :style "color: ${color_accent}; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);")
+    (label :text music_title
+           :class "music-title"
+           :halign "start"
+           :limit-width 35
+           :style "color: ${color_fg}; font-size: 16px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);")
+    (label :text music_artist
+           :class "music-artist"
+           :halign "start"
+           :limit-width 35
+           :style "color: ${color_fg}; opacity: 0.8; font-size: 13px; margin-top: 5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);")
+    (box :class "music-controls"
+         :orientation "h"
+         :space-evenly true
+         :halign "center"
+         :spacing 15
+      (button :onclick "playerctl previous"
+              :class "music-btn"
+              :style "color: ${color_accent}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"
+              "󰒮")
+      (button :onclick "playerctl play-pause"
+              :class "music-btn"
+              :style "color: ${color_accent}; font-size: 24px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"
+              {music_status == "Playing" ? "󰏤" : "󰐊"})
+      (button :onclick "playerctl next"
+              :class "music-btn"
+              :style "color: ${color_accent}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"
+              "󰒭"))))
+
+;; Network Widget
+(defwidget network_widget []
+  (box :class "widget network-widget"
+       :orientation "v"
+       :space-evenly false
+    (label :text "NETWORK"
+           :class "widget-title"
+           :halign "start"
+           :style "color: ${color_accent2}; font-size: 16px; font-weight: bold; margin-bottom: 15px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);")
+    (box :class "stat-item" :orientation "h" :space-evenly false
+      (label :text "DOWNLOAD" :style "color: ${color_fg}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);" :halign "start" :hexpand true)
+      (label :text net_down :style "color: ${color_accent2}; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"))
+    (box :class "stat-item" :orientation "h" :space-evenly false
+      (label :text "UPLOAD" :style "color: ${color_fg}; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);" :halign "start" :hexpand true)
+      (label :text net_up :style "color: ${color_accent2}; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"))))
+
+;; Background Panel Widget
+(defwidget bg_panel_widget []
+  (box :orientation "h" :space-evenly false :halign "start" :spacing 25
+    (box :orientation "v" :space-evenly false :spacing 20
+      (eventbox :height 70 :width 70 :class "wicon" :cursor "pointer" :onclick "hyprctl dispatch exec vesktop"
+        (label :text ""))
+      (eventbox :height 70 :width 70 :class "wicon" :cursor "pointer" :onclick "hyprctl dispatch exec librewolf"
+        (label :text ""))
+      (eventbox :height 70 :width 70 :class "wicon" :cursor "pointer" :onclick "hyprctl dispatch exec spotify"
+        (label :text ""))
+      (eventbox :height 70 :width 70 :class "wicon" :cursor "pointer" :onclick "hyprctl dispatch exec 'kitty -e nvim'"
+        (label :text "")))
+    (box :orientation "v" :space-evenly false :spacing 20
+      (label :class "wdate" :xalign 0 :text "${date.date}")
+      (label :class "wday" :xalign 0 :text "${date.day}")
+      (box :orientation "h" :space-evenly false
+        (box :class "divider-v")
+        (revealer :reveal y :transition "slideright"
+          (box :orientation "v" :space-evenly false
+            (label :class "welement" :xalign 0 :text "() Up       ${uptime}")
+            (label :class "welement" :xalign 0 :text "() Weather    ${weather}")
+            (box :orientation "h" :style "margin-top: 1rem;" :spacing 15 :space-evenly false
+              (label :class "wqicon" :text "󰚢")
+              (box :orientation "v" :space-evenly false :style "margin-top: 1rem;"
+                (label :class "wqtext" :lines 3 :justify "center" :limit-width 27 :text "${quote.quote}")
+                (label :class "wqtext" :lines 1 :xalign 1 :justify "end" :limit-width 5 :style "color: rgba(#737373, 0.6);" :text "- ${quote.author}")))))))))
+
+

@@ -1,0 +1,112 @@
+;; Eww Configuration for Hyprland
+;; Variables
+(defpoll battery :interval "10s" "cat /sys/class/power_supply/BAT*/capacity 2>/dev/null || echo '100'")
+(defpoll battery_status :interval "10s" "cat /sys/class/power_supply/BAT*/status 2>/dev/null || echo 'Unknown'")
+(defpoll volume :interval "1s" "pamixer --get-volume")
+(defpoll volume_muted :interval "1s" "pamixer --get-mute")
+(defpoll cpu :interval "2s" "top -bn1 | grep 'Cpu(s)' | awk '{print int($2 + $4)}'")
+(defpoll ram :interval "2s" "free -m | awk 'NR==2{printf \"%.0f\", $3*100/$2}'")
+(defpoll workspace :interval "0.1s" "hyprctl activeworkspace -j | jq -r '.id'")
+
+;; Dynamic colors from pywal
+
+;; Windows
+(defwindow bar
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "100%"
+                      :height "30px"
+                      :anchor "top center")
+  :stacking "fg"
+  :exclusive true
+  :focusable false
+  (bar_layout))
+
+;; Widgets
+(defwidget bar_layout []
+  (box :class "bar"
+       :orientation "h"
+       :space-evenly false
+       :style "background-color: ${color_bg}; border-bottom: 2px solid ${color_accent};"
+    (box :class "left" :halign "start" :space-evenly false
+      (workspaces)
+      (window_title))
+    (box :class "center" :halign "center"
+      (datetime))
+    (box :class "right" :halign "end" :space-evenly false
+      (system_stats)
+      (volume_widget)
+      (battery_widget))))
+
+(defwidget workspaces []
+  (box :class "workspaces"
+       :orientation "h"
+       :space-evenly false
+       :spacing 5
+       :style "color: ${color_fg};"
+    (for ws in "[1,2,3,4,5,6,7,8,9,10]"
+      (button :class {workspace == ws ? "workspace-active" : "workspace"}
+              :onclick "hyprctl dispatch workspace ${ws}"
+              :style {workspace == ws ?
+                      "background-color: ${color_accent}; color: ${color_bg};" :
+                      "background-color: transparent; color: ${color_fg};"}
+        ws))))
+
+(defwidget window_title []
+  (box :class "window-title"
+       :style "color: ${color_accent2}; margin-left: 15px;"
+    (label :text "Hyprland" :limit-width 50)))
+
+(defwidget datetime []
+  (box :class "datetime"
+       :orientation "h"
+       :space-evenly false
+       :spacing 10
+       :style "color: ${color_fg};"
+    (label :class "time"
+           :text time
+           :style "font-weight: bold; color: ${color_accent};")
+    (label :class "date"
+           :text date)))
+
+(defwidget system_stats []
+  (box :class "system-stats"
+       :orientation "h"
+       :space-evenly false
+       :spacing 10
+       :style "color: ${color_fg};"
+    (box :class "cpu" :spacing 5
+      (label :text "󰻠" :style "color: ${color_accent};")
+      (label :text "${cpu}%"))
+    (box :class "ram" :spacing 5
+      (label :text "󰍛" :style "color: ${color_accent2};")
+      (label :text "${ram}%"))))
+
+(defwidget volume_widget []
+  (box :class "volume"
+       :spacing 5
+       :style "color: ${color_fg};"
+    (label :text {volume_muted == "true" ? "󰖁" :
+                  volume < 30 ? "󰕿" :
+                  volume < 70 ? "󰖀" : "󰕾"}
+           :style "color: ${color_accent};")
+    (label :text "${volume}%")))
+
+(defwidget battery_widget []
+  (box :class "battery"
+       :spacing 5
+       :style "color: ${color_fg}; margin-right: 10px;"
+       :visible {battery != "100" || battery_status != "Unknown"}
+    (label :text {battery_status == "Charging" ? "󰂄" :
+                  battery > 90 ? "󰁹" :
+                  battery > 80 ? "󰂂" :
+                  battery > 70 ? "󰂁" :
+                  battery > 60 ? "󰂀" :
+                  battery > 50 ? "󰁿" :
+                  battery > 40 ? "󰁾" :
+                  battery > 30 ? "󰁽" :
+                  battery > 20 ? "󰁼" :
+                  battery > 10 ? "󰁻" : "󰁺"}
+           :style {battery < 20 ? "color: #ff5555;" : "color: ${color_accent};"})
+    (label :text "${battery}%")))

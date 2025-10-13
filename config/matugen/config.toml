@@ -1,0 +1,15 @@
+[config]
+version_check = false
+
+[templates.gtk3]
+input_path = '~/.config/matugen/templates/gtk/gtk-colors.css'
+output_path = '~/.config/gtk-3.0/gtk.css'
+
+#[templates.gtk4]
+#input_path = '~/.config/matugen/templates/gtk/gtk-colors.css'
+#output_path = '~/.config/gtk-4.0/gtk.css'
+
+
+[templates.wallpaper]
+input_path = '~/.config/matugen/templates/wallpaper.txt'
+output_path = '~/.local/state/quickshell/user/generated/wallpaper/path.txt'

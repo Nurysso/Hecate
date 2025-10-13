@@ -1,0 +1,61 @@
+* {
+  all: unset;
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 14px;
+}
+
+.bar {
+  padding: 0px 10px;
+  background-color: black;
+}
+
+.workspaces {
+  button {
+    padding: 5px 12px;
+    margin: 2px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-weight: bold;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.window-title {
+  padding: 5px 10px;
+  font-style: italic;
+}
+
+.datetime {
+  padding: 5px 15px;
+  border-radius: 8px;
+
+  .time {
+    font-size: 16px;
+  }
+
+  .date {
+    opacity: 0.8;
+  }
+}
+
+.system-stats {
+  padding: 5px 10px;
+
+  box {
+    padding: 0px 8px;
+    border-radius: 5px;
+  }
+}
+
+.volume {
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.battery {
+  padding: 5px 10px;
+  border-radius: 5px;
+}
