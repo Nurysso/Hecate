@@ -268,8 +268,9 @@ ask_preferences() {
   echo ""
 
   gum style --foreground 82 "This will download additional packages to your system select based on your work"
-  gum style --foreground 82 "This was designed for newly installed setup, by chosing profile you can break dependencies used by other softwares"
+  gum style --foreground 82 "This was designed for newly installed setup, by choosing profile you can break dependencies used by other softwares"
   sleep 2
+
   while true; do
     # User profile
     USER_PROFILE=$(gum choose --header "Select your profile:" \
@@ -279,8 +280,10 @@ ask_preferences() {
       "madlad")
     gum style --foreground 82 "✓ Profile: $USER_PROFILE"
     echo ""
-    if [ $USER_PROFILE = "madlad"]; then
-      gum style --foreground 82 "⚠️ This could take easily more than an hour or 2 to install depending upon netwrok speed and cpu power"
+
+    # FIX: Added space before ] and proper string comparison
+    if [ "$USER_PROFILE" = "madlad" ]; then
+      gum style --foreground 220 "⚠️ This could take easily more than an hour or 2 to install depending upon network speed and CPU power"
       if gum confirm "Do you want to continue?"; then
         break
       else
@@ -551,6 +554,12 @@ install_single_package() {
   local max_retries=3
   local success=false
 
+  # Check if package is already installed
+  if pacman -Q "$pkg" &>/dev/null; then
+    gum style --foreground 82 "  ✓ $pkg (already installed)"
+    return 0
+  fi
+
   for ((i = 1; i <= max_retries; i++)); do
     gum style --foreground 220 "  → $pkg (attempt $i/$max_retries)..."
 
@@ -603,12 +612,16 @@ install_packages() {
     local official_pkgs=()
     local aur_pkgs=()
     local failed_pkgs=()
+    local already_installed=()
 
     gum style --foreground 220 "Categorizing packages..."
     gum spin --spinner dot --title "Checking package sources..." -- sleep 1
 
+    # Check what's already installed and categorize
     for pkg in "${INSTALL_PACKAGES[@]}"; do
-      if is_official_package "$pkg"; then
+      if pacman -Q "$pkg" &>/dev/null; then
+        already_installed+=("$pkg")
+      elif is_official_package "$pkg"; then
         official_pkgs+=("$pkg")
       else
         aur_pkgs+=("$pkg")
@@ -617,18 +630,30 @@ install_packages() {
 
     echo ""
     gum style --foreground 212 "Package Summary:"
+    gum style --foreground 82 "  Already installed: ${#already_installed[@]} packages"
     gum style --foreground 220 "  Official repo: ${#official_pkgs[@]} packages"
     gum style --foreground 220 "  AUR: ${#aur_pkgs[@]} packages"
     echo ""
+
+    # Show already installed packages
+    if [ ${#already_installed[@]} -gt 0 ]; then
+      gum style --foreground 82 "Already installed packages:"
+      for pkg in "${already_installed[@]}"; do
+        gum style --foreground 82 "  ✓ $pkg"
+      done
+      echo ""
+    fi
 
     # Install official packages first (batch install for speed)
     if [ ${#official_pkgs[@]} -gt 0 ]; then
       gum style --border normal --padding "0 1" --border-foreground 212 "Installing Official Repository Packages"
 
-      if sudo pacman -S --needed --noconfirm "${official_pkgs[@]}" 2>&1 | tee /tmp/pacman_install.log; then
-        gum style --foreground 82 "✓ Official packages installed"
+      # Use --needed flag to skip already installed packages
+      if sudo pacman -S --needed --noconfirm "${official_pkgs[@]}" 2>&1 | tee /tmp/pacman_install.log | grep -v "nothing to do"; then
+        gum style --foreground 82 "✓ Official packages processed"
       else
-        gum style --foreground 196 "⚠ Some official packages failed"
+        # Check log for actual failures (not just "already installed")
+        gum style --foreground 196 "⚠ Some official packages may have failed"
         # Parse failed packages from log
         while IFS= read -r pkg; do
           if ! pacman -Q "$pkg" &>/dev/null; then
@@ -659,8 +684,12 @@ install_packages() {
 
     # Summary
     gum style --border double --padding "1 2" --border-foreground 212 "Installation Summary"
-    local total_installed=$((${#INSTALL_PACKAGES[@]} - ${#failed_pkgs[@]}))
-    gum style --foreground 82 "✓ Successfully installed: $total_installed/${#INSTALL_PACKAGES[@]} packages"
+    local total_success=$((${#already_installed[@]} + ${#INSTALL_PACKAGES[@]} - ${#failed_pkgs[@]}))
+    gum style --foreground 82 "✓ Total packages available: $total_success/${#INSTALL_PACKAGES[@]}"
+
+    if [ ${#already_installed[@]} -gt 0 ]; then
+      gum style --foreground 82 "  (${#already_installed[@]} were already installed)"
+    fi
 
     if [ ${#failed_pkgs[@]} -gt 0 ]; then
       gum style --foreground 196 "✗ Failed packages (${#failed_pkgs[@]}):"
@@ -675,6 +704,7 @@ install_packages() {
         gum style --foreground 220 "Failed packages saved to: $failed_log"
         gum style --foreground 220 "You can install them later with:"
         gum style --foreground 220 "  $PACKAGE_MANAGER -S \$(cat $failed_log)"
+        echo ""
       fi
     fi
     ;;
@@ -771,7 +801,8 @@ install_all_packages() {
 # Verify critical packages are installed
 verify_critical_packages() {
   clear
-  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "cliphist" "swaync" "hypridle" "hyprlock" "waybar" "wallust" "fastfetch" "starship" "wlogout" "notos-fonts-emoji" "rofi" "rofi-emoji" "grim" "wl-clipboard")
+  # Fixed typo: notos-fonts-emoji -> noto-fonts-emoji
+  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "cliphist" "swaync" "hypridle" "hyprlock" "wallust" "fastfetch" "starship" "wlogout" "noto-fonts-emoji" "grim" "wl-clipboard")
   local missing_packages=()
 
   gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
@@ -794,8 +825,31 @@ verify_critical_packages() {
     if gum confirm "Try to install missing critical packages now?"; then
       INSTALL_PACKAGES=("${missing_packages[@]}")
       install_packages
+
+      # Re-verify after installation
+      local still_missing=()
+      for pkg in "${missing_packages[@]}"; do
+        if ! command -v "$pkg" &>/dev/null && ! pacman -Q "$pkg" &>/dev/null; then
+          still_missing+=("$pkg")
+        fi
+      done
+
+      if [ ${#still_missing[@]} -gt 0 ]; then
+        gum style --foreground 196 "⚠ Some critical packages are still missing:"
+        for pkg in "${still_missing[@]}"; do
+          gum style --foreground 196 "  • $pkg"
+        done
+
+        if ! gum confirm "Continue anyway? (Not recommended)"; then
+          gum style --foreground 196 "Installation aborted"
+          exit 1
+        fi
+      fi
     else
-      gum style --foreground 220 "Continuing anyway... (not recommended)"
+      if ! gum confirm "Continue without critical packages? (Not recommended)"; then
+        gum style --foreground 196 "Installation aborted"
+        exit 1
+      fi
     fi
   else
     gum style --foreground 82 "✓ All critical packages verified!"
@@ -1020,7 +1074,7 @@ create_hecate_config() {
 
   local config_dir="$HOME/.config/hecate"
   local config_file="$config_dir/hecate.toml"
-  local version="0.3.6 blind owl"
+  local version="0.3.8 blind owl"
   local install_date=$(date +%Y-%m-%d)
 
   # Create config directory

@@ -1,2 +1,93 @@
+# ─────────────────────────────
+# Global
+# ─────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*.swo
+*.tmp
+*.bak
+*.old
+*.lock
+*.pid
+*~
+.cache/
+logs/
+temp/
+tmp/
+*.env
+.env.*
+
+# ─────────────────────────────
+# System Files
+# ─────────────────────────────
+version.txt
 deps-used.md
 install-script-idea.txt
+
+# ─────────────────────────────
+# Go + Wails
+# ─────────────────────────────
+# Build outputs
+/apps/system-visualizer/build/
+/apps/system-visualizer/frontend/wailsjs/
+dist/
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go module/vendor cache
+/apps/system-visualizer/vendor/
+/apps/system-visualizer/go.sum
+/apps/system-visualizer/wails.json.md5
+
+# Wails specific
+/apps/system-visualizer/frontend/package.json.md5
+/apps/system-visualizer/build-mac*
+/apps/system-visualizer/build-windows*
+
+# ─────────────────────────────
+# Node / React / Vite frontend
+# ─────────────────────────────
+/apps/system-visualizer/frontend/node_modules/
+/apps/system-visualizer/frontend/dist/
+/apps/system-visualizer/frontend/.vite/
+*.tsbuildinfo
+
+# ─────────────────────────────
+# OS / IDE / Editor junk
+# ─────────────────────────────
+# macOS
+.AppleDouble
+.LSOverride
+Icon?
+__MACOSX/
+
+# Linux
+.Trash-*
+.nfs*
+
+# Windows
+ehthumbs.db
+Desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# JetBrains
+*.iws
+*.ipr
+
+# ─────────────────────────────
+# Other Generated or Transient Files
+# ─────────────────────────────
+/config/**/update_colors.sh.bak
+/config/**/eww.css.map
+/config/**/cache/
