@@ -9,26 +9,26 @@ WALLPAPER_OUTPUT="$HOME/.cache/wlogout/blurred_wallpaper.png"
 
 # Verify colors.json exists
 if [ ! -f "$COLOR_FILE" ]; then
-    echo "Error: wal colors.json not found at $COLOR_FILE"
-    exit 1
+  echo "Error: wal colors.json not found at $COLOR_FILE"
+  exit 1
 fi
 
 # Verify jq is installed
-if ! command -v jq &> /dev/null; then
-    echo "Error: jq is not installed"
-    exit 1
+if ! command -v jq &>/dev/null; then
+  echo "Error: jq is not installed"
+  exit 1
 fi
 
 # Extract colors
 extract_color() {
-    local key="$1"
-    local value
-    value=$(jq -r "$key" "$COLOR_FILE" 2>/dev/null)
-    if [ -z "$value" ] || [ "$value" = "null" ]; then
-        echo "Error: Failed to extract $key"
-        exit 1
-    fi
-    echo "$value"
+  local key="$1"
+  local value
+  value=$(jq -r "$key" "$COLOR_FILE" 2>/dev/null)
+  if [ -z "$value" ] || [ "$value" = "null" ]; then
+    echo "Error: Failed to extract $key"
+    exit 1
+  fi
+  echo "$value"
 }
 
 # Extract all colors
@@ -58,22 +58,22 @@ mkdir -p "$(dirname "$CSS_OUTPUT")"
 # Generate blurred wallpaper from current wallpaper
 CONFIG="$HOME/.config/waypaper/config.ini"
 if [ -f "$CONFIG" ]; then
-    WP_PATH=$(grep '^wallpaper' "$CONFIG" | cut -d '=' -f2 | tr -d ' ')
-    WP_PATH="${WP_PATH/#\~/$HOME}"
+  WP_PATH=$(grep '^wallpaper' "$CONFIG" | cut -d '=' -f2 | tr -d ' ')
+  WP_PATH="${WP_PATH/#\~/$HOME}"
 
-    if [ -f "$WP_PATH" ] && command -v convert &> /dev/null; then
-        convert "$WP_PATH" -blur 0x10 -scale 1920x1080^ -gravity center -extent 1920x1080 "$WALLPAPER_OUTPUT" 2>/dev/null
-        echo "✓ Generated blurred wallpaper"
-    fi
+  if [ -f "$WP_PATH" ] && command -v convert &>/dev/null; then
+    convert "$WP_PATH" -blur 0x10 -scale 1920x1080^ -gravity center -extent 1920x1080 "$WALLPAPER_OUTPUT" 2>/dev/null
+    echo "✓ Generated blurred wallpaper"
+  fi
 fi
 
 # Create backup
 if [ -f "$CSS_OUTPUT" ]; then
-    cp "$CSS_OUTPUT" "${CSS_OUTPUT}.backup"
+  cp "$CSS_OUTPUT" "${CSS_OUTPUT}.backup"
 fi
 
 # Generate color.css with GTK color definitions
-cat > "$CSS_OUTPUT" <<EOF
+cat >"$CSS_OUTPUT" <<EOF
 /* Wlogout Colors - Generated from Pywal */
 /* Generated: $(date '+%Y-%m-%d %H:%M:%S') */
 
@@ -111,14 +111,14 @@ echo "✓ Primary color: $COLOR4"
 
 # Optional: Recolor SVG icons if they exist
 SVG_DIR="$HOME/.config/wlogout/icons"
-if [ -d "$SVG_DIR" ] && command -v sed &> /dev/null; then
-    echo "↻ Updating SVG icon colors..."
-    for svg in "$SVG_DIR"/*.svg; do
-        if [ -f "$svg" ]; then
-            # Replace common fill colors with foreground color
-            sed -i "s/fill=\"#[0-9a-fA-F]\{6\}\"/fill=\"${FOREGROUND}\"/g" "$svg"
-            sed -i "s/stroke=\"#[0-9a-fA-F]\{6\}\"/stroke=\"${FOREGROUND}\"/g" "$svg"
-        fi
-    done
-    echo "✓ SVG icons recolored"
+if [ -d "$SVG_DIR" ] && command -v sed &>/dev/null; then
+  echo "↻ Updating SVG icon colors..."
+  for svg in "$SVG_DIR"/*.svg; do
+    if [ -f "$svg" ]; then
+      # Replace common fill colors with foreground color
+      sed -i "s/fill=\"#[0-9a-fA-F]\{6\}\"/fill=\"${FOREGROUND}\"/g" "$svg"
+      sed -i "s/stroke=\"#[0-9a-fA-F]\{6\}\"/stroke=\"${FOREGROUND}\"/g" "$svg"
+    fi
+  done
+  echo "✓ SVG icons recolored"
 fi

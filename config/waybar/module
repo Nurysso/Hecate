@@ -116,7 +116,16 @@
       "on-scroll-down": "shift_down"
     }
   },
-
+  "custom/updates": {
+    "format": "  {}",
+    "escape": true,
+    "return-type": "json",
+    "exec": "~/.config/hecate/scripts/update.sh",
+    "interval": 1800,
+    "signal": 1,
+    "hide-empty-text": false,
+    "on-click": "~/.config/hecate/scripts/term.sh"
+  },
 "tray": {
     "icon-size": 21,
     "spacing": 10,
@@ -195,7 +204,7 @@
     "on-click": "activate",
     "on-click-middle": "close",
     "ignore-list": [
-       "Alacritty"
+       "waypaper"
     ],
     "app_ids-mapping": {
       "firefoxdeveloperedition": "firefox-developer-edition"
@@ -249,7 +258,7 @@
     "format-bluetooth": "{icon}",
     "format-muted": "",
     "format-icons": {
-      "headphone": "",
+      "headphone": "",
       "default": ""
     },
     "ignored-sinks": ["Easy Effects Sink"],
@@ -316,14 +325,6 @@
     "tooltip-format": "Left: Logout Menu"
   },
 
-  "custom/menu": {
-    "format": "󰣇",
-    "on-click": "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window",
-    "on-click-middle": "$HOME/.config/hypr/UserScripts/WallpaperSelect.sh",
-    "on-click-right": "$HOME/.config/hypr/scripts/WaybarLayout.sh",
-    "tooltip": true,
-    "tooltip-format": "Left: App Launcher\nMiddle: Wallpaper\nRight: Layout Menu"
-  },
   "battery": {
     "interval": 60,
     "align": 0,

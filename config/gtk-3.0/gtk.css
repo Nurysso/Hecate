@@ -21,13 +21,3 @@
 @define-color sidebar_border_color @window_bg_color;
 @define-color sidebar_backdrop_color @window_bg_color;
 
-/* Force transparency for all eww widgets */
-window.background {
-    background-color: rgba(0, 0, 0, 0);
-    background: none;
-}
-
-* {
-    background-color: rgba(0, 0, 0, 0);
-    background: none;
-}

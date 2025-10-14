@@ -84,10 +84,3 @@ Desktop.ini
 # JetBrains
 *.iws
 *.ipr
-
-# ─────────────────────────────
-# Other Generated or Transient Files
-# ─────────────────────────────
-/config/**/update_colors.sh.bak
-/config/**/eww.css.map
-/config/**/cache/

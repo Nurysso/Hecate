@@ -9,20 +9,20 @@ COLOR_FILE="$HOME/.cache/wal/colors.sh"
 
 # Source pywal colors
 if [ -f "$COLOR_FILE" ]; then
-    source "$COLOR_FILE"
+  source "$COLOR_FILE"
 else
-    echo "Error: Pywal colors not found at $COLOR_FILE"
-    echo "Please run 'wal' to generate colors first."
-    exit 1
+  echo "Error: Pywal colors not found at $COLOR_FILE"
+  echo "Please run 'wal' to generate colors first."
+  exit 1
 fi
 
 # Backup existing config
 if [ -f "$STARSHIP_CONFIG" ]; then
-    cp "$STARSHIP_CONFIG" "$BACKUP_CONFIG"
+  cp "$STARSHIP_CONFIG" "$BACKUP_CONFIG"
 fi
 
 # Create the starship.toml file with pywal colors
-cat > "$STARSHIP_CONFIG" << EOF
+cat >"$STARSHIP_CONFIG" <<EOF
 # ────────────────────────────────────────────────────────────────
 # 🌟 Starship Prompt Configuration
 # Modern, clean prompt — Hecate Theme Edition
@@ -119,7 +119,7 @@ symbol = " "
 format = "[\$symbol\$version](\$style)"
 style = "bold ${color4}"
 
-[go]
+[golang]
 symbol = " "
 format = "via [$symbol($version )]($style)"
 style = "bold ${color6}"

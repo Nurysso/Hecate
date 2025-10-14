@@ -11,13 +11,13 @@ SCRIPTSDIR="$HOME/.config/hypr/scripts"
 
 # --- helpers ---
 file_exists() {
-	[[ -e "$1" ]]
+  [[ -e "$1" ]]
 }
 
 # --- kill processes safely ---
 _ps=(waybar swaync ags)
 for _prs in "${_ps[@]}"; do
-	pkill -x "$_prs" 2>/dev/null || true
+  pkill -x "$_prs" 2>/dev/null || true
 done
 
 # --- restart waybar ---
@@ -40,13 +40,13 @@ hyprctl reload >/dev/null 2>&1 || true
 
 # --- hyprpm reload if requested ---
 if [[ "$1" == "hyprpm" ]]; then
-	if [[ -n "$2" ]]; then
-		echo ":: Reloading hyprpm plugin: $2"
-		hyprpm reload "$2"
-	else
-		echo ":: Reloading all hyprpm plugins"
-		hyprpm reload all
-	fi
+  if [[ -n "$2" ]]; then
+    echo ":: Reloading hyprpm plugin: $2"
+    hyprpm reload "$2"
+  else
+    echo ":: Reloading all hyprpm plugins"
+    hyprpm reload all
+  fi
 fi
 
 notify-send -u low "System Reloaded Successfully"

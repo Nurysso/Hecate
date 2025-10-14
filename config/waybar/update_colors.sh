@@ -6,26 +6,26 @@ OUTPUT_FILE="$HOME/.config/waybar/color.css"
 
 # Verify colors.json exists and is readable
 if [ ! -f "$COLOR_FILE" ]; then
-    echo "Error: wal colors.json not found at $COLOR_FILE"
-    exit 1
+  echo "Error: wal colors.json not found at $COLOR_FILE"
+  exit 1
 fi
 
 # Verify jq is installed
-if ! command -v jq &> /dev/null; then
-    echo "Error: jq is not installed"
-    exit 1
+if ! command -v jq &>/dev/null; then
+  echo "Error: jq is not installed"
+  exit 1
 fi
 
 # Extract colors with error checking
 extract_color() {
-    local key="$1"
-    local value
-    value=$(jq -r "$key" "$COLOR_FILE" 2>/dev/null)
-    if [ -z "$value" ] || [ "$value" = "null" ]; then
-        echo "Error: Failed to extract $key from colors.json"
-        exit 1
-    fi
-    echo "$value"
+  local key="$1"
+  local value
+  value=$(jq -r "$key" "$COLOR_FILE" 2>/dev/null)
+  if [ -z "$value" ] || [ "$value" = "null" ]; then
+    echo "Error: Failed to extract $key from colors.json"
+    exit 1
+  fi
+  echo "$value"
 }
 
 # Extract all colors
@@ -50,19 +50,19 @@ FOREGROUND=$(extract_color '.special.foreground')
 
 # Convert hex to rgba function
 hex_to_rgba() {
-    local hex=$1
-    local alpha=$2
-    hex=${hex#"#"}
+  local hex=$1
+  local alpha=$2
+  hex=${hex#"#"}
 
-    if [ ${#hex} -ne 6 ]; then
-        echo "Error: Invalid hex color: $hex"
-        return 1
-    fi
+  if [ ${#hex} -ne 6 ]; then
+    echo "Error: Invalid hex color: $hex"
+    return 1
+  fi
 
-    local r=$((16#${hex:0:2}))
-    local g=$((16#${hex:2:2}))
-    local b=$((16#${hex:4:2}))
-    echo "rgba($r, $g, $b, $alpha)"
+  local r=$((16#${hex:0:2}))
+  local g=$((16#${hex:2:2}))
+  local b=$((16#${hex:4:2}))
+  echo "rgba($r, $g, $b, $alpha)"
 }
 
 # Generate RGBA colors
@@ -76,11 +76,11 @@ BG_DARK=$(hex_to_rgba "$BACKGROUND" "0.5")
 
 # Create backup
 if [ -f "$OUTPUT_FILE" ]; then
-    cp "$OUTPUT_FILE" "${OUTPUT_FILE}.backup"
+  cp "$OUTPUT_FILE" "${OUTPUT_FILE}.backup"
 fi
 
 # Generate the color.css file
-cat > "$OUTPUT_FILE" <<EOF
+cat >"$OUTPUT_FILE" <<EOF
 /* Waybar Colors - Generated from Pywal */
 /* Generated: $(date '+%Y-%m-%d %H:%M:%S') */
 
@@ -126,8 +126,8 @@ EOF
 
 # Verify file was created successfully
 if [ ! -f "$OUTPUT_FILE" ]; then
-    echo "Error: Failed to create CSS file"
-    exit 1
+  echo "Error: Failed to create CSS file"
+  exit 1
 fi
 
 echo "✓ Waybar colors updated at $OUTPUT_FILE"
@@ -140,9 +140,9 @@ echo "  • Warning: ${COLOR3}"
 echo "  • Error: ${COLOR1}"
 
 # Reload Waybar
-if pgrep -x waybar > /dev/null; then
-    pkill -SIGUSR2 waybar
-    echo "✓ Waybar reloaded"
+if pgrep -x waybar >/dev/null; then
+  pkill -SIGUSR2 waybar
+  echo "✓ Waybar reloaded"
 else
-    echo "⚠ Waybar is not running"
+  echo "⚠ Waybar is not running"
 fi

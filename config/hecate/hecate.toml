@@ -1,11 +1,16 @@
 # Hecate Dotfiles Configuration
-# This file manages your Hecate installation settings
 
 [metadata]
-version = "0.3.8 blind owl"
+version = "v0.3.8 blind owl"
 install_date = "2025-01-01"
 last_update = "2025-01-01"
 repo_url = "https://github.com/Aelune/Hecate.git"
+
+[preferences]
+terminal = "ghostty"
+shell = "zsh"
+browser = "firefox"
+profile = "minimal"
 
 [theme]
 # Theme mode: "dynamic" or "static"

@@ -9,10 +9,10 @@ sensors 2>/dev/null | head -20
 echo ""
 echo "   - thermal zones:"
 for i in {0..5}; do
-    if [ -f "/sys/class/thermal/thermal_zone$i/temp" ]; then
-        temp=$(cat /sys/class/thermal/thermal_zone$i/temp 2>/dev/null)
-        echo "     thermal_zone$i: $((temp / 1000))°C"
-    fi
+  if [ -f "/sys/class/thermal/thermal_zone$i/temp" ]; then
+    temp=$(cat /sys/class/thermal/thermal_zone$i/temp 2>/dev/null)
+    echo "     thermal_zone$i: $((temp / 1000))°C"
+  fi
 done
 echo ""
 echo "   - hwmon:"
@@ -25,16 +25,16 @@ nvidia-smi --query-gpu=name,utilization.gpu,temperature.gpu --format=csv,noheade
 echo ""
 echo "   - AMD (sysfs):"
 if [ -f "/sys/class/drm/card0/device/gpu_busy_percent" ]; then
-    echo "     Usage: $(cat /sys/class/drm/card0/device/gpu_busy_percent)%"
+  echo "     Usage: $(cat /sys/class/drm/card0/device/gpu_busy_percent)%"
 else
-    echo "     Not found at /sys/class/drm/card0"
+  echo "     Not found at /sys/class/drm/card0"
 fi
 echo ""
 echo "   - Intel:"
 if [ -f "/sys/class/drm/card0/gt_cur_freq_mhz" ]; then
-    echo "     Detected Intel GPU"
+  echo "     Detected Intel GPU"
 else
-    echo "     Not found"
+  echo "     Not found"
 fi
 echo ""
 
@@ -44,19 +44,19 @@ ls /sys/class/net/ | grep -v 'lo'
 echo ""
 echo "   - Network script:"
 if [ -f "$HOME/.config/eww/scripts/network.sh" ]; then
-    echo "     Script exists"
-    $HOME/.config/eww/scripts/network.sh down 2>&1 | head -1
-    $HOME/.config/eww/scripts/network.sh up 2>&1 | head -1
+  echo "     Script exists"
+  $HOME/.config/eww/scripts/network.sh down 2>&1 | head -1
+  $HOME/.config/eww/scripts/network.sh up 2>&1 | head -1
 else
-    echo "     Script not found at $HOME/.config/eww/scripts/network.sh"
+  echo "     Script not found at $HOME/.config/eww/scripts/network.sh"
 fi
 echo ""
 echo "   - Direct interface stats (example for first interface):"
 iface=$(ls /sys/class/net/ | grep -v 'lo' | head -1)
 if [ -n "$iface" ]; then
-    echo "     Interface: $iface"
-    echo "     RX bytes: $(cat /sys/class/net/$iface/statistics/rx_bytes)"
-    echo "     TX bytes: $(cat /sys/class/net/$iface/statistics/tx_bytes)"
+  echo "     Interface: $iface"
+  echo "     RX bytes: $(cat /sys/class/net/$iface/statistics/rx_bytes)"
+  echo "     TX bytes: $(cat /sys/class/net/$iface/statistics/tx_bytes)"
 fi
 
 echo ""

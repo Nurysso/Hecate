@@ -17,6 +17,7 @@ NC='\033[0m'
 
 # Global Variables
 HECATEDIR="$HOME/Hecate"
+HECATEAPPSDIR="$HOME/Hecate/apps"
 CONFIGDIR="$HOME/.config"
 REPO_URL="https://github.com/Aelune/Hecate.git"
 OS=""
@@ -152,7 +153,7 @@ backup_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Backing Up Existing Configs"
 
   local timestamp=$(date +%Y%m%d_%H%M%S)
-  local backup_dir="$CONFIGDIR/Hecate-backup-$timestamp"
+  local backup_dir="$CONFIGDIR/Hecate-backup/config-$timestamp"
 
   if [ -d "$HECATEDIR/config" ]; then
     local backed_up=false
@@ -314,7 +315,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages
-  INSTALL_PACKAGES+=(git wget curl unzip wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel cliphist jq hyprpaper inter-fonts ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim wl-clipboard)
+  INSTALL_PACKAGES+=(git wget curl unzip wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim wl-clipboard)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -464,7 +465,8 @@ add_gamer_packages() {
       echo "$emulators" | grep -q "RetroArch" && INSTALL_PACKAGES+=(retroarch retroarch-assets-xmb retroarch-assets-ozone)
       echo "$emulators" | grep -q "PCSX2" && INSTALL_PACKAGES+=(pcsx2)
       echo "$emulators" | grep -q "Dolphin" && INSTALL_PACKAGES+=(dolphin-emu)
-      echo "$emulators" | grep -q "RPCS3" && INSTALL_PACKAGES+=(rpcs3-git)
+      # Changed from rpcs3-git to rpcs3-bin for binary version
+      echo "$emulators" | grep -q "RPCS3" && INSTALL_PACKAGES+=(rpcs3-bin)
     fi
   fi
 
@@ -490,13 +492,27 @@ install_user_browser() {
         # Use AUR helper
         if command -v paru &>/dev/null; then
           gum style --foreground 220 "Using paru (attempt $i/$retries)..."
-          if paru -S --needed --noconfirm "$USER_BROWSER_PKG"; then
+
+          # Disable exit on error for this command
+          set +e
+          paru -S --needed --noconfirm "$USER_BROWSER_PKG" || true
+          local exit_code=$?
+          set -e
+
+          if [ $exit_code -eq 0 ]; then
             success=true
             break
           fi
         elif command -v yay &>/dev/null; then
           gum style --foreground 220 "Using yay (attempt $i/$retries)..."
-          if yay -S --needed --noconfirm "$USER_BROWSER_PKG"; then
+
+          # Disable exit on error for this command
+          set +e
+          yay -S --needed --noconfirm "$USER_BROWSER_PKG"
+          local exit_code=$?
+          set -e
+
+          if [ $exit_code -eq 0 ]; then
             success=true
             break
           fi
@@ -508,7 +524,14 @@ install_user_browser() {
       *)
         # Regular pacman package
         gum style --foreground 220 "Using pacman (attempt $i/$retries)..."
-        if sudo pacman -S --needed --noconfirm "$USER_BROWSER_PKG"; then
+
+        # Disable exit on error for this command
+        set +e
+        sudo pacman -S --needed --noconfirm "$USER_BROWSER_PKG" &>/dev/null
+        local exit_code=$?
+        set -e
+
+        if [ $exit_code -eq 0 ]; then
           success=true
           break
         fi
@@ -564,14 +587,24 @@ install_single_package() {
     gum style --foreground 220 "  → $pkg (attempt $i/$max_retries)..."
 
     if is_official_package "$pkg"; then
-      # Official repo package
-      if sudo pacman -S --needed --noconfirm "$pkg" 2>/dev/null; then
+      # Official repo package - disable exit on error for this command
+      set +e
+      sudo pacman -S --needed --noconfirm "$pkg" 2>/dev/null
+      local exit_code=$?
+      set -e
+
+      if [ $exit_code -eq 0 ]; then
         success=true
         break
       fi
     else
       # AUR package
-      if $PACKAGE_MANAGER -S --needed --noconfirm "$pkg" 2>/dev/null; then
+      set +e
+      $PACKAGE_MANAGER -S --needed --noconfirm "$pkg" 2>/dev/null
+      local exit_code=$?
+      set -e
+
+      if [ $exit_code -eq 0 ]; then
         success=true
         break
       fi
@@ -648,19 +681,29 @@ install_packages() {
     if [ ${#official_pkgs[@]} -gt 0 ]; then
       gum style --border normal --padding "0 1" --border-foreground 212 "Installing Official Repository Packages"
 
-      # Use --needed flag to skip already installed packages
-      if sudo pacman -S --needed --noconfirm "${official_pkgs[@]}" 2>&1 | tee /tmp/pacman_install.log | grep -v "nothing to do"; then
-        gum style --foreground 82 "✓ Official packages processed"
-      else
-        # Check log for actual failures (not just "already installed")
-        gum style --foreground 196 "⚠ Some official packages may have failed"
-        # Parse failed packages from log
-        while IFS= read -r pkg; do
+      # Temporarily disable exit on error
+      set +e
+      sudo pacman -S --needed --noconfirm "${official_pkgs[@]}" 2>&1 | tee /tmp/pacman_install.log
+      local pacman_exit=$?
+      set -e
+
+      # Check which packages actually failed (not already installed)
+      if [ $pacman_exit -ne 0 ]; then
+        gum style --foreground 220 "Checking installation results..."
+        for pkg in "${official_pkgs[@]}"; do
           if ! pacman -Q "$pkg" &>/dev/null; then
             failed_pkgs+=("$pkg")
+            gum style --foreground 196 "  ✗ $pkg"
           fi
-        done < <(printf '%s\n' "${official_pkgs[@]}")
+        done
       fi
+
+      if [ ${#failed_pkgs[@]} -eq 0 ]; then
+        gum style --foreground 82 "✓ Official packages processed successfully"
+      else
+        gum style --foreground 196 "⚠ Some official packages failed"
+      fi
+
       echo ""
     fi
 
@@ -801,7 +844,6 @@ install_all_packages() {
 # Verify critical packages are installed
 verify_critical_packages() {
   clear
-  # Fixed typo: notos-fonts-emoji -> noto-fonts-emoji
   local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "cliphist" "swaync" "hypridle" "hyprlock" "wallust" "fastfetch" "starship" "wlogout" "noto-fonts-emoji" "grim" "wl-clipboard")
   local missing_packages=()
 
@@ -863,10 +905,31 @@ enable_sddm() {
   if [ "$INSTALL_SDDM" = true ]; then
     gum style --border double --padding "1 2" --border-foreground 212 "Enabling SDDM"
 
-    sudo systemctl enable sddm
-    sudo systemctl set-default graphical.target
+    # Check if another display manager is already enabled
+    local current_dm=$(systemctl is-enabled display-manager.service 2>/dev/null || echo "none")
 
-    gum style --foreground 82 "✓ SDDM enabled!"
+    if [ "$current_dm" != "none" ] && [ "$current_dm" != "sddm.service" ]; then
+      gum style --foreground 220 "Detected existing display manager: $current_dm"
+
+      if gum confirm "Disable $current_dm and enable SDDM instead?"; then
+        gum style --foreground 220 "Disabling $current_dm..."
+        sudo systemctl disable display-manager.service || true
+        sudo systemctl disable "$current_dm" || true
+
+        gum style --foreground 220 "Enabling SDDM..."
+        sudo systemctl enable sddm
+        sudo systemctl set-default graphical.target
+        gum style --foreground 82 "✓ SDDM enabled!"
+      else
+        gum style --foreground 220 "Keeping existing display manager"
+        gum style --foreground 220 "SDDM installed but not enabled"
+        return
+      fi
+    else
+      sudo systemctl enable sddm
+      sudo systemctl set-default graphical.target
+      gum style --foreground 82 "✓ SDDM enabled!"
+    fi
   fi
 }
 
@@ -1021,6 +1084,23 @@ move_config() {
     fi
   done
 
+  for appFolder in $HECATEAPPSDIR/*; do
+    if [ -d "$appFolder" ]; then
+      app_name=$(basename "$appFolder")
+
+      case "$app_name" in
+      Pulse)
+        gum style --foreground 82 "Installing Pulse to your system..."
+        cp "$appFolder/Pulse/build/bin/Pulse" "$HOME/.local/bin/Pulse"
+        chmod +x "$HOME/.local/bin/Pulse"
+        ;;
+      *)
+        gum style --foreground 220 "Skipping $app_name"
+        ;;
+      esac
+    fi
+  done
+
   # Install hecate CLI tool
   if [ -f "$HECATEDIR/config/hecate.sh" ]; then
     gum style --foreground 82 "Installing hecate CLI tool..."
@@ -1036,13 +1116,13 @@ move_config() {
     gum style --foreground 82 "✓ Starship Config installed"
   fi
 
-  # Install Hyprland plugin installer
-  if [ -f "$HECATEDIR/config/install-hyprland-plugins.sh" ]; then
-    gum style --foreground 82 "Installing Hyprland plugin installer..."
-    cp "$HECATEDIR/config/install-hyprland-plugins.sh" "$HOME/.local/bin/install-hyprland-plugins"
-    chmod +x "$HOME/.local/bin/install-hyprland-plugins"
-    gum style --foreground 82 "✓ Plugin installer available: install-hyprland-plugins"
-  fi
+  #   # Install Hyprland plugin installer
+  #   if [ -f "$HECATEDIR/config/install-hyprland-plugins.sh" ]; then
+  #     gum style --foreground 82 "Installing Hyprland plugin installer..."
+  #     cp "$HECATEDIR/config/install-hyprland-plugins.sh" "$HOME/.local/bin/install-hyprland-plugins"
+  #     chmod +x "$HOME/.local/bin/install-hyprland-plugins"
+  #     gum style --foreground 82 "✓ Plugin installer available: install-hyprland-plugins"
+  #   fi
 
   gum style --foreground 220 "  Run 'hecate' or 'install-hyprland-plugins' from anywhere!"
   gum style --foreground 82 "✓ Configuration files installed successfully!"
@@ -1071,10 +1151,12 @@ EOF
 # Create Hecate configuration file
 create_hecate_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Creating Hecate Configuration"
+    URL="https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt"
+    local_version=$(curl -s "$URL")
 
   local config_dir="$HOME/.config/hecate"
   local config_file="$config_dir/hecate.toml"
-  local version="0.3.8 blind owl"
+  local version="$local_version"
   local install_date=$(date +%Y-%m-%d)
 
   # Create config directory
@@ -1107,6 +1189,12 @@ repo_url = "$REPO_URL"
 # dynamic: Automatically updates system colors when wallpaper changes
 # static: Keeps colors unchanged regardless of wallpaper
 mode = "$theme_mode"
+
+[preferences]
+term = "$USER_TERMINAL"
+browser = "$USER_BROWSER_EXEC"
+shell = "$USER_SHELL"
+profile = "$USER_PROFILE"
 EOF
 
   gum style --foreground 82 "✓ Hecate config created at: $config_file"
@@ -1182,32 +1270,42 @@ configure_sddm_theme() {
   fi
 }
 
-run_plugin_installer_if_in_hyprland() {
-  # Only run if user is currently in Hyprland session
-  if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
-    gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
+# run_plugin_installer_if_in_hyprland() {
+#   # Only run if user is currently in Hyprland session
+#   if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+#     gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
 
-    if gum confirm "You're currently in Hyprland. Install plugins now?"; then
-      if [ -x "$HOME/.local/bin/install-hyprland-plugins" ]; then
-        gum style --foreground 220 "Running plugin installer..."
-        "$HOME/.local/bin/install-hyprland-plugins"
-      else
-        gum style --foreground 196 "Error: Plugin installer not found!"
-      fi
-    else
-      gum style --foreground 220 "You can run 'install-hyprland-plugins' later"
-    fi
-  elif [ "$HYPRLAND_NEWLY_INSTALLED" = true ]; then
-    gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
-    gum style --foreground 220 "Hyprland was just installed."
-    gum style --foreground 220 "After reboot, log into Hyprland and run:"
-    gum style --foreground 82 "  install-hyprland-plugins"
-  else
-    gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
-    gum style --foreground 220 "When you're in Hyprland, run: install-hyprland-plugins"
-  fi
+#     if gum confirm "You're currently in Hyprland. Install plugins now?"; then
+#       if [ -x "$HOME/.local/bin/install-hyprland-plugins" ]; then
+#         gum style --foreground 220 "Running plugin installer..."
+#         "$HOME/.local/bin/install-hyprland-plugins"
+#       else
+#         gum style --foreground 196 "Error: Plugin installer not found!"
+#       fi
+#     else
+#       gum style --foreground 220 "You can run 'install-hyprland-plugins' later"
+#     fi
+#   elif [ "$HYPRLAND_NEWLY_INSTALLED" = true ]; then
+#     gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
+#     gum style --foreground 220 "Hyprland was just installed."
+#     gum style --foreground 220 "After reboot, log into Hyprland and run:"
+#     gum style --foreground 82 "  install-hyprland-plugins"
+#   else
+#     gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
+#     gum style --foreground 220 "When you're in Hyprland, run: install-hyprland-plugins"
+#   fi
+# }
+install_Hecate_apps() {
+  # Make sure the directory exists
+  mkdir -p ~/.local/bin
+
+  # Copy Pulse binary
+  cp apps/pulse/build/bin/Pulse ~/.local/bin/
+
+  # Ensure it's executable
+  chmod +x ~/.local/bin/Pulse
+
 }
-
 # Main function
 main() {
   # Parse arguments
@@ -1310,7 +1408,7 @@ main() {
   configure_sddm_theme
 
   # Runs hyperland plugin install script if user is already in hyperland and skips if hyperland is newly installed or not loged in
-  run_plugin_installer_if_in_hyprland
+  #   run_plugin_installer_if_in_hyprland
 
   # Completion message
   gum style \

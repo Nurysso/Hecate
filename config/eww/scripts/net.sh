@@ -11,35 +11,35 @@ mkdir -p "$CACHE_DIR"
 
 # Get current RX/TX bytes
 get_bytes() {
-    if [ -z "$INTERFACE" ]; then
-        echo "0 0"
-        return
-    fi
+  if [ -z "$INTERFACE" ]; then
+    echo "0 0"
+    return
+  fi
 
-    RX_BYTES=$(cat /sys/class/net/$INTERFACE/statistics/rx_bytes 2>/dev/null || echo 0)
-    TX_BYTES=$(cat /sys/class/net/$INTERFACE/statistics/tx_bytes 2>/dev/null || echo 0)
-    echo "$RX_BYTES $TX_BYTES"
+  RX_BYTES=$(cat /sys/class/net/$INTERFACE/statistics/rx_bytes 2>/dev/null || echo 0)
+  TX_BYTES=$(cat /sys/class/net/$INTERFACE/statistics/tx_bytes 2>/dev/null || echo 0)
+  echo "$RX_BYTES $TX_BYTES"
 }
 
 # Format bytes to human readable
 format_bytes() {
-    local bytes=$1
-    if [ $bytes -lt 1024 ]; then
-        echo "${bytes}B/s"
-    elif [ $bytes -lt 1048576 ]; then
-        echo "$(awk "BEGIN {printf \"%.1f\", $bytes/1024}")KB/s"
-    else
-        echo "$(awk "BEGIN {printf \"%.1f\", $bytes/1048576}")MB/s"
-    fi
+  local bytes=$1
+  if [ $bytes -lt 1024 ]; then
+    echo "${bytes}B/s"
+  elif [ $bytes -lt 1048576 ]; then
+    echo "$(awk "BEGIN {printf \"%.1f\", $bytes/1024}")KB/s"
+  else
+    echo "$(awk "BEGIN {printf \"%.1f\", $bytes/1048576}")MB/s"
+  fi
 }
 
 # Read previous values
 if [ -f "$CACHE_FILE" ]; then
-    read PREV_RX PREV_TX PREV_TIME < "$CACHE_FILE"
+  read PREV_RX PREV_TX PREV_TIME <"$CACHE_FILE"
 else
-    PREV_RX=0
-    PREV_TX=0
-    PREV_TIME=$(date +%s)
+  PREV_RX=0
+  PREV_TX=0
+  PREV_TIME=$(date +%s)
 fi
 
 # Get current values
@@ -50,34 +50,34 @@ read CURRENT_RX CURRENT_TX < <(get_bytes)
 TIME_DIFF=$((CURRENT_TIME - PREV_TIME))
 
 if [ $TIME_DIFF -eq 0 ]; then
-    TIME_DIFF=1
+  TIME_DIFF=1
 fi
 
 # Calculate speeds (bytes per second)
-RX_SPEED=$(( (CURRENT_RX - PREV_RX) / TIME_DIFF ))
-TX_SPEED=$(( (CURRENT_TX - PREV_TX) / TIME_DIFF ))
+RX_SPEED=$(((CURRENT_RX - PREV_RX) / TIME_DIFF))
+TX_SPEED=$(((CURRENT_TX - PREV_TX) / TIME_DIFF))
 
 # Handle negative values (interface reset)
 if [ $RX_SPEED -lt 0 ]; then
-    RX_SPEED=0
+  RX_SPEED=0
 fi
 if [ $TX_SPEED -lt 0 ]; then
-    TX_SPEED=0
+  TX_SPEED=0
 fi
 
 # Save current values for next run
-echo "$CURRENT_RX $CURRENT_TX $CURRENT_TIME" > "$CACHE_FILE"
+echo "$CURRENT_RX $CURRENT_TX $CURRENT_TIME" >"$CACHE_FILE"
 
 # Output based on argument
 case "$1" in
-    up)
-        format_bytes $TX_SPEED
-        ;;
-    down)
-        format_bytes $RX_SPEED
-        ;;
-    *)
-        echo "Usage: $0 [up|down]"
-        exit 1
-        ;;
+up)
+  format_bytes $TX_SPEED
+  ;;
+down)
+  format_bytes $RX_SPEED
+  ;;
+*)
+  echo "Usage: $0 [up|down]"
+  exit 1
+  ;;
 esac

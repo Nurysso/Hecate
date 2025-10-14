@@ -10,21 +10,21 @@ COLOR_FILE="$HOME/.config/swaync/color.css"
 
 # Source pywal colors
 if [ -f "$HOME/.cache/wal/colors.sh" ]; then
-    source "$HOME/.cache/wal/colors.sh"
+  source "$HOME/.cache/wal/colors.sh"
 else
-    echo "Error: Pywal colors not found at ~/.cache/wal/colors.sh"
-    echo "Please run 'wal' to generate colors first."
-    exit 1
+  echo "Error: Pywal colors not found at ~/.cache/wal/colors.sh"
+  echo "Please run 'wal' to generate colors first."
+  exit 1
 fi
 
 # Function to convert hex to RGB values
 hex_to_rgb() {
-    hex=$1
-    hex=${hex#\#}  # Remove # if present
-    r=$((16#${hex:0:2}))
-    g=$((16#${hex:2:2}))
-    b=$((16#${hex:4:2}))
-    echo "$r, $g, $b"
+  hex=$1
+  hex=${hex#\#} # Remove # if present
+  r=$((16#${hex:0:2}))
+  g=$((16#${hex:2:2}))
+  b=$((16#${hex:4:2}))
+  echo "$r, $g, $b"
 }
 
 # Convert colors to RGB
@@ -46,7 +46,7 @@ rgb14=$(hex_to_rgb "$color14")
 rgb15=$(hex_to_rgb "$color15")
 
 # Create the color.css file
-cat > "$COLOR_FILE" << EOF
+cat >"$COLOR_FILE" <<EOF
 /*
   SwayNC Color Definitions
   Generated from Pywal on $(date '+%Y-%m-%d %H:%M:%S')
@@ -90,10 +90,10 @@ EOF
 echo "✓ Colors updated successfully at $COLOR_FILE"
 
 # Reload SwayNC if it's running
-if pgrep -x swaync > /dev/null; then
-    echo "↻ Reloading SwayNC..."
-    swaync-client -rs
-    echo "✓ SwayNC reloaded"
+if pgrep -x swaync >/dev/null; then
+  echo "↻ Reloading SwayNC..."
+  swaync-client -rs
+  echo "✓ SwayNC reloaded"
 else
-    echo "⚠ SwayNC is not running"
+  echo "⚠ SwayNC is not running"
 fi

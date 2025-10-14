@@ -20,6 +20,7 @@
 ],
 "modules-right": [
     "group/motherboard",
+    "custom/updates",
     "pulseaudio",
     "pulseaudio#microphone",
     "group/notify",
@@ -27,5 +28,3 @@
     "custom/power"
 ]
 }
-
-
