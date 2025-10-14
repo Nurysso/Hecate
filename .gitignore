@@ -30,8 +30,7 @@ install-script-idea.txt
 # Go + Wails
 # ─────────────────────────────
 # Build outputs
-/apps/system-visualizer/build/
-/apps/system-visualizer/frontend/wailsjs/
+/apps/system-visualizer/front end/wailsjs/
 dist/
 bin/
 *.exe

@@ -71,7 +71,7 @@ if [ ! -f "$COLOR_CACHE" ]; then
   cat /tmp/wal_error.log 2>/dev/null
   exit 1
 fi
-
+ro
 # Verify colors.json is valid JSON and has required fields
 if ! jq -e '.special.background' "$COLOR_CACHE" >/dev/null 2>&1; then
   echo "Error: colors.json is invalid or incomplete"

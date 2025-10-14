@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Hyprland Dotfiles Installer with Gum
-# Author: Hecate Dotfiles
 # Description: Interactive installer for Hyprland configuration
 
 set -e
@@ -75,8 +74,6 @@ check_OS() {
       ;;
     *)
       gum style --foreground 196 --bold "Error: OS '$ID' is not supported!"
-      gum style --foreground 220 "Supported: Arch Linux, Manjaro, EndeavourOS"
-      gum style --foreground 220 "Partially Supported: Fedora, it runs on hopes and prayers"
       exit 1
       ;;
     esac
@@ -99,10 +96,10 @@ get_packageManager() {
     fi
     ;;
   fedora)
-    gum style --foreground 220 --bold "⚠️ Warning: Script has not been tested on Fedora!"
-    gum style --foreground 220 "Proceed at your own risk."
+    # gum style --foreground 220 --bold "⚠️ Warning: Script has not been tested on Fedora!"
+    # gum style --foreground 220 "Proceed at your own risk."
 
-    if ! gum confirm "Do you want to continue on Fedora?"; then
+    if ! gum confirm "Do you want to continue on Fedora? Its not tested "; then
       gum style --foreground 196 "Aborting installation on Fedora."
       exit 1
     fi
@@ -315,7 +312,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages
-  INSTALL_PACKAGES+=(git wget curl unzip wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim wl-clipboard)
+  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim neovim nano)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -571,60 +568,6 @@ is_official_package() {
   pacman -Si "$pkg" &>/dev/null
 }
 
-# Install a single package with retry logic
-install_single_package() {
-  local pkg="$1"
-  local max_retries=3
-  local success=false
-
-  # Check if package is already installed
-  if pacman -Q "$pkg" &>/dev/null; then
-    gum style --foreground 82 "  ✓ $pkg (already installed)"
-    return 0
-  fi
-
-  for ((i = 1; i <= max_retries; i++)); do
-    gum style --foreground 220 "  → $pkg (attempt $i/$max_retries)..."
-
-    if is_official_package "$pkg"; then
-      # Official repo package - disable exit on error for this command
-      set +e
-      sudo pacman -S --needed --noconfirm "$pkg" 2>/dev/null
-      local exit_code=$?
-      set -e
-
-      if [ $exit_code -eq 0 ]; then
-        success=true
-        break
-      fi
-    else
-      # AUR package
-      set +e
-      $PACKAGE_MANAGER -S --needed --noconfirm "$pkg" 2>/dev/null
-      local exit_code=$?
-      set -e
-
-      if [ $exit_code -eq 0 ]; then
-        success=true
-        break
-      fi
-    fi
-
-    if [ $i -lt $max_retries ]; then
-      gum style --foreground 220 "    Retrying in 2 seconds..."
-      sleep 2
-    fi
-  done
-
-  if [ "$success" = true ]; then
-    gum style --foreground 82 "    ✓ $pkg installed"
-    return 0
-  else
-    gum style --foreground 196 "    ✗ Failed: $pkg"
-    return 1
-  fi
-}
-
 # Main package installation function
 install_packages() {
   gum style --border double --padding "1 2" --border-foreground 212 "Installing Packages"
@@ -641,98 +584,29 @@ install_packages() {
 
   case "$PACKAGE_MANAGER" in
   paru | yay)
-    # Categorize packages
-    local official_pkgs=()
-    local aur_pkgs=()
+    # Simple approach: disable exit on error for the entire installation
+    set +e
+
+    gum style --foreground 220 "Installing all packages..."
+    $PACKAGE_MANAGER -S --needed --noconfirm "${INSTALL_PACKAGES[@]}"
+
+    # Check what actually got installed
     local failed_pkgs=()
-    local already_installed=()
+    local success_count=0
 
-    gum style --foreground 220 "Categorizing packages..."
-    gum spin --spinner dot --title "Checking package sources..." -- sleep 1
-
-    # Check what's already installed and categorize
     for pkg in "${INSTALL_PACKAGES[@]}"; do
       if pacman -Q "$pkg" &>/dev/null; then
-        already_installed+=("$pkg")
-      elif is_official_package "$pkg"; then
-        official_pkgs+=("$pkg")
+        ((success_count++))
       else
-        aur_pkgs+=("$pkg")
+        failed_pkgs+=("$pkg")
       fi
     done
 
+    set -e
+
     echo ""
-    gum style --foreground 212 "Package Summary:"
-    gum style --foreground 82 "  Already installed: ${#already_installed[@]} packages"
-    gum style --foreground 220 "  Official repo: ${#official_pkgs[@]} packages"
-    gum style --foreground 220 "  AUR: ${#aur_pkgs[@]} packages"
-    echo ""
-
-    # Show already installed packages
-    if [ ${#already_installed[@]} -gt 0 ]; then
-      gum style --foreground 82 "Already installed packages:"
-      for pkg in "${already_installed[@]}"; do
-        gum style --foreground 82 "  ✓ $pkg"
-      done
-      echo ""
-    fi
-
-    # Install official packages first (batch install for speed)
-    if [ ${#official_pkgs[@]} -gt 0 ]; then
-      gum style --border normal --padding "0 1" --border-foreground 212 "Installing Official Repository Packages"
-
-      # Temporarily disable exit on error
-      set +e
-      sudo pacman -S --needed --noconfirm "${official_pkgs[@]}" 2>&1 | tee /tmp/pacman_install.log
-      local pacman_exit=$?
-      set -e
-
-      # Check which packages actually failed (not already installed)
-      if [ $pacman_exit -ne 0 ]; then
-        gum style --foreground 220 "Checking installation results..."
-        for pkg in "${official_pkgs[@]}"; do
-          if ! pacman -Q "$pkg" &>/dev/null; then
-            failed_pkgs+=("$pkg")
-            gum style --foreground 196 "  ✗ $pkg"
-          fi
-        done
-      fi
-
-      if [ ${#failed_pkgs[@]} -eq 0 ]; then
-        gum style --foreground 82 "✓ Official packages processed successfully"
-      else
-        gum style --foreground 196 "⚠ Some official packages failed"
-      fi
-
-      echo ""
-    fi
-
-    # Install AUR packages one by one
-    if [ ${#aur_pkgs[@]} -gt 0 ]; then
-      gum style --border normal --padding "0 1" --border-foreground 212 "Installing AUR Packages"
-
-      local installed_count=0
-      for pkg in "${aur_pkgs[@]}"; do
-        if install_single_package "$pkg"; then
-          ((installed_count++))
-        else
-          failed_pkgs+=("$pkg")
-        fi
-      done
-
-      echo ""
-      gum style --foreground 82 "✓ AUR packages: $installed_count/${#aur_pkgs[@]} installed"
-      echo ""
-    fi
-
-    # Summary
     gum style --border double --padding "1 2" --border-foreground 212 "Installation Summary"
-    local total_success=$((${#already_installed[@]} + ${#INSTALL_PACKAGES[@]} - ${#failed_pkgs[@]}))
-    gum style --foreground 82 "✓ Total packages available: $total_success/${#INSTALL_PACKAGES[@]}"
-
-    if [ ${#already_installed[@]} -gt 0 ]; then
-      gum style --foreground 82 "  (${#already_installed[@]} were already installed)"
-    fi
+    gum style --foreground 82 "✓ Successfully installed: $success_count/${#INSTALL_PACKAGES[@]} packages"
 
     if [ ${#failed_pkgs[@]} -gt 0 ]; then
       gum style --foreground 196 "✗ Failed packages (${#failed_pkgs[@]}):"
@@ -760,11 +634,11 @@ install_packages() {
       echo ""
 
       if gum confirm "Install paru now?"; then
-        # Install dependencies
+        set +e
+
         gum style --foreground 220 "Installing build dependencies..."
         sudo pacman -S --needed --noconfirm base-devel git
 
-        # Clone and build paru
         gum style --foreground 220 "Building paru from AUR..."
         local temp_dir="/tmp/paru-install-$$"
         mkdir -p "$temp_dir"
@@ -773,20 +647,22 @@ install_packages() {
         git clone https://aur.archlinux.org/paru.git
         cd paru
 
-        if makepkg -si --noconfirm; then
+        makepkg -si --noconfirm
+        local paru_result=$?
+
+        cd "$HOME"
+        rm -rf "$temp_dir"
+
+        set -e
+
+        if [ $paru_result -eq 0 ]; then
           gum style --foreground 82 "✓ Paru installed successfully!"
           PACKAGE_MANAGER="paru"
-          cd "$HOME"
-          rm -rf "$temp_dir"
           echo ""
-
-          # Recursively call with paru
           install_packages
           return $?
         else
           gum style --foreground 196 "✗ Failed to install paru"
-          cd "$HOME"
-          rm -rf "$temp_dir"
 
           if gum confirm "Try installing yay instead?"; then
             sudo pacman -S --needed --noconfirm yay
@@ -808,12 +684,11 @@ install_packages() {
     ;;
 
   dnf)
+    set +e
     gum style --foreground 220 "Installing packages with DNF..."
-    if sudo dnf install -y "${INSTALL_PACKAGES[@]}"; then
-      gum style --foreground 82 "✓ Package installation complete!"
-    else
-      gum style --foreground 196 "⚠ Some packages failed to install"
-    fi
+    sudo dnf install -y "${INSTALL_PACKAGES[@]}"
+    set -e
+    gum style --foreground 82 "✓ Package installation complete!"
     ;;
 
   *)
@@ -824,7 +699,6 @@ install_packages() {
 
   echo ""
 }
-
 # Wrapper function to install everything
 install_all_packages() {
   # First install system packages
@@ -1091,7 +965,7 @@ move_config() {
       case "$app_name" in
       Pulse)
         gum style --foreground 82 "Installing Pulse to your system..."
-        cp "$appFolder/Pulse/build/bin/Pulse" "$HOME/.local/bin/Pulse"
+        cp "$appFolder/build/bin/Pulse" "$HOME/.local/bin/Pulse"
         chmod +x "$HOME/.local/bin/Pulse"
         ;;
       *)
@@ -1295,17 +1169,7 @@ configure_sddm_theme() {
 #     gum style --foreground 220 "When you're in Hyprland, run: install-hyprland-plugins"
 #   fi
 # }
-install_Hecate_apps() {
-  # Make sure the directory exists
-  mkdir -p ~/.local/bin
 
-  # Copy Pulse binary
-  cp apps/pulse/build/bin/Pulse ~/.local/bin/
-
-  # Ensure it's executable
-  chmod +x ~/.local/bin/Pulse
-
-}
 # Main function
 main() {
   # Parse arguments
