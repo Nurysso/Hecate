@@ -11,7 +11,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 ORANGE='\033[0;33m'
-RED='\033[0;31m'
 NC='\033[0m'
 
 # Global Variables
@@ -26,11 +25,13 @@ HYPRLAND_NEWLY_INSTALLED=false
 # User preferences
 USER_TERMINAL=""
 USER_SHELL=""
-USER_BROWSER=""
+USER_BROWSER_PKG=""
+USER_BROWSER_EXEC=""
 USER_BROWSER_DISPLAY=""
 USER_PROFILE=""
 INSTALL_SDDM=false
 INSTALL_PACKAGES=()
+FAILED_PACKAGES=()
 
 # Check if gum is installed
 check_gum() {
@@ -96,17 +97,12 @@ get_packageManager() {
     fi
     ;;
   fedora)
-    # gum style --foreground 220 --bold "⚠️ Warning: Script has not been tested on Fedora!"
-    # gum style --foreground 220 "Proceed at your own risk."
-
-    if ! gum confirm "Do you want to continue on Fedora? Its not tested "; then
+    if ! gum confirm "Do you want to continue on Fedora? Its not tested"; then
       gum style --foreground 196 "Aborting installation on Fedora."
       exit 1
     fi
-
     PACKAGE_MANAGER="dnf"
     ;;
-
   *)
     gum style --foreground 196 --bold "Error: No supported OS detected for package management!"
     exit 1
@@ -135,14 +131,19 @@ clone_dotfiles() {
   fi
 
   gum style --foreground 220 "Cloning repository..."
-  git clone "$REPO_URL" "$HECATEDIR"
-
-  if [ $? -eq 0 ]; then
-    gum style --foreground 82 "✓ Dotfiles cloned successfully!"
-  else
+  if ! git clone "$REPO_URL" "$HECATEDIR"; then
     gum style --foreground 196 "✗ Error cloning repository!"
+    gum style --foreground 196 "Check your internet connection and try again."
     exit 1
   fi
+
+  # Verify critical directories exist
+  if [ ! -d "$HECATEDIR/config" ]; then
+    gum style --foreground 196 "✗ Error: Config directory not found in cloned repo!"
+    exit 1
+  fi
+
+  gum style --foreground 82 "✓ Dotfiles cloned successfully!"
 }
 
 # Backup config based on Hecate/config contents
@@ -185,12 +186,21 @@ backup_config() {
             cp "$HOME/.bashrc" "$backup_dir/.bashrc"
           fi
           ;;
+        fish)
+          if [ -f "$HOME/.config/fish/config.fish" ]; then
+            [ "$backed_up" = false ] && mkdir -p "$backup_dir" && backed_up=true
+            gum style --foreground 220 "Backing up: fish config"
+            mkdir -p "$backup_dir/fish"
+            cp -r "$HOME/.config/fish"/* "$backup_dir/fish/"
+          fi
+          ;;
         esac
       fi
     done
 
     if [ "$backed_up" = true ]; then
       gum style --foreground 82 "✓ Backup created at: $backup_dir"
+      echo "$backup_dir" >"$HOME/.config/hecate_last_backup.txt"
     else
       gum style --foreground 220 "No existing configs found to backup"
     fi
@@ -226,27 +236,27 @@ ask_preferences() {
       "Chromium" \
       "Google Chrome"
   )
-  # Map display names to package names, executable names, and display names
+
   case "$browser_choice" in
   "Firefox")
-    USER_BROWSER_PKG="firefox"     # Package to install
-    USER_BROWSER_EXEC="firefox"    # Command to run
-    USER_BROWSER_DISPLAY="Firefox" # Display name
+    USER_BROWSER_PKG="firefox"
+    USER_BROWSER_EXEC="firefox"
+    USER_BROWSER_DISPLAY="Firefox"
     ;;
   "Brave")
-    USER_BROWSER_PKG="brave-bin" # Package to install (AUR)
-    USER_BROWSER_EXEC="brave"    # Command to run
-    USER_BROWSER_DISPLAY="Brave" # Display name
+    USER_BROWSER_PKG="brave-bin"
+    USER_BROWSER_EXEC="brave"
+    USER_BROWSER_DISPLAY="Brave"
     ;;
   "Chromium")
-    USER_BROWSER_PKG="chromium"     # Package to install
-    USER_BROWSER_EXEC="chromium"    # Command to run
-    USER_BROWSER_DISPLAY="Chromium" # Display name
+    USER_BROWSER_PKG="chromium"
+    USER_BROWSER_EXEC="chromium"
+    USER_BROWSER_DISPLAY="Chromium"
     ;;
   "Google Chrome")
-    USER_BROWSER_PKG="google-chrome"         # Package to install (AUR)
-    USER_BROWSER_EXEC="google-chrome-stable" # Command to run
-    USER_BROWSER_DISPLAY="Google Chrome"     # Display name
+    USER_BROWSER_PKG="google-chrome"
+    USER_BROWSER_EXEC="google-chrome-stable"
+    USER_BROWSER_DISPLAY="Google Chrome"
     ;;
   esac
 
@@ -265,12 +275,11 @@ ask_preferences() {
   fi
   echo ""
 
-  gum style --foreground 82 "This will download additional packages to your system select based on your work"
-  gum style --foreground 82 "This was designed for newly installed setup, by choosing profile you can break dependencies used by other softwares"
+  gum style --foreground 82 "This will download additional packages to your system"
+  gum style --foreground 220 "Choose profile based on your needs"
   sleep 2
 
   while true; do
-    # User profile
     USER_PROFILE=$(gum choose --header "Select your profile:" \
       "minimal" \
       "developer" \
@@ -279,9 +288,8 @@ ask_preferences() {
     gum style --foreground 82 "✓ Profile: $USER_PROFILE"
     echo ""
 
-    # FIX: Added space before ] and proper string comparison
     if [ "$USER_PROFILE" = "madlad" ]; then
-      gum style --foreground 220 "⚠️ This could take easily more than an hour or 2 to install depending upon network speed and CPU power"
+      gum style --foreground 220 "⚠️ This could take easily more than an hour or 2 to install"
       if gum confirm "Do you want to continue?"; then
         break
       else
@@ -311,7 +319,7 @@ ask_preferences() {
 build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
-  # Base packages
+  # Base packages - removed browser from here since we handle it separately
   INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim neovim nano)
 
   # Check if Hyprland is already installed
@@ -339,8 +347,10 @@ build_package_list() {
     ;;
   esac
 
-  # Browser
-  [ -n "$USER_BROWSER_PKG" ] && INSTALL_PACKAGES+=("$USER_BROWSER_PKG")
+  # Browser - add to package list
+  if [ -n "$USER_BROWSER_PKG" ]; then
+    INSTALL_PACKAGES+=("$USER_BROWSER_PKG")
+  fi
 
   # SDDM
   if [ "$INSTALL_SDDM" = true ]; then
@@ -356,16 +366,14 @@ build_package_list() {
     add_gamer_packages
     ;;
   madlad)
-    gum style --foreground 220 "Adding all the things..."
-    gum style --foreground 220 "this is going to take a long time so sit back relax and enjoy..."
+    gum style --foreground 220 "Adding all packages..."
     add_developer_packages
     add_gamer_packages
     ;;
   esac
 
   # Show package list
-  gum style --foreground 220 "Packages to install:"
-  printf '%s\n' "${INSTALL_PACKAGES[@]}" | gum format
+  gum style --foreground 220 "Total packages to install: ${#INSTALL_PACKAGES[@]}"
 }
 
 # Add developer packages
@@ -385,30 +393,25 @@ add_developer_packages() {
     return
   fi
 
-  # AI/ML packages
   if echo "$dev_types" | grep -q "AI/ML"; then
     gum style --foreground 220 "Adding AI/ML packages..."
     INSTALL_PACKAGES+=(python python-pip python-numpy python-pandas python-matplotlib python-scikit-learn)
   fi
 
-  # Web Development packages
   if echo "$dev_types" | grep -q "Web Development"; then
     gum style --foreground 220 "Adding Web Development packages..."
     INSTALL_PACKAGES+=(nodejs npm yarn)
   fi
 
-  # Server/Backend packages
   if echo "$dev_types" | grep -q "Server/Backend"; then
     gum style --foreground 220 "Adding Server/Backend packages..."
     INSTALL_PACKAGES+=(docker docker-compose)
   fi
 
-  # Database packages
   if echo "$dev_types" | grep -q "Database"; then
     gum style --foreground 220 "Adding Database packages..."
     INSTALL_PACKAGES+=(postgresql sqlite)
 
-    # Ask about MySQL separately as it's larger
     if gum confirm "Install MySQL/MariaDB?"; then
       INSTALL_PACKAGES+=(mariadb)
     fi
@@ -418,19 +421,16 @@ add_developer_packages() {
     fi
   fi
 
-  # Mobile Development packages
   if echo "$dev_types" | grep -q "Mobile Development"; then
     gum style --foreground 220 "Adding Mobile Development packages..."
     INSTALL_PACKAGES+=(android-tools)
   fi
 
-  # DevOps packages
   if echo "$dev_types" | grep -q "DevOps"; then
     gum style --foreground 220 "Adding DevOps packages..."
     INSTALL_PACKAGES+=(docker kubectl terraform ansible)
   fi
 
-  # Game Development packages
   if echo "$dev_types" | grep -q "Game Development"; then
     gum style --foreground 220 "Adding Game Development packages..."
     INSTALL_PACKAGES+=(godot blender)
@@ -441,15 +441,12 @@ add_developer_packages() {
 add_gamer_packages() {
   gum style --foreground 220 "Adding gaming packages..."
 
-  # Core gaming packages
   INSTALL_PACKAGES+=(steam lutris wine-staging winetricks gamemode lib32-gamemode mangohud lib32-mangohud)
 
-  # Discord
   if gum confirm "Install Discord?"; then
     INSTALL_PACKAGES+=(discord)
   fi
 
-  # Emulators
   if gum confirm "Install emulators?"; then
     local emulators=$(gum choose --no-limit --header "Select emulators (Space to select, Enter to confirm):" \
       "RetroArch" \
@@ -462,120 +459,21 @@ add_gamer_packages() {
       echo "$emulators" | grep -q "RetroArch" && INSTALL_PACKAGES+=(retroarch retroarch-assets-xmb retroarch-assets-ozone)
       echo "$emulators" | grep -q "PCSX2" && INSTALL_PACKAGES+=(pcsx2)
       echo "$emulators" | grep -q "Dolphin" && INSTALL_PACKAGES+=(dolphin-emu)
-      # Changed from rpcs3-git to rpcs3-bin for binary version
       echo "$emulators" | grep -q "RPCS3" && INSTALL_PACKAGES+=(rpcs3-bin)
     fi
   fi
 
-  # Proton-GE
   if gum confirm "Install ProtonUp-Qt (for managing Proton-GE)?"; then
     INSTALL_PACKAGES+=(protonup-qt)
   fi
 }
 
-# Install user's preferred browser
-install_user_browser() {
-  if [ -n "$USER_BROWSER_PKG" ]; then
-    gum style --border double --padding "1 2" --border-foreground 212 "Installing Browser"
-    gum style --foreground 220 "Installing $USER_BROWSER_DISPLAY..."
-
-    local retries=3
-    local success=false
-
-    for ((i = 1; i <= retries; i++)); do
-      # Check if it's an AUR package
-      case "$USER_BROWSER_PKG" in
-      brave-bin | google-chrome)
-        # Use AUR helper
-        if command -v paru &>/dev/null; then
-          gum style --foreground 220 "Using paru (attempt $i/$retries)..."
-
-          # Disable exit on error for this command
-          set +e
-          paru -S --needed --noconfirm "$USER_BROWSER_PKG" || true
-          local exit_code=$?
-          set -e
-
-          if [ $exit_code -eq 0 ]; then
-            success=true
-            break
-          fi
-        elif command -v yay &>/dev/null; then
-          gum style --foreground 220 "Using yay (attempt $i/$retries)..."
-
-          # Disable exit on error for this command
-          set +e
-          yay -S --needed --noconfirm "$USER_BROWSER_PKG"
-          local exit_code=$?
-          set -e
-
-          if [ $exit_code -eq 0 ]; then
-            success=true
-            break
-          fi
-        else
-          gum style --foreground 196 "Error: No AUR helper found! Install paru or yay first."
-          return 1
-        fi
-        ;;
-      *)
-        # Regular pacman package
-        gum style --foreground 220 "Using pacman (attempt $i/$retries)..."
-
-        # Disable exit on error for this command
-        set +e
-        sudo pacman -S --needed --noconfirm "$USER_BROWSER_PKG" &>/dev/null
-        local exit_code=$?
-        set -e
-
-        if [ $exit_code -eq 0 ]; then
-          success=true
-          break
-        fi
-        ;;
-      esac
-
-      if [ $i -lt $retries ]; then
-        gum style --foreground 220 "Retrying in 3 seconds..."
-        sleep 3
-      fi
-    done
-
-    if [ "$success" = true ]; then
-      gum style --foreground 82 "✓ $USER_BROWSER_DISPLAY installed successfully!"
-      echo ""
-      return 0
-    else
-      gum style --foreground 196 "✗ Failed to install $USER_BROWSER_DISPLAY after $retries attempts"
-      if gum confirm "Continue without browser installation?"; then
-        gum style --foreground 220 "Continuing without browser..."
-        echo ""
-        return 0
-      else
-        gum style --foreground 196 "Installation cancelled"
-        exit 1
-      fi
-    fi
-  else
-    gum style --foreground 220 "Skipping browser installation (user choice)"
-    echo ""
-  fi
-}
-
-# Check if a package is from official repos
-is_official_package() {
-  local pkg="$1"
-  pacman -Si "$pkg" &>/dev/null
-}
-
-# Main package installation function
+# Main package installation function with proper error handling
 install_packages() {
   gum style --border double --padding "1 2" --border-foreground 212 "Installing Packages"
 
-  # Ensure package list is not empty
   if [ ${#INSTALL_PACKAGES[@]} -eq 0 ]; then
     gum style --foreground 220 "No packages to install"
-    echo ""
     return 0
   fi
 
@@ -584,103 +482,61 @@ install_packages() {
 
   case "$PACKAGE_MANAGER" in
   paru | yay)
-    # Simple approach: disable exit on error for the entire installation
+    gum style --foreground 220 "Installing packages with $PACKAGE_MANAGER..."
+
+    # Try to install all packages at once, but don't exit on error
     set +e
+    $PACKAGE_MANAGER -S --needed --noconfirm "${INSTALL_PACKAGES[@]}" 2>&1 | tee /tmp/hecate_install.log
+    set -e
 
-    gum style --foreground 220 "Installing all packages..."
-    $PACKAGE_MANAGER -S --needed --noconfirm "${INSTALL_PACKAGES[@]}"
-
-    # Check what actually got installed
-    local failed_pkgs=()
+    # Check which packages actually installed
     local success_count=0
+    FAILED_PACKAGES=()
 
     for pkg in "${INSTALL_PACKAGES[@]}"; do
       if pacman -Q "$pkg" &>/dev/null; then
         ((success_count++))
       else
-        failed_pkgs+=("$pkg")
+        FAILED_PACKAGES+=("$pkg")
       fi
     done
 
-    set -e
-
     echo ""
-    gum style --border double --padding "1 2" --border-foreground 212 "Installation Summary"
+    gum style --border double --padding "1 2" --border-foreground 212 "Installation Results"
     gum style --foreground 82 "✓ Successfully installed: $success_count/${#INSTALL_PACKAGES[@]} packages"
 
-    if [ ${#failed_pkgs[@]} -gt 0 ]; then
-      gum style --foreground 196 "✗ Failed packages (${#failed_pkgs[@]}):"
-      for pkg in "${failed_pkgs[@]}"; do
+    if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
+      gum style --foreground 196 "✗ Failed packages: ${#FAILED_PACKAGES[@]}"
+      for pkg in "${FAILED_PACKAGES[@]}"; do
         gum style --foreground 196 "  • $pkg"
       done
       echo ""
 
-      if gum confirm "Save failed packages list for manual installation?"; then
-        local failed_log="$HOME/hecate_failed_packages.txt"
-        printf '%s\n' "${failed_pkgs[@]}" >"$failed_log"
-        gum style --foreground 220 "Failed packages saved to: $failed_log"
-        gum style --foreground 220 "You can install them later with:"
-        gum style --foreground 220 "  $PACKAGE_MANAGER -S \$(cat $failed_log)"
-        echo ""
+      # Save failed packages
+      local failed_log="$HOME/hecate_failed_packages.txt"
+      printf '%s\n' "${FAILED_PACKAGES[@]}" >"$failed_log"
+      gum style --foreground 220 "Failed packages saved to: $failed_log"
+      gum style --foreground 220 "Install them later with: $PACKAGE_MANAGER -S \$(cat $failed_log)"
+      echo ""
+
+      # Don't continue if critical packages failed
+      if ! verify_critical_packages_installed; then
+        gum style --foreground 196 "✗ Critical packages failed to install!"
+        gum style --foreground 196 "Cannot continue without these packages."
+        exit 1
       fi
     fi
     ;;
 
   pacman)
-    # Install paru first if needed
-    if ! command -v paru &>/dev/null; then
-      gum style --border normal --padding "0 1" --border-foreground 212 "Installing Paru AUR Helper"
-      gum style --foreground 220 "Paru is required for AUR package support"
-      echo ""
-
-      if gum confirm "Install paru now?"; then
-        set +e
-
-        gum style --foreground 220 "Installing build dependencies..."
-        sudo pacman -S --needed --noconfirm base-devel git
-
-        gum style --foreground 220 "Building paru from AUR..."
-        local temp_dir="/tmp/paru-install-$$"
-        mkdir -p "$temp_dir"
-        cd "$temp_dir"
-
-        git clone https://aur.archlinux.org/paru.git
-        cd paru
-
-        makepkg -si --noconfirm
-        local paru_result=$?
-
-        cd "$HOME"
-        rm -rf "$temp_dir"
-
-        set -e
-
-        if [ $paru_result -eq 0 ]; then
-          gum style --foreground 82 "✓ Paru installed successfully!"
-          PACKAGE_MANAGER="paru"
-          echo ""
-          install_packages
-          return $?
-        else
-          gum style --foreground 196 "✗ Failed to install paru"
-
-          if gum confirm "Try installing yay instead?"; then
-            sudo pacman -S --needed --noconfirm yay
-            if command -v yay &>/dev/null; then
-              PACKAGE_MANAGER="yay"
-              install_packages
-              return $?
-            fi
-          fi
-
-          gum style --foreground 196 "Cannot proceed without an AUR helper"
-          exit 1
-        fi
-      else
-        gum style --foreground 196 "Cannot proceed without an AUR helper"
-        exit 1
-      fi
+    # Need to install an AUR helper first
+    if ! install_aur_helper; then
+      gum style --foreground 196 "Failed to install AUR helper. Cannot continue."
+      exit 1
     fi
+    # Recursively call with new package manager
+    install_packages
+    return $?
     ;;
 
   dnf)
@@ -693,38 +549,95 @@ install_packages() {
 
   *)
     gum style --foreground 196 "✗ Unsupported package manager: $PACKAGE_MANAGER"
-    return 1
+    exit 1
     ;;
   esac
 
   echo ""
 }
-# Wrapper function to install everything
-install_all_packages() {
-  # First install system packages
-  install_packages
 
+# Install AUR helper (paru or yay)
+install_aur_helper() {
+  gum style --border normal --padding "0 1" --border-foreground 212 "Installing AUR Helper"
+  gum style --foreground 220 "An AUR helper is required for some packages"
   echo ""
 
-  # Then install user's browser
-  install_user_browser
+  if ! gum confirm "Install paru AUR helper now?"; then
+    return 1
+  fi
 
-  echo ""
-  gum style --foreground 82 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  gum style --foreground 82 "  All package installations complete!"
-  gum style --foreground 82 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  gum style --foreground 220 "Installing build dependencies..."
+  if ! sudo pacman -S --needed --noconfirm base-devel git; then
+    gum style --foreground 196 "Failed to install build dependencies"
+    return 1
+  fi
+
+  gum style --foreground 220 "Building paru from AUR..."
+  local temp_dir="/tmp/paru-install-$$"
+  mkdir -p "$temp_dir"
+
+  if ! git clone https://aur.archlinux.org/paru.git "$temp_dir/paru"; then
+    gum style --foreground 196 "Failed to clone paru repository"
+    rm -rf "$temp_dir"
+    return 1
+  fi
+
+  cd "$temp_dir/paru"
+
+  if makepkg -si --noconfirm; then
+    cd "$HOME"
+    rm -rf "$temp_dir"
+    PACKAGE_MANAGER="paru"
+    gum style --foreground 82 "✓ Paru installed successfully!"
+    return 0
+  else
+    cd "$HOME"
+    rm -rf "$temp_dir"
+    gum style --foreground 196 "✗ Failed to build paru"
+
+    if gum confirm "Try installing yay instead?"; then
+      if sudo pacman -S --needed --noconfirm yay; then
+        PACKAGE_MANAGER="yay"
+        gum style --foreground 82 "✓ Yay installed successfully!"
+        return 0
+      fi
+    fi
+    return 1
+  fi
 }
 
-# Verify critical packages are installed
+# Verify critical packages are installed (returns 0 if ok, 1 if critical failure)
+verify_critical_packages_installed() {
+  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard")
+  local missing_critical=()
+
+  for pkg in "${critical_packages[@]}"; do
+    if ! command -v "$pkg" &>/dev/null && ! pacman -Q "$pkg" &>/dev/null 2>&1; then
+      missing_critical+=("$pkg")
+    fi
+  done
+
+  if [ ${#missing_critical[@]} -gt 0 ]; then
+    gum style --foreground 196 "Missing critical packages:"
+    for pkg in "${missing_critical[@]}"; do
+      gum style --foreground 196 "  • $pkg"
+    done
+    return 1
+  fi
+
+  return 0
+}
+
+# Verify critical packages after installation
 verify_critical_packages() {
   clear
+  gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
+
   local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "cliphist" "swaync" "hypridle" "hyprlock" "wallust" "fastfetch" "starship" "wlogout" "noto-fonts-emoji" "grim" "wl-clipboard")
   local missing_packages=()
 
-  gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
-
   for pkg in "${critical_packages[@]}"; do
-    if ! command -v "$pkg" &>/dev/null && ! pacman -Q "$pkg" &>/dev/null; then
+    if ! command -v "$pkg" &>/dev/null && ! pacman -Q "$pkg" &>/dev/null 2>&1; then
       missing_packages+=("$pkg")
       gum style --foreground 196 "✗ Missing: $pkg"
     else
@@ -742,20 +655,9 @@ verify_critical_packages() {
       INSTALL_PACKAGES=("${missing_packages[@]}")
       install_packages
 
-      # Re-verify after installation
-      local still_missing=()
-      for pkg in "${missing_packages[@]}"; do
-        if ! command -v "$pkg" &>/dev/null && ! pacman -Q "$pkg" &>/dev/null; then
-          still_missing+=("$pkg")
-        fi
-      done
-
-      if [ ${#still_missing[@]} -gt 0 ]; then
-        gum style --foreground 196 "⚠ Some critical packages are still missing:"
-        for pkg in "${still_missing[@]}"; do
-          gum style --foreground 196 "  • $pkg"
-        done
-
+      # Re-verify
+      if ! verify_critical_packages_installed; then
+        gum style --foreground 196 "⚠ Critical packages still missing after retry"
         if ! gum confirm "Continue anyway? (Not recommended)"; then
           gum style --foreground 196 "Installation aborted"
           exit 1
@@ -776,33 +678,44 @@ verify_critical_packages() {
 
 # Enable SDDM after installation
 enable_sddm() {
-  if [ "$INSTALL_SDDM" = true ]; then
-    gum style --border double --padding "1 2" --border-foreground 212 "Enabling SDDM"
+  if [ "$INSTALL_SDDM" != true ]; then
+    return
+  fi
 
-    # Check if another display manager is already enabled
-    local current_dm=$(systemctl is-enabled display-manager.service 2>/dev/null || echo "none")
+  # Verify SDDM actually installed
+  if ! pacman -Q sddm &>/dev/null; then
+    gum style --foreground 196 "✗ SDDM was not installed successfully"
+    gum style --foreground 220 "Skipping SDDM configuration"
+    return
+  fi
 
-    if [ "$current_dm" != "none" ] && [ "$current_dm" != "sddm.service" ]; then
-      gum style --foreground 220 "Detected existing display manager: $current_dm"
+  gum style --border double --padding "1 2" --border-foreground 212 "Enabling SDDM"
 
-      if gum confirm "Disable $current_dm and enable SDDM instead?"; then
-        gum style --foreground 220 "Disabling $current_dm..."
-        sudo systemctl disable display-manager.service || true
-        sudo systemctl disable "$current_dm" || true
+  local current_dm=$(systemctl is-enabled display-manager.service 2>/dev/null || echo "none")
 
-        gum style --foreground 220 "Enabling SDDM..."
-        sudo systemctl enable sddm
-        sudo systemctl set-default graphical.target
-        gum style --foreground 82 "✓ SDDM enabled!"
+  if [ "$current_dm" != "none" ] && [ "$current_dm" != "sddm.service" ]; then
+    gum style --foreground 220 "Detected existing display manager: $current_dm"
+
+    if gum confirm "Disable $current_dm and enable SDDM instead?"; then
+      gum style --foreground 220 "Disabling $current_dm..."
+      sudo systemctl disable display-manager.service 2>/dev/null || true
+      sudo systemctl disable "$current_dm" 2>/dev/null || true
+
+      gum style --foreground 220 "Enabling SDDM..."
+      if sudo systemctl enable sddm && sudo systemctl set-default graphical.target; then
+        gum style --foreground 82 "✓ SDDM enabled successfully!"
       else
-        gum style --foreground 220 "Keeping existing display manager"
-        gum style --foreground 220 "SDDM installed but not enabled"
-        return
+        gum style --foreground 196 "✗ Failed to enable SDDM"
+        gum style --foreground 220 "You may need to enable it manually"
       fi
     else
-      sudo systemctl enable sddm
-      sudo systemctl set-default graphical.target
-      gum style --foreground 82 "✓ SDDM enabled!"
+      gum style --foreground 220 "Keeping existing display manager"
+    fi
+  else
+    if sudo systemctl enable sddm && sudo systemctl set-default graphical.target; then
+      gum style --foreground 82 "✓ SDDM enabled successfully!"
+    else
+      gum style --foreground 196 "✗ Failed to enable SDDM"
     fi
   fi
 }
@@ -826,27 +739,22 @@ setup_shell_plugins() {
 
 # Setup Zsh plugins
 setup_zsh_plugins() {
-  # Install Oh My Zsh
   if [ ! -d "$HOME/.oh-my-zsh" ]; then
     gum style --foreground 220 "Installing Oh My Zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    if ! sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; then
+      gum style --foreground 196 "Failed to install Oh My Zsh"
+      return 1
+    fi
   fi
 
-  # Install Powerlevel10k
-  #   if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
-  #     gum style --foreground 220 "Installing Powerlevel10k..."
-  #     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-  #   fi
-
-  # Install plugins
   if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
     gum style --foreground 220 "Installing zsh-autosuggestions..."
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 2>/dev/null || true
   fi
 
   if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
     gum style --foreground 220 "Installing zsh-syntax-highlighting..."
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 2>/dev/null || true
   fi
 
   gum style --foreground 82 "✓ Zsh plugins installed!"
@@ -854,40 +762,28 @@ setup_zsh_plugins() {
 
 # Setup Fish plugins
 setup_fish_plugins() {
-  # Install fisher
   if ! fish -c "type -q fisher" 2>/dev/null; then
     gum style --foreground 220 "Installing Fisher..."
-    fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
+    fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher" 2>/dev/null || true
   fi
 
-  # Install useful Fish plugins
   gum style --foreground 220 "Installing Fish plugins..."
   fish -c "
-        fisher install jethrokuan/z 2>/dev/null
-        fisher install PatrickF1/fzf.fish 2>/dev/null
-        fisher install jorgebucaran/nvm.fish 2>/dev/null
-    " || true
+    fisher install jethrokuan/z 2>/dev/null || true
+    fisher install PatrickF1/fzf.fish 2>/dev/null || true
+    fisher install jorgebucaran/nvm.fish 2>/dev/null || true
+  " 2>/dev/null || true
 
-  gum style --foreground 82 "✓ Fish plugins and Starship installed!"
+  gum style --foreground 82 "✓ Fish plugins installed!"
 }
 
 setup_bash_plugins() {
   gum style --foreground 220 "Setting up Bash with Starship..."
 
-  # Setup bash-completion if not already installed
-  if ! [ -f /usr/share/bash-completion/bash_completion ] && ! [ -f /etc/bash_completion ]; then
-    gum style --foreground 220 "bash-completion will be installed via package manager..."
-  else
-    gum style --foreground 82 "✓ bash-completion already installed"
-  fi
-
-  # Setup FZF for Bash (this creates ~/.fzf.bash)
   if [ ! -f "$HOME/.fzf.bash" ]; then
     gum style --foreground 220 "Setting up FZF for Bash..."
 
-    # Check if fzf package includes the bash integration
     if [ -f /usr/share/fzf/key-bindings.bash ]; then
-      # Create fzf.bash file that sources system fzf files
       cat >"$HOME/.fzf.bash" <<'FZFEOF'
 # FZF Bash Integration
 [ -f /usr/share/fzf/completion.bash ] && source /usr/share/fzf/completion.bash
@@ -900,8 +796,8 @@ FZFEOF
   else
     gum style --foreground 82 "✓ FZF already configured"
   fi
+
   gum style --foreground 82 "✓ Bash setup complete!"
-  gum style --foreground 220 "Note: Restart your terminal or run 'source ~/.bashrc' to apply changes"
 }
 
 # Move config files
@@ -958,22 +854,19 @@ move_config() {
     fi
   done
 
-  for appFolder in $HECATEAPPSDIR/*; do
-    if [ -d "$appFolder" ]; then
-      app_name=$(basename "$appFolder")
-
-      case "$app_name" in
-      Pulse)
-        gum style --foreground 82 "Installing Pulse to your system..."
-        cp "$appFolder/build/bin/Pulse" "$HOME/.local/bin/Pulse"
-        chmod +x "$HOME/.local/bin/Pulse"
-        ;;
-      *)
-        gum style --foreground 220 "Skipping $app_name"
-        ;;
-      esac
+  # Install apps from apps directory
+  if [ -d "$HECATEAPPSDIR/Pulse/build/bin" ]; then
+    gum style --foreground 82 "Installing Pulse..."
+    if [ -f "$HECATEAPPSDIR/Pulse/build/bin/Pulse" ]; then
+      cp "$HECATEAPPSDIR/Pulse/build/bin/Pulse" "$HOME/.local/bin/Pulse"
+      chmod +x "$HOME/.local/bin/Pulse"
+      gum style --foreground 82 "✓ Pulse installed to ~/.local/bin/Pulse"
+    else
+      gum style --foreground 220 "⚠ Pulse binary not found at expected location"
     fi
-  done
+  else
+    gum style --foreground 220 "⚠ Pulse build directory not found"
+  fi
 
   # Install hecate CLI tool
   if [ -f "$HECATEDIR/config/hecate.sh" ]; then
@@ -981,24 +874,27 @@ move_config() {
     cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
     chmod +x "$HOME/.local/bin/hecate"
     gum style --foreground 82 "✓ hecate command installed to ~/.local/bin/hecate"
+  else
+    gum style --foreground 220 "⚠ hecate.sh not found in config directory"
   fi
 
+  # Install Starship config
   if [ -f "$HECATEDIR/config/starship/starship.toml" ]; then
     gum style --foreground 82 "Installing Starship config..."
-    mkdir -p "$HOME/.config"
     cp "$HECATEDIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
-    gum style --foreground 82 "✓ Starship Config installed"
+    gum style --foreground 82 "✓ Starship config installed"
+  else
+    gum style --foreground 220 "⚠ Starship config not found"
   fi
 
-  #   # Install Hyprland plugin installer
+  # Install Hyprland plugin installer if it exists
   #   if [ -f "$HECATEDIR/config/install-hyprland-plugins.sh" ]; then
   #     gum style --foreground 82 "Installing Hyprland plugin installer..."
   #     cp "$HECATEDIR/config/install-hyprland-plugins.sh" "$HOME/.local/bin/install-hyprland-plugins"
   #     chmod +x "$HOME/.local/bin/install-hyprland-plugins"
-  #     gum style --foreground 82 "✓ Plugin installer available: install-hyprland-plugins"
+  #     gum style --foreground 82 "✓ Plugin installer: install-hyprland-plugins"
   #   fi
 
-  gum style --foreground 220 "  Run 'hecate' or 'install-hyprland-plugins' from anywhere!"
   gum style --foreground 82 "✓ Configuration files installed successfully!"
 }
 
@@ -1008,9 +904,6 @@ build_preferd_app_keybind() {
 
   mkdir -p ~/.config/hypr/configs/UserConfigs
 
-  # Use the display name if available, otherwise use package name
-  local browser_name="${USER_BROWSER_DISPLAY:-$USER_BROWSER}"
-
   cat >~/.config/hypr/configs/UserConfigs/app-names.conf <<EOF
 # Set your default applications here
 \$term = $USER_TERMINAL
@@ -1019,21 +912,24 @@ EOF
 
   gum style --foreground 82 "✓ App keybinds configured!"
   gum style --foreground 220 "Terminal: $USER_TERMINAL"
-  [ -n "$browser_name" ] && gum style --foreground 220 "Browser: $browser_name"
+  [ -n "$USER_BROWSER_DISPLAY" ] && gum style --foreground 220 "Browser: $USER_BROWSER_DISPLAY"
 }
 
 # Create Hecate configuration file
 create_hecate_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Creating Hecate Configuration"
-    URL="https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt"
-    local_version=$(curl -s "$URL")
 
   local config_dir="$HOME/.config/hecate"
   local config_file="$config_dir/hecate.toml"
-  local version="$local_version"
+  local version="1.0.0"
   local install_date=$(date +%Y-%m-%d)
 
-  # Create config directory
+  # Try to get version from remote
+  if command -v curl &>/dev/null; then
+    local remote_version=$(curl -s "https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt" 2>/dev/null || echo "")
+    [ -n "$remote_version" ] && version="$remote_version"
+  fi
+
   mkdir -p "$config_dir"
 
   # Ask about theme mode
@@ -1075,11 +971,31 @@ EOF
   gum style --foreground 220 "Theme mode: $theme_mode"
 }
 
-# Setup Waybar
+# Setup Waybar - verify symlinks exist in waybar folder
 setup_Waybar() {
   gum style --foreground 220 "Configuring waybar..."
-  ln -sf $HOME/.config/waybar/configs/top $HOME/.config/waybar/config
-  ln -sf $HOME/.config/waybar/style/default.css $HOME/.config/waybar/style.css
+
+  # Verify waybar config directory exists
+  if [ ! -d "$HOME/.config/waybar" ]; then
+    gum style --foreground 196 "✗ Waybar config directory not found!"
+    return 1
+  fi
+
+  # Verify source files exist before creating symlinks
+  if [ ! -f "$HOME/.config/waybar/configs/top" ]; then
+    gum style --foreground 196 "✗ Waybar config source not found: configs/top"
+    return 1
+  fi
+
+  if [ ! -f "$HOME/.config/waybar/style/default.css" ]; then
+    gum style --foreground 196 "✗ Waybar style source not found: style/default.css"
+    return 1
+  fi
+
+  # Create symlinks
+  ln -sf "$HOME/.config/waybar/configs/top" "$HOME/.config/waybar/config"
+  ln -sf "$HOME/.config/waybar/style/default.css" "$HOME/.config/waybar/style.css"
+
   gum style --foreground 82 "✓ Waybar configured!"
 }
 
@@ -1092,12 +1008,19 @@ set_default_shell() {
     return
   fi
 
+  # Verify the shell is actually installed
+  if ! command -v "$USER_SHELL" &>/dev/null; then
+    gum style --foreground 196 "✗ $USER_SHELL is not installed!"
+    gum style --foreground 220 "Cannot set as default shell"
+    return 1
+  fi
+
   if gum confirm "Set $USER_SHELL as default shell?"; then
     local shell_path=$(which "$USER_SHELL")
 
     if [ -z "$shell_path" ]; then
       gum style --foreground 196 "Error: $USER_SHELL not found in PATH"
-      return
+      return 1
     fi
 
     # Check if shell is in /etc/shells
@@ -1107,13 +1030,14 @@ set_default_shell() {
     fi
 
     gum style --foreground 220 "Changing default shell to $USER_SHELL..."
-    gum style --foreground 220 "You may be prompted for your password..."
 
     if sudo chsh -s "$shell_path" "$USER"; then
       gum style --foreground 82 "✓ $USER_SHELL set as default shell!"
-      gum style --foreground 220 "Note: You need to log out and log back in for this to take effect"
+      gum style --foreground 220 "Note: Log out and log back in for this to take effect"
     else
-      gum style --foreground 196 "✗ Failed to change shell. Try manually: chsh -s $shell_path"
+      gum style --foreground 196 "✗ Failed to change shell"
+      gum style --foreground 220 "Try manually: chsh -s $shell_path"
+      return 1
     fi
   fi
 }
@@ -1132,43 +1056,19 @@ configure_sddm_theme() {
     local theme_script="/tmp/sddm-astronaut-setup.sh"
     if curl -fsSL https://raw.githubusercontent.com/keyitdev/sddm-astronaut-theme/master/setup.sh -o "$theme_script"; then
       chmod +x "$theme_script"
-      bash "$theme_script"
+      if bash "$theme_script"; then
+        gum style --foreground 82 "✓ SDDM theme installed!"
+      else
+        gum style --foreground 196 "✗ SDDM theme installation failed"
+      fi
       rm -f "$theme_script"
-      gum style --foreground 82 "✓ SDDM theme installed!"
     else
       gum style --foreground 196 "✗ Failed to download SDDM theme installer"
     fi
   else
     gum style --foreground 220 "Skipping SDDM theme installation"
-    gum style --foreground 220 "You can configure SDDM theme later manually"
   fi
 }
-
-# run_plugin_installer_if_in_hyprland() {
-#   # Only run if user is currently in Hyprland session
-#   if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
-#     gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
-
-#     if gum confirm "You're currently in Hyprland. Install plugins now?"; then
-#       if [ -x "$HOME/.local/bin/install-hyprland-plugins" ]; then
-#         gum style --foreground 220 "Running plugin installer..."
-#         "$HOME/.local/bin/install-hyprland-plugins"
-#       else
-#         gum style --foreground 196 "Error: Plugin installer not found!"
-#       fi
-#     else
-#       gum style --foreground 220 "You can run 'install-hyprland-plugins' later"
-#     fi
-#   elif [ "$HYPRLAND_NEWLY_INSTALLED" = true ]; then
-#     gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
-#     gum style --foreground 220 "Hyprland was just installed."
-#     gum style --foreground 220 "After reboot, log into Hyprland and run:"
-#     gum style --foreground 82 "  install-hyprland-plugins"
-#   else
-#     gum style --border double --padding "1 2" --border-foreground 212 "Hyprland Plugin Setup"
-#     gum style --foreground 220 "When you're in Hyprland, run: install-hyprland-plugins"
-#   fi
-# }
 
 # Main function
 main() {
@@ -1207,9 +1107,8 @@ main() {
     exit 0
     ;;
   -*)
-    echo -e "${RED}Unknown option: $1"
-    echo -e "${ORANGE}HUH??? whats thats suppose to do?? drive f1 for FE---i and win??"
-    echo -e "${BLUE}Try running again with${NC} ${GREEN}--help${NC} Cause You really need it"
+    echo -e "${RED}Unknown option: $1${NC}"
+    echo -e "${BLUE}Try: ./install.sh --help${NC}"
     exit 1
     ;;
   esac
@@ -1241,17 +1140,20 @@ main() {
   # Clone repo early to check configs
   clone_dotfiles
 
-  # Backup existing configs based on Hecate/config
+  # Backup existing configs
   backup_config
 
-  # Ask all user preferences first (including SDDM)
+  # Ask all user preferences
   ask_preferences
 
-  # Build complete package list (includes SDDM if selected)
+  # Build complete package list
   build_package_list
 
-  # Install everything at once
+  # Install all packages at once
   install_packages
+
+  # Verify critical packages installed successfully
+  verify_critical_packages
 
   # Enable SDDM if it was installed
   enable_sddm
@@ -1261,20 +1163,23 @@ main() {
 
   # Install configuration files
   move_config
-  setup_Waybar
+
+  # Setup Waybar symlinks
+  if ! setup_Waybar; then
+    gum style --foreground 220 "⚠ Waybar setup had issues, but continuing..."
+  fi
+
   build_preferd_app_keybind
   create_hecate_config
 
   # Set default shell
   set_default_shell
 
-  # Configure SDDM theme at the end
+  # Configure SDDM theme
   configure_sddm_theme
 
-  # Runs hyperland plugin install script if user is already in hyperland and skips if hyperland is newly installed or not loged in
-  #   run_plugin_installer_if_in_hyprland
-
   # Completion message
+  echo ""
   gum style \
     --foreground 82 \
     --border-foreground 82 \
@@ -1283,12 +1188,20 @@ main() {
     --width 70 \
     --margin "1 2" \
     --padding "2 4" \
-    '✓ Installation Complete!' \
-    '(surprisingly, nothing exploded)' '' \
-    'Your Hyprland rice is now 99% complete!' \
-    'The remaining 1% is tweaking it at 3 AM for the next 6 months' ''
+    '✓ Installation Complete!'
 
-  gum style --foreground 62 \
+  echo ""
+
+  if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
+    gum style --foreground 220 "Note: Some packages failed to install"
+    gum style --foreground 220 "Check ~/hecate_failed_packages.txt for details"
+    echo ""
+  else
+    gum style --foreground 85 '(surprisingly, nothing exploded)'
+    echo ""
+  fi
+
+  gum style --foreground 82 \
     'Post-Install TODO:' \
     '1. Reboot (or live dangerously and just re-login)' \
     '2. Log into Hyprland' \
@@ -1296,18 +1209,17 @@ main() {
     '4. Take screenshot' \
     '5. Post to r/unixporn'
   echo ""
-  echo "May your wallpapers be dynamic and your RAM usage low."
+  gum style --foreground 92 "May your wallpapers be dynamic and your RAM usage low."
   echo ""
   sleep 3
-
-  if gum confirm "Reboot now? (Recommended unless you enjoy living on the edge)"; then
-    gum style --foreground 72 "See you on the other side..."
+  if gum confirm "Reboot now?"; then
+    gum style --foreground 82 "Rebooting..."
     sleep 2
     sudo reboot
   else
-    gum style --foreground 220 "Bold choice. Remember to reboot eventually!"
-    gum style --foreground 220 "Your computer will judge you silently until you do."
+    gum style --foreground 220 "Remember to reboot to apply all changes!"
   fi
+
 }
 
 # Run main function with arguments

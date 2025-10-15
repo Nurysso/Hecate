@@ -11,67 +11,67 @@ HECATE_DIR="$HOME/.config/hecate"
 WAYBAR_CSS="$HOME/.config/waybar/color.css"
 SWAYNC_CSS="$HOME/.config/swaync/color.css"
 WLOGOUT_CSS="$HOME/.config/wlogout/color.css"
-ROFI_RASI="$HOME/.config/rofi/theme/colors-rofi.rasi"
+ROFI_RASI="$HOME/.config/rofi/wallust/colors-rofi.rasi"
 
 # Verify dependencies
 if [ ! -f "$COLOR_FILE" ]; then
-  echo "Error: wal colors.json not found at $COLOR_FILE"
-  exit 1
+    echo "Error: wal colors.json not found at $COLOR_FILE"
+    exit 1
 fi
 
-if ! command -v jq &>/dev/null; then
-  echo "Error: jq is not installed"
-  exit 1
+if ! command -v jq &> /dev/null; then
+    echo "Error: jq is not installed"
+    exit 1
 fi
 
 # Extract color with error checking
 extract_color() {
-  local key="$1"
-  local value
-  value=$(jq -r "$key" "$COLOR_FILE" 2>/dev/null)
-  if [ -z "$value" ] || [ "$value" = "null" ]; then
-    echo "Error: Failed to extract $key from colors.json"
-    exit 1
-  fi
-  echo "$value"
+    local key="$1"
+    local value
+    value=$(jq -r "$key" "$COLOR_FILE" 2>/dev/null)
+    if [ -z "$value" ] || [ "$value" = "null" ]; then
+        echo "Error: Failed to extract $key from colors.json"
+        exit 1
+    fi
+    echo "$value"
 }
 
 # Convert hex to rgba
 hex_to_rgba() {
-  local hex=$1
-  local alpha=$2
-  hex=${hex#"#"}
+    local hex=$1
+    local alpha=$2
+    hex=${hex#"#"}
 
-  local r=$((16#${hex:0:2}))
-  local g=$((16#${hex:2:2}))
-  local b=$((16#${hex:4:2}))
-  echo "rgba($r, $g, $b, $alpha)"
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
+    echo "rgba($r, $g, $b, $alpha)"
 }
 
 # Calculate luminance for contrast detection
 get_luminance() {
-  local hex=$1
-  hex=${hex#\#}
+    local hex=$1
+    hex=${hex#\#}
 
-  local r=$((16#${hex:0:2}))
-  local g=$((16#${hex:2:2}))
-  local b=$((16#${hex:4:2}))
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
 
-  local r_norm=$(echo "scale=4; $r / 255" | bc)
-  local g_norm=$(echo "scale=4; $g / 255" | bc)
-  local b_norm=$(echo "scale=4; $b / 255" | bc)
+    local r_norm=$(echo "scale=4; $r / 255" | bc)
+    local g_norm=$(echo "scale=4; $g / 255" | bc)
+    local b_norm=$(echo "scale=4; $b / 255" | bc)
 
-  r_norm=$(echo "scale=4; if ($r_norm <= 0.03928) $r_norm / 12.92 else e(2.4 * l(($r_norm + 0.055) / 1.055))" | bc -l)
-  g_norm=$(echo "scale=4; if ($g_norm <= 0.03928) $g_norm / 12.92 else e(2.4 * l(($g_norm + 0.055) / 1.055))" | bc -l)
-  b_norm=$(echo "scale=4; if ($b_norm <= 0.03928) $b_norm / 12.92 else e(2.4 * l(($b_norm + 0.055) / 1.055))" | bc -l)
+    r_norm=$(echo "scale=4; if ($r_norm <= 0.03928) $r_norm / 12.92 else e(2.4 * l(($r_norm + 0.055) / 1.055))" | bc -l)
+    g_norm=$(echo "scale=4; if ($g_norm <= 0.03928) $g_norm / 12.92 else e(2.4 * l(($g_norm + 0.055) / 1.055))" | bc -l)
+    b_norm=$(echo "scale=4; if ($b_norm <= 0.03928) $b_norm / 12.92 else e(2.4 * l(($b_norm + 0.055) / 1.055))" | bc -l)
 
-  local luminance=$(echo "scale=4; 0.2126 * $r_norm + 0.7152 * $g_norm + 0.0722 * $b_norm" | bc -l)
-  echo "$luminance"
+    local luminance=$(echo "scale=4; 0.2126 * $r_norm + 0.7152 * $g_norm + 0.0722 * $b_norm" | bc -l)
+    echo "$luminance"
 }
 
 is_light() {
-  local luminance=$1
-  [ $(echo "$luminance > 0.5" | bc) -eq 1 ]
+    local luminance=$1
+    [ $(echo "$luminance > 0.5" | bc) -eq 1 ]
 }
 
 echo "Extracting colors from pywal..."
@@ -102,17 +102,17 @@ BG_LUMINANCE=$(get_luminance "$BACKGROUND")
 echo "Background luminance: $BG_LUMINANCE"
 
 if is_light "$BG_LUMINANCE"; then
-  echo "⚠ Light background detected - adjusting for contrast"
-  SMART_FG="${COLOR0}"
-  SMART_FG_DIM="${COLOR8}"
-  SMART_FG_BRIGHT="${COLOR7}"
-  SMART_BG_ALT="${COLOR15}"
+    echo "⚠ Light background detected - adjusting for contrast"
+    SMART_FG="${COLOR0}"
+    SMART_FG_DIM="${COLOR8}"
+    SMART_FG_BRIGHT="${COLOR7}"
+    SMART_BG_ALT="${COLOR15}"
 else
-  echo "✓ Dark background detected - using standard colors"
-  SMART_FG="${COLOR7}"
-  SMART_FG_DIM="${COLOR8}"
-  SMART_FG_BRIGHT="${COLOR15}"
-  SMART_BG_ALT="${COLOR1}"
+    echo "✓ Dark background detected - using standard colors"
+    SMART_FG="${COLOR7}"
+    SMART_FG_DIM="${COLOR8}"
+    SMART_FG_BRIGHT="${COLOR15}"
+    SMART_BG_ALT="${COLOR1}"
 fi
 
 # Generate RGBA variants
@@ -128,12 +128,12 @@ BG_RGBA_DIM=$(hex_to_rgba "$BACKGROUND" "0.2")
 
 # Generate RGB values for SwayNC
 hex_to_rgb() {
-  local hex=$1
-  hex=${hex#\#}
-  local r=$((16#${hex:0:2}))
-  local g=$((16#${hex:2:2}))
-  local b=$((16#${hex:4:2}))
-  echo "$r, $g, $b"
+    local hex=$1
+    hex=${hex#\#}
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
+    echo "$r, $g, $b"
 }
 
 RGB0=$(hex_to_rgb "$COLOR0")
@@ -143,11 +143,11 @@ RGB4=$(hex_to_rgb "$COLOR4")
 # Create backup
 mkdir -p "$(dirname "$HECATE_CSS")"
 if [ -f "$HECATE_CSS" ]; then
-  cp "$HECATE_CSS" "${HECATE_CSS}.backup"
+    cp "$HECATE_CSS" "${HECATE_CSS}.backup"
 fi
 
 # Generate the master hecate.css file
-cat >"$HECATE_CSS" <<EOF
+cat > "$HECATE_CSS" <<EOF
 /* ═══════════════════════════════════════════════════════════════
    Hecate Theme - Centralized Color Definitions
    Generated from Pywal on $(date '+%Y-%m-%d %H:%M:%S')
@@ -277,30 +277,24 @@ echo "Creating symlinks to hecate.css..."
 
 mkdir -p "$(dirname "$WAYBAR_CSS")"
 if [ -L "$WAYBAR_CSS" ] || [ -f "$WAYBAR_CSS" ]; then
-  rm -f "$WAYBAR_CSS"
+    rm -f "$WAYBAR_CSS"
 fi
 ln -sf "$HECATE_CSS" "$WAYBAR_CSS"
 echo "  ✓ $WAYBAR_CSS -> $HECATE_CSS"
 
 mkdir -p "$(dirname "$SWAYNC_CSS")"
 if [ -L "$SWAYNC_CSS" ] || [ -f "$SWAYNC_CSS" ]; then
-  rm -f "$SWAYNC_CSS"
+    rm -f "$SWAYNC_CSS"
 fi
 ln -sf "$HECATE_CSS" "$SWAYNC_CSS"
 echo "  ✓ $SWAYNC_CSS -> $HECATE_CSS"
 
-mkdir -p "$(dirname "$WLOGOUT_CSS")"
-if [ -L "$WLOGOUT_CSS" ] || [ -f "$WLOGOUT_CSS" ]; then
-  rm -f "$WLOGOUT_CSS"
-fi
-ln -sf "$WLOGOUT_CSS" "$WLOGOUT_CSS"
-echo "  ✓ $WLOGOUT_CSS -> $HECATE_CSS"
 
 echo "✓ Symlinks created successfully"
 
 # Generate Rofi colors (RASI format, can't use CSS import)
 mkdir -p "$(dirname "$ROFI_RASI")"
-cat >"$ROFI_RASI" <<EOF
+cat > "$ROFI_RASI" <<EOF
 /* Rofi Colors - Generated from Hecate Theme */
 /* Generated: $(date '+%Y-%m-%d %H:%M:%S') */
 
@@ -357,45 +351,57 @@ EOF
 
 echo "✓ Generated Rofi colors (RASI format)"
 
+
+
 # Update Starship prompt colors
 echo "Updating Starship prompt..."
 STARSHIP_SCRIPT="$HOME/.config/hecate/scripts/update_starship-colors.sh"
 if [ -f "$STARSHIP_SCRIPT" ]; then
-  if bash "$STARSHIP_SCRIPT"; then
-    echo "✓ Starship colors updated"
-  else
-    echo "⚠ Starship update failed"
-  fi
+    if bash "$STARSHIP_SCRIPT"; then
+        echo "✓ Starship colors updated"
+    else
+        echo "⚠ Starship update failed"
+    fi
 else
-  echo "⚠ Starship color script not found, skipping..."
+    echo "⚠ Starship color script not found, skipping..."
 fi
-
+echo "Updating Wlogout ..."
+Wlogout_SCRIPT="$HOME/.config/hecate/scripts/update_wlogout_color.sh"
+if [ -f "$Wlogout_SCRIPT" ]; then
+    if bash "$Wlogout_SCRIPT"; then
+        echo "✓ Wlogout colors updated"
+    else
+        echo "⚠ Wlogout update failed"
+    fi
+else
+    echo "⚠ Starship color script not found, skipping..."
+fi
 # Generate blurred wallpaper for Wlogout
-WALLPAPER_OUTPUT="$HOME/.cache/wlogout/blurred_wallpaper.png"
-CONFIG="$HOME/.config/waypaper/config.ini"
-if [ -f "$CONFIG" ]; then
-  WP_PATH=$(grep '^wallpaper' "$CONFIG" | cut -d '=' -f2 | tr -d ' ')
-  WP_PATH="${WP_PATH/#\~/$HOME}"
+# WALLPAPER_OUTPUT="$HOME/.cache/wlogout/blurred_wallpaper.png"
+# CONFIG="$HOME/.config/waypaper/config.ini"
+# if [ -f "$CONFIG" ]; then
+#     WP_PATH=$(grep '^wallpaper' "$CONFIG" | cut -d '=' -f2 | tr -d ' ')
+#     WP_PATH="${WP_PATH/#\~/$HOME}"
 
-  if [ -f "$WP_PATH" ] && command -v convert &>/dev/null; then
-    mkdir -p "$HOME/.cache/wlogout"
-    convert "$WP_PATH" -blur 0x10 -scale 1920x1080^ -gravity center -extent 1920x1080 "$WALLPAPER_OUTPUT" 2>/dev/null
-    echo "✓ Generated blurred wallpaper for Wlogout"
-  fi
-fi
+#     if [ -f "$WP_PATH" ] && command -v convert &> /dev/null; then
+#         mkdir -p "$HOME/.cache/wlogout"
+#         convert "$WP_PATH" -blur 0x10 -scale 1920x1080^ -gravity center -extent 1920x1080 "$WALLPAPER_OUTPUT" 2>/dev/null
+#         echo "✓ Generated blurred wallpaper for Wlogout"
+#     fi
+# fi
 
 # Reload components
 echo ""
 echo "Reloading components..."
 
-if pgrep -x waybar >/dev/null; then
-  pkill -SIGUSR2 waybar
-  echo "✓ Waybar reloaded"
+if pgrep -x waybar > /dev/null; then
+    pkill -SIGUSR2 waybar
+    echo "✓ Waybar reloaded"
 fi
 
-if pgrep -x swaync >/dev/null; then
-  swaync-client -rs
-  echo "✓ SwayNC reloaded"
+if pgrep -x swaync > /dev/null; then
+    swaync-client -rs
+    echo "✓ SwayNC reloaded"
 fi
 
 echo ""

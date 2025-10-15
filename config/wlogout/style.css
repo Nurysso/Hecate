@@ -20,27 +20,30 @@ button {
     background-size: 20%;
     animation: gradient_f 20s ease-in infinite;
     border-radius: 80px;
-    border: 0px;
-    transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
-    color: #15151c;
-    background-color: alpha(#4B7DC2, 0.2);
+    /* border: 0px; */
+    transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682),
+                box-shadow 0.2s ease-in-out,
+                background-color 0.2s ease-in-out;
+    color: @background;
+    background-color: alpha(@primary, 0.2);
 }
 
 button:focus {
-    background-color: alpha(#4B7DC2, 0.5);
+    background-color: alpha(@primary, 0.5);
     background-size: 25%;
     border: 0px;
 }
 
 button:hover {
-    background-color: alpha(#4B7DC2, 0.9);
+    background-color: alpha(@primary, 0.9);
     opacity: 0.8;
-    color: #15151c;
+    color: @background;
     background-size: 30%;
     margin: 30px;
     border-radius: 80px;
-    box-shadow: 0 0 50px #15151c;
+    box-shadow: 0 0 50px @background;
 }
+
 
 button span {
     font-size: 1.2em;
