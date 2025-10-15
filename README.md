@@ -1,22 +1,35 @@
 <div align="center">
 
 # 🌙 Hecate
-
-### *A Dynamic Hyprland Configuration Manager*
+<!-- <img src="assets/img/header.webp" alt="Header"/> -->
+### ✦ Dotfiles for hyprland like never before
+<!-- *Experience Hyprland with intelligent theming that adapts to your wallpaper* -->
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 [![Hyprland](https://img.shields.io/badge/Hyprland-Dynamic-5e81ac?logo=wayland)](https://hyprland.org)
-[![Made with Love](https://img.shields.io/badge/Made%20with-♥-ff69b4.svg)](https://github.com/Aelune/Hecate)
+[![Made with Love](https://img.shields.io/badge/Made%20with-♥-ff69b4.svg)](https://dwukn.vercel.app)
 
 <!-- ![Hecate Banner](https://via.placeholder.com/1200x300/1a1b26/c0caf5?text=Hecate+%E2%80%A2+Dynamic+Hyprland+Setup) -->
 
-*Experience Hyprland with intelligent theming that adapts to your wallpaper*
+
 
 <!-- [Features](#-features) • [Installation](#-installation) • [Configuration](#-configuration) • [Supported Apps](#-supported-applications) • [Contributing](#-contributing) -->
 
 </div>
 
 ---
+
+## DEMO
+
+### Installation
+<img src="assets/gifs/hecate-install.gif" alt="Installation Demo" width="600"/>
+
+### Usage
+<img src="assets/gifs/hecate-demo.gif" alt="Usage Demo" width="600"/>
+
+
+<!-- ### Auto generates pallet
+![Installation and Usage Demo](assets/gifs/palette.png) -->
 
 ## 🌟 Features
 
@@ -28,7 +41,7 @@
 Hecate automatically extracts colors from your wallpaper and applies them across your entire system. Watch your interface transform with every wallpaper change.
 
 ### 🚀 **Smart Installation**
-Interactive setup that asks for your preferences upfront - no more editing config files manually.
+Interactive setup that asks for your preferences upfront - so less editing config files manuall 🤌
 
 ### 🔧 **Multi-Shell Support**
 Choose your preferred shell during installation:
@@ -84,11 +97,13 @@ Hecate provides beautiful, coordinated configurations for:
 
 ### Prerequisites
 
-> **Note:** Hecate will detect your package manager automatically (pacman, yay, paru)
+> [!Note]
+> Hecate will detect your package manager automatically (pacman, yay, paru)
+> if paru is installed on system the script selects paru to install packages
 
 ```bash
-# Ensure you have git installed
-sudo pacman -S git
+# Ensure you have git and gum installed
+sudo pacman -S git gum
 ```
 
 ### Quick Install
@@ -185,10 +200,10 @@ All configuration files are located in `~/.config/`:
 
 Hecate uses **Wallust** to intelligently extract colors from your wallpaper and applies them to:
 
-- 🎯 **Rofi** - Application launcher themes
-- 📊 **Waybar** - Status bar colors
-- 🔔 **SwayNC** - Notification styling
-- 🚪 **Wlogout** - Logout menu appearance
+- **Rofi** - Application launcher themes
+- **Waybar** - Status bar colors
+- **SwayNC** - Notification styling
+- **Wlogout** - Logout menu appearance
 
 Simply change your wallpaper, and watch your entire desktop environment transform!
 
@@ -196,9 +211,12 @@ Simply change your wallpaper, and watch your entire desktop environment transfor
 
 ## 🔨 Post-Installation
 
-### Plugin Management
+ Setup your wallpaper by pressing  `SUPER+CTRL+W` and see the magic happen
 
-After installation, Hecate creates a plugin installer script:
+> [!NOTE]
+> Hyprland Plugin's have been removed from the system cause they break system when hyprland is updated
+
+<!-- After installation, Hecate creates a plugin installer script:
 
 ```bash
 # Install additional shell plugins
@@ -216,7 +234,7 @@ git pull
 
 # Re-run installer (your configs will be preserved)
 ./install.sh
-```
+``` -->
 
 ---
 
@@ -261,11 +279,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🙏 Acknowledgments
+<!-- ## 🙏 Acknowledgments
 
 - [Hyprland](https://hyprland.org) - Amazing wayland compositor
 - [Wallust](https://github.com/explosion-mental/wallust) - Color palette generation
-- All the amazing developers of the supported applications
+- All the amazing developers of the supported applications -->
 
 ---
 

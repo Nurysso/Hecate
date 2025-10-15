@@ -26,18 +26,13 @@ browser=$(awk -F'=' '
     exit
   }
 ' "$CONFIG")
-if [ -z "$terminal" ]; then
-  echo "Error: no terminal found in $CONFIG"
-  exit 1
-fi
 
-# Choose correct command based on terminal
 case "$1" in
 term)
-  echo "$terminal"
+  exec "$terminal"
   ;;
   browser)
-  echo "$browser"
+  exec "$browser"
   ;;
 *)
   echo "huh??"

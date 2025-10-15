@@ -1,6 +1,6 @@
-Hecate 0.4 GOALS
+TODO for next version Hecate 0.4.0 shy eagle
 
-- Install script, install-hyprland-plugins, hecate script work with no error
-- add grub theme selction at installation
-- ask all questions in begining then install everything in one go even for customization
-- add gtk3 theme customization based on wallpaper
+- Add support for fedora and debian based distros
+- Add more waybar style and layouts
+- Curate some wallpaper maybe a seprate repo??
+- Add Widgets even tho eww exists in config the kinda dont work cause of gtk themeing
