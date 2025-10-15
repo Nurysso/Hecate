@@ -4,9 +4,8 @@
 | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
 |  _  | |__| |___ / ___ \| | | |___      > ^ <
 |_| |_|_____\____/_/   \_\_| |_____|
-
- Waybar Dynamic Theme - Generated from Pywal
- Generated: $(date '+%d-%m-%y %H:%M:%S') */
+*/
+@import "./color.css";
 
 /* ==================== FONT & BASE SETTINGS ==================== */
 * {
@@ -18,10 +17,10 @@
 
 /* ==================== WAYBAR WINDOW ==================== */
 window#waybar {
-	background: #15151c;
-	color: #c4c4c6;
+	background: @background;
+	color: @foreground;
 	border: none;
-	border-bottom: 2px solid rgba(75, 125, 194, 0.15);
+	border-bottom: 2px solid @color4_rgba;
 	padding: 4px 12px;
 }
 
@@ -32,7 +31,7 @@ window#waybar.hidden {
 window#waybar.empty,
 window#waybar.empty #window {
 	border: none;
-	background-color: #1b0c11;
+	background-color: @bg-dim;
 }
 
 /* ==================== WORKSPACES ==================== */
@@ -42,7 +41,7 @@ window#waybar.empty #window {
 }
 
 #workspaces button {
-	color: #6f5b62;
+	color: @fg-dim;
 	border-radius: 10px;
 	padding: 4px 12px;
 	margin: 0px 3px;
@@ -53,24 +52,25 @@ window#waybar.empty #window {
 }
 
 #workspaces button:hover {
-	color: #E36039;
+	color: @primary;
 }
 
 #workspaces button.active {
-	color: #c6c2c3;
+	color: @foreground;
 	font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 #workspaces button.active:hover {
-	color: #E36039;
+	color: @primary;
 	font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #workspaces button.urgent {
-	color: #8D242A;
-	background: rgba(141, 36, 42, 0.4);
-	border: 2px solid #8D242A;
+	color: @error;
+	background: @color1_rgba;
+	border: 2px solid @error;
 	animation: urgent-pulse 1s ease-in-out infinite;
 }
 
@@ -107,7 +107,7 @@ window#waybar.empty #window {
 #pulseaudio:hover,
 #custom-swaync:hover,
 #network:hover {
-	color: #E36039;
+	color: @primary;
     background-color: transparent;
 }
 
@@ -116,18 +116,18 @@ window#waybar.empty #window {
 	margin-left: 8px;
 	padding: 4px 12px;
 	font-size: 18px;
-	color: #c6c2c3;
+	color: @foreground;
 	border-radius: 10px;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #custom-dMenu:hover {
-	color: #E36039;
+	color: @primary;
 }
 
 /* ==================== CLOCK ==================== */
 #clock {
-	color: #c6c2c3;
+	color: @foreground;
 	font-weight: 600;
 	padding: 4px 16px;
 	margin: 0px 8px;
@@ -135,97 +135,96 @@ window#waybar.empty #window {
 
 /* ==================== CPU & MEMORY ==================== */
 #cpu {
-	color: #c6c2c3;
+	color: @foreground;
 	font-weight: 500;
 }
 
 #cpu.warning {
-	color: #EDED2D;
+	color: @warning;
 }
 
 #cpu.critical {
-	color: #B01E1E;
+	color: @error;
 	animation: critical-blink 1s ease-in-out infinite;
 }
 
 #memory {
-	color: #c6c2c3;
+	color: @foreground;
 	font-weight: 500;
 }
 
 #memory.warning {
-	color: #EDED2D;
+	color: @warning;
 }
 
 #memory.critical {
-	color: #B01E1E;
+	color: @error;
 	animation: critical-blink 1s ease-in-out infinite;
 }
 
-
 /* ==================== DISK ==================== */
 #disk {
-	color: #c6c2c3;
+	color: @foreground;
 }
 
 /* ==================== TEMPERATURE ==================== */
 #temperature {
-	color: #c6c2c3;
+	color: @foreground;
 }
 
 #temperature.critical {
-	color: #B01E1E;
+	color: @error;
 	animation: critical-blink 1s ease-in-out infinite;
 }
 
 /* ==================== AUDIO ==================== */
 #pulseaudio {
-	color: #c6c2c3;
+	color: @foreground;
 	padding: 4px 10px;
 	font-size: 16px;
 }
 
 #pulseaudio.muted {
-	color: #6f5b62;
+	color: @fg-dim;
 	opacity: 0.6;
 }
 
 #pulseaudio#microphone {
-	color: #c6c2c3;
+	color: @foreground;
 	font-size: 14px;
 }
 
 #pulseaudio#microphone.source-muted {
-	color: #6f5b62;
+	color: @fg-dim;
 	opacity: 0.6;
 }
 
 /* ==================== IDLE INHIBITOR ==================== */
 #idle_inhibitor {
-	color: #6f5b62;
+	color: @fg-dim;
 }
 
 #idle_inhibitor.activated {
-	color: #A9232E;
-	background: rgba(227, 96, 57, 0.15);
+	color: @error;
+	background: @color4_rgba;
 }
 
 /* ==================== POWER PROFILES ==================== */
 #power-profiles-daemon {
-	color: #c3c3c7;
+	color: @foreground;
 }
 
 #power-profiles-daemon.performance {
-	color: #3b9bff;
+	color: @blue;
 }
 
 #power-profiles-daemon.power-saver {
-	color: #e1992a;
+	color: @yellow;
 }
 
 /* ==================== WINDOW TITLE ==================== */
 #window {
-	color: #E36039;
+	color: @primary;
 	font-weight: 600;
 	padding: 4px 16px;
 }
@@ -242,13 +241,13 @@ window#waybar.empty #window {
 
 /* ==================== NOTIFICATIONS ==================== */
 #custom-swaync {
-	color: #c6c2c3;
+	color: @foreground;
 	font-size: 16px;
 }
 
 /* ==================== POWER BUTTON ==================== */
 #custom-power {
-	color: #c6c2c3;
+	color: @foreground;
 	padding: 4px 12px;
 	margin: 0px 4px;
 	font-size: 16px;
@@ -258,7 +257,7 @@ window#waybar.empty #window {
 }
 
 #custom-power:hover {
-	color: #8D242A;
+	color: @error;
 }
 
 /* ==================== TRAY ==================== */
@@ -272,52 +271,52 @@ window#waybar.empty #window {
 
 #tray > .needs-attention {
 	-gtk-icon-effect: highlight;
-	background: rgba(141, 36, 42, 0.4);
+	background: @color1_rgba;
 	border-radius: 6px;
 }
 
 #tray menu {
-	background: #1b0c11;
-	color: #c6c2c3;
-	border: 1px solid rgba(227, 96, 57, 0.15);
+	background: @bg-dim;
+	color: @foreground;
+	border: 1px solid @color4_rgba;
 	border-radius: 8px;
 	padding: 4px;
 }
 
 /* ==================== NETWORK ==================== */
 #network {
-	color: #c6c2c3;
+	color: @foreground;
 	font-size: 16px;
 	padding: 4px 10px;
 }
 
 #network.connected {
-	color: #A9232E;
+	color: @success;
 }
 
 #network.disconnected {
-	color: #8D242A;
+	color: @error;
 	opacity: 0.6;
 }
 
 #network.disabled {
-	color: #6f5b62;
+	color: @fg-dim;
 	opacity: 0.5;
 }
 
 /* ==================== BLUETOOTH ==================== */
 #bluetooth {
-	color: #c6c2c3;
+	color: @foreground;
 	font-size: 16px;
 	padding: 4px 10px;
 }
 
 #bluetooth.connected {
-	color: #E36039;
+	color: @accent;
 }
 
 #bluetooth.disabled {
-	color: #6f5b62;
+	color: @fg-dim;
 	opacity: 0.5;
 }
 
@@ -326,7 +325,7 @@ window#waybar.empty #window {
 	padding: 2px 8px;
 	border-radius: 10px;
 	margin: 2px 4px;
-	box-shadow: 0 2px 8px rgba(27, 12, 17, 0.2);
+	box-shadow: 0 2px 8px @bg_dark;
 }
 
 #taskbar button {
@@ -338,14 +337,14 @@ window#waybar.empty #window {
 }
 
 #taskbar button.urgent {
-	background: rgba(141, 36, 42, 0.4);
-	border: 2px solid #8D242A;
+	background: @color1_rgba;
+	border: 2px solid @error;
 	animation: urgent-pulse 1s ease-in-out infinite;
 }
 
 #taskbar button.minimized {
 	opacity: 0.5;
-	background: rgba(27, 12, 17, 0.2);
+	background: @bg_rgba_dim;
 }
 
 #taskbar.empty {
@@ -366,14 +365,14 @@ window#waybar.empty #window {
 
 /* ==================== TOOLTIPS ==================== */
 tooltip {
-	background: #1b0c11;
-	color: #c6c2c3;
-	border: 1px solid rgba(227, 96, 57, 0.4);
+	background: @bg-dim;
+	color: @foreground;
+	border: 1px solid @color4_rgba_hover;
 	border-radius: 8px;
 	padding: 8px 12px;
 	font-size: 12px;
 }
 
 tooltip label {
-	color: #c6c2c3;
+	color: @foreground;
 }

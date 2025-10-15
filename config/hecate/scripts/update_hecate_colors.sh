@@ -10,8 +10,7 @@ HECATE_DIR="$HOME/.config/hecate"
 # Component CSS files that will import hecate.css
 WAYBAR_CSS="$HOME/.config/waybar/color.css"
 SWAYNC_CSS="$HOME/.config/swaync/color.css"
-WLOGOUT_CSS="$HOME/.config/wlogout/color.css"
-ROFI_RASI="$HOME/.config/rofi/wallust/colors-rofi.rasi"
+ROFI_RASI="$HOME/.config/rofi/theme/colors-rofi.rasi"
 
 # Verify dependencies
 if [ ! -f "$COLOR_FILE" ]; then

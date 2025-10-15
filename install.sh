@@ -44,10 +44,10 @@ check_gum() {
     echo "Arch Linux:"
     echo "  sudo pacman -S gum"
     echo ""
-    echo "Fedora:"
-    echo "  sudo dnf install gum"
-    echo ""
-    echo "Or visit: https://github.com/charmbracelet/gum"
+    # echo "Fedora:"
+    # echo "  sudo dnf install gum"
+    # echo ""
+    # echo "Or visit: https://github.com/charmbracelet/gum"
     exit 1
   fi
 }
@@ -65,6 +65,7 @@ check_OS() {
       gum style --foreground 220 --bold "⚠️ Warning: Script has not been tested on Fedora!"
       gum style --foreground 220 "Proceed at your own risk or follow the Fedora guide if available at https://github.com/Aelune/Hecate/tree/main/documentation/install-fedora.md"
       OS="fedora"
+      exit 1
       ;;
     ubuntu | debian | pop | linuxmint)
       gum style --foreground 196 --bold "❌ Error: Ubuntu/Debian-based OS detected!"
@@ -97,11 +98,11 @@ get_packageManager() {
     fi
     ;;
   fedora)
-    if ! gum confirm "Do you want to continue on Fedora? Its not tested"; then
-      gum style --foreground 196 "Aborting installation on Fedora."
+    # if ! gum confirm "Do you want to continue on Fedora? Its not tested"; then
+    #   gum style --foreground 196 "Aborting installation on Fedora."
+    # fi
+    # PACKAGE_MANAGER="dnf"
       exit 1
-    fi
-    PACKAGE_MANAGER="dnf"
     ;;
   *)
     gum style --foreground 196 --bold "Error: No supported OS detected for package management!"
@@ -468,7 +469,6 @@ add_gamer_packages() {
   fi
 }
 
-# Main package installation function with proper error handling
 install_packages() {
   gum style --border double --padding "1 2" --border-foreground 212 "Installing Packages"
 
@@ -484,15 +484,25 @@ install_packages() {
   paru | yay)
     gum style --foreground 220 "Installing packages with $PACKAGE_MANAGER..."
 
-    # Try to install all packages at once, but don't exit on error
+    # Try to install all packages at once, never exit on error
     set +e
     $PACKAGE_MANAGER -S --needed --noconfirm "${INSTALL_PACKAGES[@]}" 2>&1 | tee /tmp/hecate_install.log
+    local install_exit_code=$?
     set -e
 
-    # Check which packages actually installed
+    # Check if all packages were already up to date
+    if grep -q "there is nothing to do" /tmp/hecate_install.log 2>/dev/null || \
+       grep -q "is up to date -- skipping" /tmp/hecate_install.log 2>/dev/null; then
+      gum style --foreground 82 "✓ All packages are already installed and up to date!"
+      echo ""
+      return 0
+    fi
+
+    # Always check which packages are actually installed, regardless of exit code
     local success_count=0
     FAILED_PACKAGES=()
 
+    gum style --foreground 220 "Verifying package installation..."
     for pkg in "${INSTALL_PACKAGES[@]}"; do
       if pacman -Q "$pkg" &>/dev/null; then
         ((success_count++))
@@ -503,29 +513,44 @@ install_packages() {
 
     echo ""
     gum style --border double --padding "1 2" --border-foreground 212 "Installation Results"
-    gum style --foreground 82 "✓ Successfully installed: $success_count/${#INSTALL_PACKAGES[@]} packages"
+    gum style --foreground 82 "✓ Verified installed: $success_count/${#INSTALL_PACKAGES[@]} packages"
 
+    # Handle failed packages gracefully
     if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
-      gum style --foreground 196 "✗ Failed packages: ${#FAILED_PACKAGES[@]}"
+      gum style --foreground 196 "✗ Not installed: ${#FAILED_PACKAGES[@]} packages"
       for pkg in "${FAILED_PACKAGES[@]}"; do
         gum style --foreground 196 "  • $pkg"
       done
       echo ""
 
-      # Save failed packages
+      # Save failed packages for later
       local failed_log="$HOME/hecate_failed_packages.txt"
       printf '%s\n' "${FAILED_PACKAGES[@]}" >"$failed_log"
       gum style --foreground 220 "Failed packages saved to: $failed_log"
       gum style --foreground 220 "Install them later with: $PACKAGE_MANAGER -S \$(cat $failed_log)"
       echo ""
 
-      # Don't continue if critical packages failed
+      # Only check if CRITICAL packages failed
       if ! verify_critical_packages_installed; then
-        gum style --foreground 196 "✗ Critical packages failed to install!"
-        gum style --foreground 196 "Cannot continue without these packages."
-        exit 1
+        gum style --foreground 196 "✗ Critical packages are missing!"
+
+        if gum confirm "Some critical packages failed. Continue anyway? (May cause issues)"; then
+          gum style --foreground 220 "⚠ Continuing with missing critical packages..."
+          return 0
+        else
+          gum style --foreground 196 "Installation aborted by user"
+          exit 1
+        fi
+      else
+        gum style --foreground 82 "✓ All critical packages are installed"
+        gum style --foreground 220 "Non-critical packages can be installed later"
       fi
+    else
+      gum style --foreground 82 "✓ All packages installed successfully!"
     fi
+
+    # Always return success to continue the script
+    return 0
     ;;
 
   pacman)
@@ -539,13 +564,21 @@ install_packages() {
     return $?
     ;;
 
-  dnf)
-    set +e
-    gum style --foreground 220 "Installing packages with DNF..."
-    sudo dnf install -y "${INSTALL_PACKAGES[@]}"
-    set -e
-    gum style --foreground 82 "✓ Package installation complete!"
-    ;;
+#   dnf)
+    # set +e
+    # gum style --foreground 220 "Installing packages with DNF..."
+    # sudo dnf install -y "${INSTALL_PACKAGES[@]}"
+    # local dnf_exit=$?
+    # set -e
+
+    # if [ $dnf_exit -eq 0 ]; then
+    #   gum style --foreground 82 "✓ Package installation complete!"
+    # else
+    #   gum style --foreground 220 "⚠ DNF encountered some issues, but continuing..."
+    # fi
+
+    # return 0
+    # ;;
 
   *)
     gum style --foreground 196 "✗ Unsupported package manager: $PACKAGE_MANAGER"
@@ -971,31 +1004,14 @@ EOF
   gum style --foreground 220 "Theme mode: $theme_mode"
 }
 
-# Setup Waybar - verify symlinks exist in waybar folder
+# Setup Waybar and links system colors
 setup_Waybar() {
   gum style --foreground 220 "Configuring waybar..."
-
-  # Verify waybar config directory exists
-  if [ ! -d "$HOME/.config/waybar" ]; then
-    gum style --foreground 196 "✗ Waybar config directory not found!"
-    return 1
-  fi
-
-  # Verify source files exist before creating symlinks
-  if [ ! -f "$HOME/.config/waybar/configs/top" ]; then
-    gum style --foreground 196 "✗ Waybar config source not found: configs/top"
-    return 1
-  fi
-
-  if [ ! -f "$HOME/.config/waybar/style/default.css" ]; then
-    gum style --foreground 196 "✗ Waybar style source not found: style/default.css"
-    return 1
-  fi
-
   # Create symlinks
-  ln -sf "$HOME/.config/waybar/configs/top" "$HOME/.config/waybar/config"
-  ln -sf "$HOME/.config/waybar/style/default.css" "$HOME/.config/waybar/style.css"
-
+  ln -s ~/.config/waybar/style/default.css ~/.config/waybar/style.css
+  ln -s ~/.config/waybar/configs/top ~/.config/waybar/config
+  ln -s ~/.config/hecate/hecate.css ~/.config/waybar/color.css
+  ln -s ~/.config/hecate/hecate.css ~/.config/swaync/color.css
   gum style --foreground 82 "✓ Waybar configured!"
 }
 
@@ -1146,6 +1162,8 @@ main() {
   # Ask all user preferences
   ask_preferences
 
+  # Install configuration files
+  move_config
   # Build complete package list
   build_package_list
 
@@ -1161,13 +1179,8 @@ main() {
   # Setup shell plugins
   setup_shell_plugins
 
-  # Install configuration files
-  move_config
-
   # Setup Waybar symlinks
-  if ! setup_Waybar; then
-    gum style --foreground 220 "⚠ Waybar setup had issues, but continuing..."
-  fi
+  setup_Waybar
 
   build_preferd_app_keybind
   create_hecate_config
