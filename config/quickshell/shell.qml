@@ -1,12 +1,12 @@
 import Quickshell
 import Quickshell.Wayland
-import "widgets"
+import "widgets" as Widgets
 
 ShellRoot {
 
-     ClockWidget {}
-     QuickAppsWidget {}
-     AudioWidget {}
-     SystemInfoWidget {}
-     // WeatherWidget {}
+     Widgets.ClockWidget {}
+     Widgets.QuickAppsWidget {}
+     Widgets.AudioWidget {}
+     Widgets.SystemInfoWidget {}
+//   Widgets.WeatherWidget {}
 }

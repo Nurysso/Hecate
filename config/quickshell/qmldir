@@ -1,0 +1,6 @@
+module widgets
+ClockWidget 1.0
+AudioWidget 1.0
+QuickAppsWidget 1.0
+WeatherWidget 1.0
+SystemInfoWidget 1.0

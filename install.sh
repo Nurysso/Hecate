@@ -321,7 +321,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - removed browser from here since we handle it separately
-  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim neovim nano webkit2gtk)
+  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim neovim nano webkit2gtk)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -840,8 +840,8 @@ move_config() {
       alacritty | foot | ghostty | kitty)
         if [ "$folder_name" = "$USER_TERMINAL" ]; then
           gum style --foreground 82 "Installing $folder_name config..."
-          rm -rf "$CONFIGDIR/$folder_name"
-          cp -r "$folder" "$CONFIGDIR/"
+          # rm -rf "$CONFIGDIR/$folder_name"
+          cp -rT "$folder" "$CONFIGDIR/"
         fi
         ;;
       zsh)
@@ -866,8 +866,8 @@ move_config() {
       *)
         # Install other configs (hyprland, waybar, etc.)
         gum style --foreground 82 "Installing $folder_name..."
-        rm -rf "$CONFIGDIR/$folder_name"
-        cp -r "$folder" "$CONFIGDIR/"
+        # rm -rf "$CONFIGDIR/$folder_name"
+        cp -rT "$folder" "$CONFIGDIR/"
         ;;
       esac
     fi
@@ -885,6 +885,18 @@ move_config() {
     fi
   else
     gum style --foreground 220 "⚠ Pulse build directory not found"
+  fi
+  if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ]; then
+    gum style --foreground 82 "Installing Hecate-Help..."
+    if [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" ]; then
+      cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" "$HOME/.local/bin/Hecate-Help"
+      chmod +x "$HOME/.local/bin/Hecate-Help"
+      gum style --foreground 82 "✓ Hecate-Help installed to ~/.local/bin/Pulse"
+    else
+      gum style --foreground 220 "⚠ Hecate-Help binary not found at expected location"
+    fi
+  else
+    gum style --foreground 220 "⚠ Hecate-Help build directory not found"
   fi
 
   # Install hecate CLI tool
@@ -936,8 +948,6 @@ EOF
 
 build_quickApps(){
       gum style --border double --padding "1 2" --border-foreground 212 "Configuring Widgets"
-
-  mkdir -p ~/.config/hecate/quickapps.conf
 
   cat >~/.config/hecate/quickapps.conf <<EOF
 # Quick Apps Configuration
@@ -1008,13 +1018,28 @@ EOF
 # Setup Waybar and links system colors
 setup_Waybar() {
   gum style --foreground 220 "Configuring waybar..."
-  # Create symlinks
-  ln -s ~/.config/waybar/style/default.css ~/.config/waybar/style.css
-  ln -s ~/.config/waybar/configs/top ~/.config/waybar/config
-  ln -s ~/.config/hecate/hecate.css ~/.config/waybar/color.css
-  ln -s ~/.config/hecate/hecate.css ~/.config/swaync/color.css
+
+  # Define the symlink paths
+  WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
+  WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
+  WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
+  SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
+
+  # Remove existing symlinks if they exist
+  [ -L "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
+  [ -L "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
+  [ -L "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
+  [ -L "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
+
+  # Create new symlinks
+  ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
+  ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
+  ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
+  ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
+
   gum style --foreground 82 "✓ Waybar configured!"
 }
+
 
 # Set default shell
 set_default_shell() {
@@ -1084,6 +1109,19 @@ configure_sddm_theme() {
     fi
   else
     gum style --foreground 220 "Skipping SDDM theme installation"
+  fi
+}
+
+post_install(){
+  # Convert $XDG_SESSION_DESKTOP to lowercase and compare
+  if [[ "${XDG_SESSION_DESKTOP,,}" == "hyprland" ]]; then
+    echo "Hyprland session detected."
+    # Insert commands specific to Hyprland here
+    hyprctl reload
+    ~/.config/hypr/scripts/launch-widgets.sh
+    ~/.config/hypr/scripts/launch-waybar.sh
+  else
+    echo "Not in a Hyprland session. Skipping Hyprland-specific commands."
   fi
 }
 
@@ -1163,8 +1201,7 @@ main() {
   # Ask all user preferences
   ask_preferences
 
-  # Install configuration files
-  move_config
+
   # Build complete package list
   build_package_list
 
@@ -1173,7 +1210,8 @@ main() {
 
   # Verify critical packages installed successfully
   verify_critical_packages
-
+  # Install configuration files
+  move_config
   # Enable SDDM if it was installed
   enable_sddm
 
@@ -1192,7 +1230,7 @@ main() {
 
   # Configure SDDM theme
   configure_sddm_theme
-
+  post_install
   # Completion message
   echo ""
   gum style \
