@@ -20,19 +20,27 @@ tmp/
 .env.*
 
 # ─────────────────────────────
-# System Files
+# Go + Wails
 # ─────────────────────────────
-version.txt
-deps-used.md
-install-script-idea.txt
+# Build outputs
+/apps/**/frontend/wailsjs/
+dist/
+
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
 
 # ─────────────────────────────
 # Go + Wails
 # ─────────────────────────────
 # Build outputs
-/apps/system-visualizer/front end/wailsjs/
+/apps/**/frontend/wailsjs/
 dist/
-bin/
+
+# Binaries & temporary build artifacts
 *.exe
 *.dll
 *.so
@@ -41,21 +49,21 @@ bin/
 *.out
 
 # Go module/vendor cache
-/apps/system-visualizer/vendor/
-/apps/system-visualizer/go.sum
-/apps/system-visualizer/wails.json.md5
+/apps/**/vendor/
+/apps/**/go.sum
+/apps/**/wails.json.md5
 
-# Wails specific
-/apps/system-visualizer/frontend/package.json.md5
-/apps/system-visualizer/build-mac*
-/apps/system-visualizer/build-windows*
+# Wails-specific build metadata
+/apps/**/frontend/package.json.md5
+/apps/**/build-mac*
+/apps/**/build-windows*
 
 # ─────────────────────────────
 # Node / React / Vite frontend
 # ─────────────────────────────
-/apps/system-visualizer/frontend/node_modules/
-/apps/system-visualizer/frontend/dist/
-/apps/system-visualizer/frontend/.vite/
+/apps/**/frontend/node_modules/
+/apps/**/frontend/dist/
+/apps/**/frontend/.vite/
 *.tsbuildinfo
 
 # ─────────────────────────────

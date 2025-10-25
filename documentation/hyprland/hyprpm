@@ -1,6 +1,0 @@
-❯ hyprpm update
-
-❯ hyprpm add https://github.com/hyprwm/hyprland-plugins
-❯ hyprpm add https://github.com/KZDKM/Hyprspace.git
-❯ hyprpm enable hyprfocus
-❯ hyprpm enable Hyprspace

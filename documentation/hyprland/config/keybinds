@@ -1,9 +1,0 @@
-
-
-
-# Toggle Waybar Visibility
-# This command sends the SIGUSR1 signal to the Waybar process.
-# Waybar is configured to toggle its visibility (hide/show) when it receives SIGUSR1.
-# It does NOT terminate the process — it just tells Waybar to hide or show itself.
-
-bind = SUPER CTRL ALT, B, exec, pkill -SIGUSR1 waybar

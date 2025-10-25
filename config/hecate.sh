@@ -378,8 +378,22 @@ show_help() {
   gum style --foreground 196 "And probably some broken keybindings"
 }
 
+show_term() {
+    # Use get_config_value to safely extract terminal
+    terminal=$(get_config_value "term")
+
+    # Fallback if terminal is empty
+    if [ -z "$terminal" ]; then
+        notify-send "error due to: $terminal not found "
+    fi
+
+    echo "$terminal"
+}
 # Main command handler
 case "${1:-help}" in
+    term)
+        show_term
+        ;;
 startup)
   startup_check
   ;;

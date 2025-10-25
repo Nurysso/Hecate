@@ -321,7 +321,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - removed browser from here since we handle it separately
-  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim neovim nano)
+  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim neovim nano webkit2gtk)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -564,21 +564,7 @@ install_packages() {
     return $?
     ;;
 
-#   dnf)
-    # set +e
-    # gum style --foreground 220 "Installing packages with DNF..."
-    # sudo dnf install -y "${INSTALL_PACKAGES[@]}"
-    # local dnf_exit=$?
-    # set -e
 
-    # if [ $dnf_exit -eq 0 ]; then
-    #   gum style --foreground 82 "✓ Package installation complete!"
-    # else
-    #   gum style --foreground 220 "⚠ DNF encountered some issues, but continuing..."
-    # fi
-
-    # return 0
-    # ;;
 
   *)
     gum style --foreground 196 "✗ Unsupported package manager: $PACKAGE_MANAGER"
@@ -948,6 +934,21 @@ EOF
   [ -n "$USER_BROWSER_DISPLAY" ] && gum style --foreground 220 "Browser: $USER_BROWSER_DISPLAY"
 }
 
+build_quickApps(){
+      gum style --border double --padding "1 2" --border-foreground 212 "Configuring Widgets"
+
+  mkdir -p ~/.config/hecate/quickapps.conf
+
+  cat >~/.config/hecate/quickapps.conf <<EOF
+# Quick Apps Configuration
+# Syntax name=command
+# Max 12 characters in name
+Browser=$USER_BROWSER_EXEC
+Terminal=$USER_TERMINAL
+Files=dolphin
+EOF
+    gum style --foreground 82 "✓ widget configured!"
+}
 # Create Hecate configuration file
 create_hecate_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Creating Hecate Configuration"
@@ -1183,6 +1184,7 @@ main() {
   setup_Waybar
 
   build_preferd_app_keybind
+  build_quickApps
   create_hecate_config
 
   # Set default shell
