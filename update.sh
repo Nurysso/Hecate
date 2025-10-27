@@ -573,8 +573,7 @@ main() {
   check_gum
   check_hecate_installed
   check_OS
-  get_packageManager
-
+  
   echo ""
 
   # Check versions and get confirmation
