@@ -140,22 +140,6 @@ check_OS() {
   fi
 }
 
-# Get package manager
-get_packageManager() {
-  if command -v paru &>/dev/null; then
-    PACKAGE_MANAGER="paru"
-  elif command -v yay &>/dev/null; then
-    PACKAGE_MANAGER="yay"
-  elif command -v pacman &>/dev/null; then
-    PACKAGE_MANAGER="pacman"
-  else
-    gum style --foreground 196 "Error: No supported package manager found!"
-    exit 1
-  fi
-
-  gum style --foreground 82 "✓ Package Manager: $PACKAGE_MANAGER"
-}
-
 # Clone dotfiles
 clone_dotfiles() {
   gum style --border double --padding "1 2" --border-foreground 212 "Cloning Hecate Dotfiles"
@@ -366,13 +350,15 @@ verify_critical_packages_installed() {
     "$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync"
     "hyprlock" "hypridle" "wallust" "starship" "wlogout"
     "grim" "wl-clipboard" "webkit2gtk" "quickshell-git"
-    "python-pywal" "fastfetch" "matugen" "waypaper"
+    "python-pywal" "fastfetch" "matugen-bin" "waypaper"
   )
   local missing_critical=()
 
   for pkg in "${critical_packages[@]}"; do
-    if ! command -v "$pkg" &>/dev/null && ! pacman -Q "$pkg" &>/dev/null 2>&1; then
-      missing_critical+=("$pkg")
+    if ! command -v "$pkg" &>/dev/null; then
+      if ! pacman -Q "$pkg" &>/dev/null 2>&1 && ! paru -Q "$pkg" &>/dev/null 2>&1; then
+        missing_critical+=("$pkg")
+      fi
     fi
   done
 
@@ -382,11 +368,20 @@ verify_critical_packages_installed() {
       gum style --foreground 196 "  • $pkg"
     done
 
-    gum confirm "Install missing packages now?" && sudo pacman -S --needed "${missing_critical[@]}" || return 1
+    if gum confirm "Install missing packages now?"; then
+      if command -v paru &>/dev/null; then
+        paru -S --needed "${missing_critical[@]}"
+      else
+        sudo pacman -S --needed "${missing_critical[@]}"
+      fi
+    else
+      return 1
+    fi
   fi
 
   return 0
 }
+
 
 # Install updated config files
 install_config() {
