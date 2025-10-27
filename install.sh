@@ -889,7 +889,7 @@ move_config() {
   if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ]; then
     gum style --foreground 82 "Installing Hecate-Help..."
     if [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" ]; then
-      cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" "$HOME/.local/bin/Hecate-Help"
+      cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" "$HOME/.local/bin/hecate-help"
       chmod +x "$HOME/.local/bin/Hecate-Help"
       gum style --foreground 82 "✓ Hecate-Help installed to ~/.local/bin/Pulse"
     else
