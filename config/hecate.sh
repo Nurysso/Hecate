@@ -217,58 +217,53 @@ update_hecate() {
   gum style --foreground 12 --bold "it does nothing for now"
 
   # # Check network first
-  # if ! check_network "true"; then
-  # 	gum style --foreground 196 "✗ Cannot update: No network connection"
-  # 	gum style --foreground 220 "Can't update without internet. That's just science."
-  # 	send_notification "Hecate Update Failed" "No network = no update. Pretty simple." "critical"
-  # 	exit 1
-  # fi
+  if ! check_network "true"; then
+  	gum style --foreground 196 "✗ Cannot update: No network connection"
+  	gum style --foreground 220 "Can't update without internet. That's just science."
+  	send_notification "Hecate Update Failed" "No network = no update. Pretty simple." "critical"
+  	exit 1
+  fi
 
-  # # Download update.sh
-  # local update_script="/tmp/hecate-update.sh"
+  # Download update.sh
+  local update_script="/tmp/hecate-update.sh"
 
-  # gum spin --spinner dot --title "Downloading update script from the cloud..." -- \
-  # 	curl -fsSL "$UPDATE_SCRIPT_URL" -o "$update_script"
+  gum spin --spinner dot --title "Downloading update script from the cloud..." -- \
+  	curl -fsSL "$UPDATE_SCRIPT_URL" -o "$update_script"
 
-  # if [ -f "$update_script" ]; then
-  # 	chmod +x "$update_script"
-  # 	gum style --foreground 82 "✓ Update script acquired"
-  # 	gum style --foreground 220 "About to run mystery code from the internet"
-  # 	gum style --foreground 220 "What could possibly go wrong?"
-  # 	echo ""
+  if [ -f "$update_script" ]; then
+  	chmod +x "$update_script"
+  	gum style --foreground 82 "✓ Update script acquired"
+  	gum style --foreground 220 "About to run mystery code from the internet"
+  	gum style --foreground 220 "What could possibly go wrong?"
+  	echo ""
 
-  # 	sleep 1
+  	sleep 1
 
-  # 	# Run update script
-  # 	gum style --foreground 220 "Running update script..."
-  # 	bash "$update_script"
+  	# Run update script
+  	gum style --foreground 220 "Running update script..."
+  	bash "$update_script"
 
-  # 	# Clean up
-  # 	rm -f "$update_script"
+  	# Clean up
+  	rm -f "$update_script"
+  	echo ""
+  	gum style \
+  		--foreground 82 --border-foreground 82 --border double \
+  		--align center --width 50 --margin "1 2" --padding "2 4" \
+  		'✓ UPDATE COMPLETE!' \
+  		'' \
+  		'Your configs are now 0.1% better' \
+  		'Or worse. Who knows?'
 
-  # 	# Rewrite config with new version
-  # 	local new_version=$(get_remote_version)
-  # 	rewrite_config "$new_version"
-
-  # 	echo ""
-  # 	gum style \
-  # 		--foreground 82 --border-foreground 82 --border double \
-  # 		--align center --width 50 --margin "1 2" --padding "2 4" \
-  # 		'✓ UPDATE COMPLETE!' \
-  # 		'' \
-  # 		'Your configs are now 0.1% better' \
-  # 		'Or worse. Who knows?'
-
-  # 	send_notification "Hecate Updated" \
-  # 		"Successfully updated to v$new_version\n\nTime to find all the new bugs!" \
-  # 		"normal"
-  # else
-  # 	gum style --foreground 196 "✗ Failed to download update script"
-  # 	gum style --foreground 220 "GitHub refused our download request"
-  # 	gum style --foreground 220 "Maybe they know something we don't"
-  # 	send_notification "Hecate Update Failed" "Couldn't download update. Try again later?" "critical"
-  # 	exit 1
-  # fi
+  	send_notification "Hecate Updated" \
+  		"Successfully updated to v$new_version\n\nTime to find all the new bugs!" \
+  		"normal"
+  else
+  	gum style --foreground 196 "✗ Failed to download update script"
+  	gum style --foreground 220 "GitHub refused our download request"
+  	gum style --foreground 220 "Maybe they know something we don't"
+  	send_notification "Hecate Update Failed" "Couldn't download update. Try again later?" "critical"
+  	exit 1
+  fi
 }
 
 # Toggle theme mode

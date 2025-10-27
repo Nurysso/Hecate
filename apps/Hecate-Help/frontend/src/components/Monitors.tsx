@@ -456,7 +456,7 @@ const MonitorsView: React.FC = () => {
 
       <Select
         value={selectedMonitorData.resolution}
-        onValueChange={(value: number) =>
+        onValueChange={(value: string) =>
           updateMonitorProperty(selectedMonitorData.name, 'resolution', value)
         }
       >

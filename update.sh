@@ -249,6 +249,118 @@ backup_config() {
   sleep 2
 }
 
+# Move config files
+move_config() {
+  gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
+
+  if [ ! -d "$HECATEDIR/config" ]; then
+    gum style --foreground 196 "Error: Config directory not found!"
+    exit 1
+  fi
+
+  mkdir -p "$CONFIGDIR"
+  mkdir -p "$HOME/.local/bin"
+
+  for folder in "$HECATEDIR/config"/*; do
+    if [ -d "$folder" ]; then
+      local folder_name=$(basename "$folder")
+
+      # Only install selected terminal config
+      case "$folder_name" in
+      alacritty | foot | ghostty | kitty)
+        if [ "$folder_name" = "$USER_TERMINAL" ]; then
+          gum style --foreground 82 "Installing $folder_name config..."
+          # rm -rf "$CONFIGDIR/$folder_name"
+          cp -rT "$folder" "$CONFIGDIR/"
+        fi
+        ;;
+      zsh)
+        if [ "$USER_SHELL" = "zsh" ] && [ -f "$folder/.zshrc" ]; then
+          gum style --foreground 82 "Installing .zshrc..."
+          cp "$folder/.zshrc" "$HOME/.zshrc"
+        fi
+        ;;
+      bash)
+        if [ "$USER_SHELL" = "bash" ] && [ -f "$folder/.bashrc" ]; then
+          gum style --foreground 82 "Installing .bashrc..."
+          cp "$folder/.bashrc" "$HOME/.bashrc"
+        fi
+        ;;
+      fish)
+        if [ "$USER_SHELL" = "fish" ]; then
+          gum style --foreground 82 "Installing fish config..."
+          mkdir -p "$CONFIGDIR/fish"
+          cp -r "$folder/"* "$CONFIGDIR/fish/"
+        fi
+        ;;
+      *)
+        # Install other configs (hyprland, waybar, etc.)
+        gum style --foreground 82 "Installing $folder_name..."
+        # rm -rf "$CONFIGDIR/$folder_name"
+        cp -rT "$folder" "$CONFIGDIR/"
+        ;;
+      esac
+    fi
+  done
+
+  # Install apps from apps directory
+  if [ -d "$HECATEAPPSDIR/Pulse/build/bin" ]; then
+    gum style --foreground 82 "Installing Pulse..."
+    if [ -f "$HECATEAPPSDIR/Pulse/build/bin/Pulse" ]; then
+      rm -f "$HOME/.local/bin/Pulse"
+      cp "$HECATEAPPSDIR/Pulse/build/bin/Pulse" "$HOME/.local/bin/Pulse"
+      chmod +x "$HOME/.local/bin/Pulse"
+      gum style --foreground 82 "✓ Pulse installed to ~/.local/bin/Pulse"
+    else
+      gum style --foreground 220 "⚠ Pulse binary not found at expected location"
+    fi
+  else
+    gum style --foreground 220 "⚠ Pulse build directory not found"
+  fi
+  if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ]; then
+    gum style --foreground 82 "Installing Hecate-Help..."
+    if [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" ]; then
+      rm -f "$HOME/.local/bin/Hecate-Help"
+      cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" "$HOME/.local/bin/Hecate-Help"
+      chmod +x "$HOME/.local/bin/Hecate-Help"
+      gum style --foreground 82 "✓ Hecate-Help installed to ~/.local/bin/Pulse"
+    else
+      gum style --foreground 220 "⚠ Hecate-Help binary not found at expected location"
+    fi
+  else
+    gum style --foreground 220 "⚠ Hecate-Help build directory not found"
+  fi
+
+  # Install hecate CLI tool
+  if [ -f "$HECATEDIR/config/hecate.sh" ]; then
+    gum style --foreground 82 "Installing hecate CLI tool..."
+    rm -f "$HOME/.local/bin/hecate"
+    cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
+    chmod +x "$HOME/.local/bin/hecate"
+    gum style --foreground 82 "✓ hecate command installed to ~/.local/bin/hecate"
+  else
+    gum style --foreground 220 "⚠ hecate.sh not found in config directory"
+  fi
+
+  # Install Starship config
+  if [ -f "$HECATEDIR/config/starship/starship.toml" ]; then
+    gum style --foreground 82 "Installing Starship config..."
+    cp "$HECATEDIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
+    gum style --foreground 82 "✓ Starship config installed"
+  else
+    gum style --foreground 220 "⚠ Starship config not found"
+  fi
+
+  # Install Hyprland plugin installer if it exists
+  #   if [ -f "$HECATEDIR/config/install-hyprland-plugins.sh" ]; then
+  #     gum style --foreground 82 "Installing Hyprland plugin installer..."
+  #     cp "$HECATEDIR/config/install-hyprland-plugins.sh" "$HOME/.local/bin/install-hyprland-plugins"
+  #     chmod +x "$HOME/.local/bin/install-hyprland-plugins"
+  #     gum style --foreground 82 "✓ Plugin installer: install-hyprland-plugins"
+  #   fi
+
+  gum style --foreground 82 "✓ Configuration files installed successfully!"
+}
 verify_critical_packages_installed() {
   local critical_packages=(
     "$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync"
@@ -366,7 +478,7 @@ install_config() {
 # Update Hecate config file with new version
 update_hecate_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Updating Hecate Configuration"
-  local update_date==$(date +%Y-%m-%d)
+  local update_date=$(date +%Y-%m-%d)
   set_config_value "version" "$remote_version"
   set_config_value "last_update" "$update_date"
 

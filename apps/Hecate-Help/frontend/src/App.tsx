@@ -15,7 +15,7 @@ interface MenuItem {
 }
 
 const App: React.FC = () => {
-  const [activePage, setActivePage] = useState<string>('home');
+  const [activePage, setActivePage] = useState<string>('keybinds');
 
   const menuItems: MenuItem[] = [
     { id: 'home', label: 'Settings', icon: HomeIcon },
