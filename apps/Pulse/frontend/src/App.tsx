@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Cpu, HardDrive, Thermometer, Zap, Clock, List, LucideIcon } from 'lucide-react';
-
+import HecateLoader from './components/loader';
 // Type definitions
 interface GTKColors {
   accentColor: string;
@@ -137,7 +137,7 @@ const SystemMonitor = () => {
     return (
       <div className="w-full h-screen flex items-center justify-center"
            style={{ backgroundColor: '#0f1416', color: '#dee3e6' }}>
-        Loading...
+        <HecateLoader />
       </div>
     );
   }

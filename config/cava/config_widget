@@ -1,0 +1,41 @@
+# CAVA config for AudioWidget.qml
+
+[general]
+bars = 50
+framerate = 60
+autosens = 1
+sensitivity = 100
+lower_cutoff_freq = 50
+higher_cutoff_freq = 10000
+sleep_timer = 0
+
+[input]
+# Try pipewire first (modern), fallback to pulse if needed
+method = pipewire
+source = auto
+
+# Alternative: use pulse if pipewire doesn't work
+# method = pulse
+# source = auto
+
+sample_rate = 44100
+sample_bits = 16
+channels = 2
+
+[output]
+method = raw
+raw_target = /dev/stdout
+data_format = ascii
+ascii_max_range = 100
+bar_delimiter = 59
+frame_delimiter = 10
+channels = mono
+mono_option = average
+
+[smoothing]
+monstercat = 1
+noise_reduction = 77
+
+[color]
+# Colors don't matter for raw output, but keep config valid
+gradient = 0

@@ -310,7 +310,7 @@ show_info() {
   local install_date=$(get_config_value "install_date")
   local last_update=$(get_config_value "last_update")
   local theme_mode=$(get_config_value "mode")
-  local terminal=$(get_config_value "terminal")
+  local terminal=$(get_config_value "term")
   local shell=$(get_config_value "shell")
   local browser=$(get_config_value "browser")
   local profile=$(get_config_value "profile")

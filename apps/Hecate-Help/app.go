@@ -3,16 +3,20 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx  context.Context
+	args []string
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	return &App{}
+	return &App{
+		args: os.Args[1:], // Capture command-line arguments (excluding program name)
+	}
 }
 
 // startup is called at application startup
@@ -41,4 +45,9 @@ func (a *App) shutdown(ctx context.Context) {
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
+}
+
+// GetStartupArgs returns command-line arguments passed to the app
+func (a *App) GetStartupArgs() []string {
+	return a.args
 }

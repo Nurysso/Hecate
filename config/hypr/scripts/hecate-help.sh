@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROGRAM="$HOME/.local/bin/hecate-help"
+PROGRAM="$HOME/.local/bin/hecate-help "
 PID=$(pgrep -x "hecate-help")
 
 if [ -n "$PID" ]; then

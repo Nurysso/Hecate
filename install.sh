@@ -955,7 +955,7 @@ build_quickApps(){
 # Max 12 characters in name
 Browser=$USER_BROWSER_EXEC
 Terminal=$USER_TERMINAL
-Files=dolphin
+Files=thunar
 EOF
     gum style --foreground 82 "✓ widget configured!"
 }

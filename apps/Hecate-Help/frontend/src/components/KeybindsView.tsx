@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, RefreshCw, Edit2 } from 'lucide-react';
-import HecateLoader from './loader';
+import { Search, RefreshCw, Edit2, Info } from 'lucide-react';
+// import HecateLoader from './loader';
+import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 interface Keybind {
   mods: string;
   key: string;
@@ -38,7 +39,7 @@ const loadKeybinds = async () => {
   setError('');
 
   // Declare startTime outside try/catch so it’s always available
-  const startTime = Date.now();
+//   const startTime = Date.now();
 
   try {
     const wailsApp = getWailsRuntime();
@@ -57,9 +58,9 @@ const loadKeybinds = async () => {
     );
   } finally {
     // Ensure loader stays visible for at least 1 second
-    const elapsed = Date.now() - startTime;
-    const remaining = Math.max(0, 1500 - elapsed);
-    await new Promise((resolve) => setTimeout(resolve, remaining));
+    // const elapsed = Date.now() - startTime;
+    // const remaining = Math.max(0, 800 - elapsed);
+    // await new Promise((resolve) => setTimeout(resolve, remaining));
 
     setLoading(false);
   }
@@ -100,8 +101,11 @@ const loadKeybinds = async () => {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: '#0f1416' }}>
-        <HecateLoader />
+       <div className="flex items-center justify-center h-full bg-gray-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-700 border-t-gray-400 mx-auto mb-4"></div>
+          <p className="text-gray-400 text-sm">Loading preferences...</p>
+        </div>
       </div>
     );
   }
@@ -125,7 +129,35 @@ const loadKeybinds = async () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full" style={{ backgroundColor: '#0f1416' }}>
+    <div className="h-full overflow-y-auto bg-[#0f1416]">
+      <div className="p-6 max-w-4xl mx-auto">
+             <div className="mb-6 pb-4 border-b border-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-100 mb-1">Key Binds Configuration</h1>
+              <p className="text-sm text-gray-500">
+                Manage Key Binds
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="ml-2 text-gray-600 hover:text-gray-400 inline-flex items-center">
+                      <Info className="w-3.5 h-3.5" />
+                    </button>
+                  </PopoverTrigger>
+    <PopoverContent className="w-80 bg-gray-900 border-gray-800 text-gray-300 text-sm">
+                    <div className="space-y-2">
+                      <p className="font-medium text-gray-200">How it works</p>
+                      <p>Key Binds mut be a single file located at ~/.config/hypr/configs/keybinds.conf </p>
+              <ul className="space-y-0.5 text-blue-400/80">
+                        <li> start line with "#/"" to create category</li>
+                        <li>start line with "#."" to be completely ignore</li>
+                      </ul>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </p>
+            </div>
+          </div>
+        </div>
       <div className="p-4 border-b" style={{ borderColor: '#1e272b' }}>
         <div className="flex items-center justify-between mb-3 gap-2">
           <div className="relative flex-1 mr-2">
@@ -249,6 +281,7 @@ const loadKeybinds = async () => {
           ))
         )}
       </div>
+    </div>
     </div>
   );
 };
