@@ -1,10 +1,10 @@
 #!/bin/bash
 
-PROGRAM="$HOME/.local/bin/hecate-help"
-PID=$(pgrep -x "hecate-help")
+PROGRAM="$HOME/.local/bin/Hecate-Settings"
+PID=$(pgrep -x "Hecate-Settings")
 
 if [ -n "$PID" ]; then
   kill "$PID"
 else
-  setsid "$PROGRAM" > /dev/null 2>&1 &
+  setsid "$PROGRAM" "$1" > /dev/null 2>&1 &
 fi

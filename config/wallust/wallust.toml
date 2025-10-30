@@ -5,13 +5,7 @@
 # |_| |_|_____\____/_/   \_\_| |_____|
 
 # Wallust Configuration
-backend = "resized"
-color_space = "lch"
-threshold = 10
-palette = "dark16"
-check_contrast = true
-saturation = 15
-brightness = 5
+no_seq = true
 
 [templates]
 hyprland = { template = "hyprland.conf", target = "~/.config/hypr/wallust/wallust-hyprland.conf" }

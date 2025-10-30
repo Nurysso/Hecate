@@ -60,9 +60,11 @@ set_config_value() {
   local value="$2"
   sed -i "s|^$key\s*=.*|$key = \"$value\"|" "$CONFIG_FILE"
 }
+
 current_version=$(get_config_value "version")
 remote_version=$(curl -s "https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt" 2>/dev/null || echo "")
 USER_TERMINAL=$(get_config_value "term")
+USER_SHELL=$(get_config_value "shell")
 
 # Get current and remote versions
 check_versions() {
@@ -90,7 +92,7 @@ show_update_warning() {
   echo ""
   gum style --foreground 220 "This update will:"
   gum style --foreground 220 "  1. Backup your current configuration to:"
-  gum style --foreground 220 "     ~/.config/Hecate-backup/config-[timestamp]"
+  gum style --foreground 220 "     ~/.cache/hecate-backup/update-[timestamp]"
   echo ""
   gum style --foreground 220 "  2. Replace all Hecate configuration files with new versions"
   echo ""
@@ -145,11 +147,14 @@ clone_dotfiles() {
   gum style --border double --padding "1 2" --border-foreground 212 "Cloning Hecate Dotfiles"
 
   if [ -d "$HECATEDIR" ]; then
-    if gum confirm "Hecate directory already exists. move it to backup if you made any changes if not "; then
-      mv "$HECATEDIR" "$CONFIGDIR/Hecate-backup/hecate-$timestamp"
+    if gum confirm "Hecate directory already exists. Move it to backup?"; then
+      local timestamp=$(date +%Y%m%d_%H%M%S)
+      mkdir -p "$HOME/.cache/hecate-backup"
+      mv "$HECATEDIR" "$HOME/.cache/hecate-backup/hecate-source-$timestamp"
+      gum style --foreground 82 "✓ Old Hecate directory moved to backup"
     else
-      exit 0
-      return
+      gum style --foreground 220 "Removing existing Hecate directory..."
+      rm -rf "$HECATEDIR"
     fi
   fi
 
@@ -169,23 +174,34 @@ clone_dotfiles() {
   gum style --foreground 82 "✓ Dotfiles cloned successfully!"
 }
 
-# Backup existing config
+# Backup existing config - FIXED VERSION
 backup_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Creating Backup"
 
   local timestamp=$(date +%Y%m%d_%H%M%S)
-  local backup_dir="$CONFIGDIR/Hecate-backup/config-$timestamp"
+  local backup_dir="$HOME/.cache/hecate-backup/update-$timestamp"
 
   mkdir -p "$backup_dir"
 
-  local USER_SHELL=$(get_config_value "shell")
+  # Get list of folders that exist in Hecate config
+  local hecate_configs=()
+  if [ -d "$HECATEDIR/config" ]; then
+    for folder in "$HECATEDIR/config"/*; do
+      if [ -d "$folder" ]; then
+        local folder_name=$(basename "$folder")
+        # Skip shell configs (zsh, bash, fish) as they're handled separately
+        if [[ ! "$folder_name" =~ ^(zsh|bash|fish)$ ]]; then
+          hecate_configs+=("$folder_name")
+        fi
+      fi
+    done
+  fi
 
-  # Backup main Hecate configs
-  local configs=("hypr" "waybar" "rofi" "swaync" "wlogout" "hecate" "fastfetch" "quickshell" "waypaper" "wallust")
-
-  for config in "${configs[@]}"; do
+  # Backup configs that exist in both Hecate and ~/.config/
+  for config in "${hecate_configs[@]}"; do
     if [ -d "$CONFIGDIR/$config" ]; then
       gum style --foreground 220 "Backing up: $config"
+      mkdir -p "$backup_dir"
       cp -r "$CONFIGDIR/$config" "$backup_dir/"
     fi
   done
@@ -201,13 +217,15 @@ backup_config() {
   zsh)
     if [ -f "$HOME/.zshrc" ]; then
       gum style --foreground 220 "Backing up: .zshrc"
-      cp "$HOME/.zshrc" "$backup_dir/.zshrc"
+      mkdir -p "$backup_dir/zsh"
+      cp "$HOME/.zshrc" "$backup_dir/zsh/.zshrc"
     fi
     ;;
   bash)
     if [ -f "$HOME/.bashrc" ]; then
       gum style --foreground 220 "Backing up: .bashrc"
-      cp "$HOME/.bashrc" "$backup_dir/.bashrc"
+      mkdir -p "$backup_dir/bash"
+      cp "$HOME/.bashrc" "$backup_dir/bash/.bashrc"
     fi
     ;;
   fish)
@@ -221,130 +239,19 @@ backup_config() {
   # Backup starship
   if [ -f "$HOME/.config/starship.toml" ]; then
     gum style --foreground 220 "Backing up: starship.toml"
-    cp "$HOME/.config/starship.toml" "$backup_dir/"
+    mkdir -p "$backup_dir/starship"
+    cp "$HOME/.config/starship.toml" "$backup_dir/starship/"
   fi
 
   gum style --foreground 82 --bold "✓ Backup created at:"
   gum style --foreground 82 "  $backup_dir"
-  echo "$backup_dir" >"$HOME/.config/hecate_last_backup.txt"
+  echo "$backup_dir" >"$HOME/.cache/hecate_last_backup.txt"
 
   echo ""
   gum style --foreground 220 "💡 Tip: Save this path to restore custom changes later!"
   sleep 2
 }
 
-# Move config files
-move_config() {
-  gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
-
-  if [ ! -d "$HECATEDIR/config" ]; then
-    gum style --foreground 196 "Error: Config directory not found!"
-    exit 1
-  fi
-
-  mkdir -p "$CONFIGDIR"
-  mkdir -p "$HOME/.local/bin"
-
-  for folder in "$HECATEDIR/config"/*; do
-    if [ -d "$folder" ]; then
-      local folder_name=$(basename "$folder")
-
-      # Only install selected terminal config
-      case "$folder_name" in
-      alacritty | foot | ghostty | kitty)
-        if [ "$folder_name" = "$USER_TERMINAL" ]; then
-          gum style --foreground 82 "Installing $folder_name config..."
-          # rm -rf "$CONFIGDIR/$folder_name"
-          cp -rT "$folder" "$CONFIGDIR/"
-        fi
-        ;;
-      zsh)
-        if [ "$USER_SHELL" = "zsh" ] && [ -f "$folder/.zshrc" ]; then
-          gum style --foreground 82 "Installing .zshrc..."
-          cp "$folder/.zshrc" "$HOME/.zshrc"
-        fi
-        ;;
-      bash)
-        if [ "$USER_SHELL" = "bash" ] && [ -f "$folder/.bashrc" ]; then
-          gum style --foreground 82 "Installing .bashrc..."
-          cp "$folder/.bashrc" "$HOME/.bashrc"
-        fi
-        ;;
-      fish)
-        if [ "$USER_SHELL" = "fish" ]; then
-          gum style --foreground 82 "Installing fish config..."
-          mkdir -p "$CONFIGDIR/fish"
-          cp -r "$folder/"* "$CONFIGDIR/fish/"
-        fi
-        ;;
-      *)
-        # Install other configs (hyprland, waybar, etc.)
-        gum style --foreground 82 "Installing $folder_name..."
-        # rm -rf "$CONFIGDIR/$folder_name"
-        cp -rT "$folder" "$CONFIGDIR/"
-        ;;
-      esac
-    fi
-  done
-
-  # Install apps from apps directory
-  if [ -d "$HECATEAPPSDIR/Pulse/build/bin" ]; then
-    gum style --foreground 82 "Installing Pulse..."
-    if [ -f "$HECATEAPPSDIR/Pulse/build/bin/Pulse" ]; then
-      rm -f "$HOME/.local/bin/Pulse"
-      cp "$HECATEAPPSDIR/Pulse/build/bin/Pulse" "$HOME/.local/bin/Pulse"
-      chmod +x "$HOME/.local/bin/Pulse"
-      gum style --foreground 82 "✓ Pulse installed to ~/.local/bin/Pulse"
-    else
-      gum style --foreground 220 "⚠ Pulse binary not found at expected location"
-    fi
-  else
-    gum style --foreground 220 "⚠ Pulse build directory not found"
-  fi
-  if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ]; then
-    gum style --foreground 82 "Installing Hecate-Help..."
-    if [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" ]; then
-      rm -f "$HOME/.local/bin/Hecate-Help"
-      cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" "$HOME/.local/bin/Hecate-Help"
-      chmod +x "$HOME/.local/bin/Hecate-Help"
-      gum style --foreground 82 "✓ Hecate-Help installed to ~/.local/bin/Pulse"
-    else
-      gum style --foreground 220 "⚠ Hecate-Help binary not found at expected location"
-    fi
-  else
-    gum style --foreground 220 "⚠ Hecate-Help build directory not found"
-  fi
-
-  # Install hecate CLI tool
-  if [ -f "$HECATEDIR/config/hecate.sh" ]; then
-    gum style --foreground 82 "Installing hecate CLI tool..."
-    rm -f "$HOME/.local/bin/hecate"
-    cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
-    chmod +x "$HOME/.local/bin/hecate"
-    gum style --foreground 82 "✓ hecate command installed to ~/.local/bin/hecate"
-  else
-    gum style --foreground 220 "⚠ hecate.sh not found in config directory"
-  fi
-
-  # Install Starship config
-  if [ -f "$HECATEDIR/config/starship/starship.toml" ]; then
-    gum style --foreground 82 "Installing Starship config..."
-    cp "$HECATEDIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
-    gum style --foreground 82 "✓ Starship config installed"
-  else
-    gum style --foreground 220 "⚠ Starship config not found"
-  fi
-
-  # Install Hyprland plugin installer if it exists
-  #   if [ -f "$HECATEDIR/config/install-hyprland-plugins.sh" ]; then
-  #     gum style --foreground 82 "Installing Hyprland plugin installer..."
-  #     cp "$HECATEDIR/config/install-hyprland-plugins.sh" "$HOME/.local/bin/install-hyprland-plugins"
-  #     chmod +x "$HOME/.local/bin/install-hyprland-plugins"
-  #     gum style --foreground 82 "✓ Plugin installer: install-hyprland-plugins"
-  #   fi
-
-  gum style --foreground 82 "✓ Configuration files installed successfully!"
-}
 verify_critical_packages_installed() {
   local critical_packages=(
     "$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync"
@@ -382,13 +289,9 @@ verify_critical_packages_installed() {
   return 0
 }
 
-
-# Install updated config files
+# Install updated config files - FIXED VERSION
 install_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Installing Updated Configuration"
-
-  USER_TERMINAL=$(get_config_value "term")
-  USER_SHELL=$(get_config_value "shell")
 
   if [ ! -d "$HECATEDIR/config" ]; then
     gum style --foreground 196 "Error: Config directory not found!"
@@ -399,45 +302,55 @@ install_config() {
   mkdir -p "$HOME/.local/bin"
 
   for folder in "$HECATEDIR/config"/*; do
-    folder_name=$(basename "$folder")
+    if [ ! -d "$folder" ]; then
+      continue
+    fi
 
-    # Skip the 'hecate' directory entirely
+    local folder_name=$(basename "$folder")
+
+    # Skip the 'hecate' directory entirely (preserved from user settings)
     [ "$folder_name" = "hecate" ] && continue
 
-    if [ -d "$folder" ]; then
-      case "$folder_name" in
-      alacritty | foot | ghostty | kitty)
-        if [ "$folder_name" = "$USER_TERMINAL" ]; then
-          gum style --foreground 82 "Updating $folder_name config..."
-          cp -rf "$folder/"* "$CONFIGDIR/$folder_name/"
-        fi
-        ;;
-      zsh)
-        if [ "$USER_SHELL" = "zsh" ] && [ -f "$folder/.zshrc" ]; then
-          gum style --foreground 82 "Updating .zshrc..."
-          cp "$folder/.zshrc" "$HOME/.zshrc"
-        fi
-        ;;
-      bash)
-        if [ "$USER_SHELL" = "bash" ] && [ -f "$folder/.bashrc" ]; then
-          gum style --foreground 82 "Updating .bashrc..."
-          cp "$folder/.bashrc" "$HOME/.bashrc"
-        fi
-        ;;
-      fish)
-        if [ "$USER_SHELL" = "fish" ]; then
-          gum style --foreground 82 "Updating fish config..."
-          mkdir -p "$CONFIGDIR/fish"
-          cp -rf "$folder/"* "$CONFIGDIR/fish/"
-        fi
-        ;;
-      *)
-        gum style --foreground 82 "Updating $folder_name..."
+    case "$folder_name" in
+    alacritty | foot | ghostty | kitty)
+      if [ "$folder_name" = "$USER_TERMINAL" ]; then
+        gum style --foreground 82 "Updating $folder_name config..."
         mkdir -p "$CONFIGDIR/$folder_name"
         cp -rf "$folder/"* "$CONFIGDIR/$folder_name/"
-        ;;
-      esac
-    fi
+      fi
+      ;;
+    zsh)
+      if [ "$USER_SHELL" = "zsh" ] && [ -f "$folder/.zshrc" ]; then
+        gum style --foreground 82 "Updating .zshrc..."
+        cp "$folder/.zshrc" "$HOME/.zshrc"
+      fi
+      ;;
+    bash)
+      if [ "$USER_SHELL" = "bash" ] && [ -f "$folder/.bashrc" ]; then
+        gum style --foreground 82 "Updating .bashrc..."
+        cp "$folder/.bashrc" "$HOME/.bashrc"
+      fi
+      ;;
+    fish)
+      if [ "$USER_SHELL" = "fish" ]; then
+        gum style --foreground 82 "Updating fish config..."
+        mkdir -p "$CONFIGDIR/fish"
+        cp -rf "$folder/"* "$CONFIGDIR/fish/"
+      fi
+      ;;
+    starship)
+      if [ -f "$folder/starship.toml" ]; then
+        gum style --foreground 82 "Updating Starship config..."
+        cp "$folder/starship.toml" "$HOME/.config/starship.toml"
+      fi
+      ;;
+    *)
+      # For all other configs, copy contents into ~/.config/folder_name/
+      gum style --foreground 82 "Updating $folder_name..."
+      mkdir -p "$CONFIGDIR/$folder_name"
+      cp -rf "$folder/"* "$CONFIGDIR/$folder_name/"
+      ;;
+    esac
   done
 
   # Update Pulse app
@@ -448,10 +361,11 @@ install_config() {
   fi
 
   # Update Hecate-Help app
-  if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ] && [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" ]; then
-    gum style --foreground 82 "Updating Hecate-Help..."
-    cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" "$HOME/.local/bin/Hecate-Help"
-    chmod +x "$HOME/.local/bin/Hecate-Help"
+  if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ] && [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" ]; then
+    gum style --foreground 82 "Updating Hecate Settings App..."
+    sleep 2
+    cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" "$HOME/.local/bin/Hecate-Settings"
+    chmod +x "$HOME/.local/bin/Hecate-Settings"
   fi
 
   # Update hecate CLI tool
@@ -459,12 +373,6 @@ install_config() {
     gum style --foreground 82 "Updating hecate CLI..."
     cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
     chmod +x "$HOME/.local/bin/hecate"
-  fi
-
-  # Update Starship config
-  if [ -f "$HECATEDIR/config/starship/starship.toml" ]; then
-    gum style --foreground 82 "Updating Starship config..."
-    cp "$HECATEDIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
   fi
 
   gum style --foreground 82 "✓ Configuration files updated successfully!"
@@ -534,7 +442,7 @@ post_update() {
 
 # Show update complete message
 show_completion_message() {
-  local backup_path=$(cat "$HOME/.config/hecate_last_backup.txt" 2>/dev/null || echo "")
+  local backup_path=$(cat "$HOME/.cache/hecate_last_backup.txt" 2>/dev/null || echo "")
 
   echo ""
   gum style --border double --padding "1 2" --border-foreground 82 "✓ Update Complete!"
@@ -547,7 +455,6 @@ show_completion_message() {
   gum style --foreground 220 "📝 To restore custom changes:"
   gum style --foreground 82 "   1. Compare backup files with new configs"
   gum style --foreground 82 "   2. Manually reapply your modifications"
-  #   gum style --foreground 82 "   3. Or use: diff -r $backup_path ~/.config/[app]"
   echo ""
   gum style --foreground 220 "🎨 If you're in Hyprland, changes have been applied automatically."
   gum style --foreground 220 "   Otherwise, log out and back in to see the updates."
@@ -557,7 +464,6 @@ show_completion_message() {
 
 # Main update flow
 main() {
-
   clear
 
   gum style \
@@ -573,7 +479,7 @@ main() {
   check_gum
   check_hecate_installed
   check_OS
-  
+
   echo ""
 
   # Check versions and get confirmation
@@ -584,9 +490,10 @@ main() {
   echo ""
 
   # Perform update
+  clone_dotfiles
+  echo ""
   backup_config
   echo ""
-  clone_dotfiles
   verify_critical_packages_installed
   echo ""
   install_config
@@ -599,7 +506,9 @@ main() {
 
   # Show completion
   show_completion_message
-  rm -rf $HECATEDIR
+
+  # Clean up cloned repository
+  rm -rf "$HECATEDIR"
 }
 
 # Run main function

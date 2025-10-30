@@ -887,16 +887,17 @@ move_config() {
     gum style --foreground 220 "⚠ Pulse build directory not found"
   fi
   if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ]; then
-    gum style --foreground 82 "Installing Hecate-Help..."
-    if [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" ]; then
-      cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Help" "$HOME/.local/bin/hecate-help"
-      chmod +x "$HOME/.local/bin/Hecate-Help"
-      gum style --foreground 82 "✓ Hecate-Help installed to ~/.local/bin/Pulse"
+    gum style --foreground 82 "Installing Hecate Settings Apps..."
+    sleep 1
+    if [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" ]; then
+      cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" "$HOME/.local/bin/Hecate-Settings"
+      chmod +x "$HOME/.local/bin/Hecate-Settings"
+      gum style --foreground 82 "✓ Hecate Settings Apps installed to ~/.local/bin"
     else
-      gum style --foreground 220 "⚠ Hecate-Help binary not found at expected location"
+      gum style --foreground 220 "⚠ Hecate-Settings binary not found at expected location"
     fi
   else
-    gum style --foreground 220 "⚠ Hecate-Help build directory not found"
+    gum style --foreground 220 "⚠ Hecate-Settings build directory not found"
   fi
 
   # Install hecate CLI tool
