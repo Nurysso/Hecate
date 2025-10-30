@@ -1,4 +1,3 @@
-// MonitorsView.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Monitor, Save, RotateCcw, Play, AlertCircle, Info } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
@@ -21,7 +20,6 @@ import {
 } from '../../wailsjs/go/main/App';
 import { main } from '../../wailsjs/go/models';
 
-// Use the generated types
 type HyprctlMonitor = main.HyprctlMonitor;
 type MonitorConfig = main.MonitorConfig;
 
@@ -40,27 +38,59 @@ const MonitorsView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
-  const SCALE = 0.1; // Scale for visualization
-  const GRID_SIZE = 20;
+const SCALE_FACTOR = 0.15;
+const GRID_SIZE = 20;
+const CANVAS_SIZE = 600;
+const PIXEL_SNAP = 10; // Snap to nearest 10 pixels in actual coordinates
+
+// Convert monitor PIXEL coordinates to canvas coordinates (centered on canvas)
+const monitorToCanvas = (x: number, y: number): { x: number; y: number } => {
+  return {
+    x: (CANVAS_SIZE / 2) + (x * SCALE_FACTOR),
+    y: (CANVAS_SIZE / 2) + (y * SCALE_FACTOR)  // Keep Y standard (down is positive)
+  };
+};
+
+// Convert canvas coordinates back to monitor PIXEL coordinates
+const canvasToMonitor = (x: number, y: number): { x: number; y: number } => {
+  return {
+    x: Math.round((x - CANVAS_SIZE / 2) / SCALE_FACTOR),
+    y: Math.round((y - CANVAS_SIZE / 2) / SCALE_FACTOR)
+  };
+};
+
+  // Check if two monitors overlap
+  const checkOverlap = (
+    x1: number, y1: number, w1: number, h1: number,
+    x2: number, y2: number, w2: number, h2: number
+  ): boolean => {
+    return !(x1 + w1 <= x2 || x2 + w2 <= x1 || y1 + h1 <= y2 || y2 + h2 <= y1);
+  };
+
+  // Constrain position to keep monitor within canvas bounds
+  const constrainToCanvas = (x: number, y: number, width: number, height: number): { x: number; y: number } => {
+    return {
+      x: Math.max(0, Math.min(x, CANVAS_SIZE - width)),
+      y: Math.max(0, Math.min(y, CANVAS_SIZE - height))
+    };
+  };
 
   useEffect(() => {
     loadMonitors();
     loadResolutions();
   }, []);
 
-  const loadMonitors = async () => {
+  const loadMonitors = async (): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
 
       const detected = await GetMonitors();
 
-      // Fallback if no monitors detected or empty array
       if (!detected || detected.length === 0) {
         toast.error('No monitors detected. Please check your Hyprland setup.');
         setLoading(false);
@@ -69,7 +99,6 @@ const MonitorsView: React.FC = () => {
 
       setMonitors(detected);
 
-      // Try to load existing config
       let existingConfig: MonitorConfig[] = [];
       try {
         existingConfig = await ParseMonitorConfig();
@@ -77,16 +106,23 @@ const MonitorsView: React.FC = () => {
         console.warn('No existing config found, using detected values');
       }
 
-      // Create draggable monitors
-      const draggable = detected.map((mon, idx) => {
-        // Check if we have existing config for this monitor
+      const draggable: DraggableMonitor[] = detected.map((mon) => {
         const existing = existingConfig.find(c => c.name === mon.name);
 
         if (existing) {
-          // Parse position
           const positionParts = existing.position.split('x');
-          const x = positionParts.length >= 1 ? parseInt(positionParts[0]) : 0;
-          const y = positionParts.length >= 2 ? parseInt(positionParts[1]) : 0;
+          const actualX = positionParts.length >= 1 ? parseInt(positionParts[0]) : 0;
+          const actualY = positionParts.length >= 2 ? parseInt(positionParts[1]) : 0;
+
+          const canvasPos = monitorToCanvas(actualX, actualY);
+          const width = mon.width * SCALE_FACTOR;
+          const height = mon.height * SCALE_FACTOR;
+
+          // Center the monitor box on the position
+          const centeredX = canvasPos.x - width / 2;
+          const centeredY = canvasPos.y - height / 2;
+
+          const constrained = constrainToCanvas(centeredX, centeredY, width, height);
 
           return {
             name: mon.name,
@@ -94,23 +130,31 @@ const MonitorsView: React.FC = () => {
             position: existing.position,
             scale: existing.scale,
             refreshRate: existing.refreshRate || mon.refreshRate,
-            x: x * SCALE,
-            y: y * SCALE,
-            width: mon.width * SCALE,
-            height: mon.height * SCALE,
+            x: constrained.x,
+            y: constrained.y,
+            width,
+            height,
           };
         } else {
-          // Use current values from hyprctl
+          const canvasPos = monitorToCanvas(mon.x, mon.y);
+          const width = mon.width * SCALE_FACTOR;
+          const height = mon.height * SCALE_FACTOR;
+
+          const centeredX = canvasPos.x - width / 2;
+          const centeredY = canvasPos.y - height / 2;
+
+          const constrained = constrainToCanvas(centeredX, centeredY, width, height);
+
           return {
             name: mon.name,
             resolution: `${mon.width}x${mon.height}`,
             position: `${mon.x}x${mon.y}`,
             scale: mon.scale || 1.0,
             refreshRate: mon.refreshRate || 60,
-            x: mon.x * SCALE,
-            y: mon.y * SCALE,
-            width: mon.width * SCALE,
-            height: mon.height * SCALE,
+            x: constrained.x,
+            y: constrained.y,
+            width,
+            height,
           };
         }
       });
@@ -126,7 +170,7 @@ const MonitorsView: React.FC = () => {
     }
   };
 
-  const loadResolutions = async () => {
+  const loadResolutions = async (): Promise<void> => {
     try {
       const resolutions = await GetAvailableResolutions();
       setAvailableResolutions(resolutions || [
@@ -137,7 +181,6 @@ const MonitorsView: React.FC = () => {
       ]);
     } catch (err) {
       console.error('Failed to load resolutions:', err);
-      // Fallback resolutions
       setAvailableResolutions([
         '1920x1080',
         '2560x1440',
@@ -149,56 +192,107 @@ const MonitorsView: React.FC = () => {
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent, monitorName: string) => {
-    if (e.button !== 0) return; // Only left click
-
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>, monitorName: string): void => {
+    e.preventDefault();
     const monitor = draggableMonitors.find(m => m.name === monitorName);
     if (!monitor) return;
 
     setDragging(monitorName);
     setSelectedMonitor(monitorName);
+
+    // Calculate offset from center of monitor
+    const centerX = monitor.x + monitor.width / 2;
+    const centerY = monitor.y + monitor.height / 2;
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
     setDragOffset({
-      x: e.clientX - monitor.x,
-      y: e.clientY - monitor.y,
+      x: clickX - centerX,
+      y: clickY - centerY
     });
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragging) return;
+const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
+  if (!dragging || !canvasRef.current) return;
 
-    const newX = Math.round((e.clientX - dragOffset.x) / GRID_SIZE) * GRID_SIZE;
-    const newY = Math.round((e.clientY - dragOffset.y) / GRID_SIZE) * GRID_SIZE;
+  const rect = canvasRef.current.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
 
+  const monitor = draggableMonitors.find(m => m.name === dragging);
+  if (!monitor) return;
+
+  // Calculate new center position
+  let centerX = mouseX - dragOffset.x;
+  let centerY = mouseY - dragOffset.y;
+
+  // Convert to pixel coordinates and snap to PIXEL_SNAP (e.g., 100 pixels)
+  const tempPixelCoords = canvasToMonitor(centerX, centerY);
+  const snappedPixelX = Math.round(tempPixelCoords.x / PIXEL_SNAP) * PIXEL_SNAP;
+  const snappedPixelY = Math.round(tempPixelCoords.y / PIXEL_SNAP) * PIXEL_SNAP;
+
+  // Convert back to canvas coordinates
+  const snappedCanvas = monitorToCanvas(snappedPixelX, snappedPixelY);
+  centerX = snappedCanvas.x;
+  centerY = snappedCanvas.y;
+
+  // Convert center to top-left corner
+  let newX = centerX - monitor.width / 2;
+  let newY = centerY - monitor.height / 2;
+
+  // Constrain to canvas
+  const constrained = constrainToCanvas(newX, newY, monitor.width, monitor.height);
+
+  // Check for overlaps with other monitors
+  let hasOverlap = false;
+
+  for (const other of draggableMonitors) {
+    if (other.name === dragging) continue;
+
+    if (checkOverlap(
+      constrained.x, constrained.y, monitor.width, monitor.height,
+      other.x, other.y, other.width, other.height
+    )) {
+      hasOverlap = true;
+      break;
+    }
+  }
+
+  // Only update if no overlap
+  if (!hasOverlap) {
     setDraggableMonitors(prev =>
-      prev.map(mon =>
-        mon.name === dragging
+      prev.map(m =>
+        m.name === dragging
           ? {
-              ...mon,
-              x: newX,
-              y: newY,
-              position: `${Math.round(newX / SCALE)}x${Math.round(newY / SCALE)}`,
+              ...m,
+              x: constrained.x,
+              y: constrained.y,
+              position: `${snappedPixelX}x${snappedPixelY}` // Store as pixel coordinates
             }
-          : mon
+          : m
       )
     );
-  };
+  }
+};
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (): void => {
     setDragging(null);
   };
 
-  const updateMonitorProperty = (name: string, property: keyof MonitorConfig, value: any) => {
+  const updateMonitorProperty = (name: string, property: keyof MonitorConfig, value: any): void => {
     setDraggableMonitors(prev =>
       prev.map(mon => {
         if (mon.name === name) {
           const updated = { ...mon, [property]: value };
 
-          // Update width/height if resolution changes
           if (property === 'resolution' && typeof value === 'string' && value !== 'preferred') {
             const [width, height] = value.split('x').map(Number);
             if (width && height) {
-              updated.width = width * SCALE;
-              updated.height = height * SCALE;
+              updated.width = width * SCALE_FACTOR;
+              updated.height = height * SCALE_FACTOR;
             }
           }
 
@@ -209,11 +303,10 @@ const MonitorsView: React.FC = () => {
     );
   };
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<void> => {
     try {
       setSaving(true);
       setError(null);
-      setSuccess(null);
 
       const configs: MonitorConfig[] = draggableMonitors.map(mon => ({
         name: mon.name,
@@ -225,7 +318,6 @@ const MonitorsView: React.FC = () => {
 
       await SaveMonitorConfig(configs);
       toast.success('Monitor configuration saved successfully!');
-
     } catch (err) {
       toast.error(`Failed to save configuration: ${err}`);
     } finally {
@@ -233,18 +325,17 @@ const MonitorsView: React.FC = () => {
     }
   };
 
-  const handleReload = async () => {
+  const handleReload = async (): Promise<void> => {
     try {
       setError(null);
       await ReloadHyprland();
       toast.success('Hyprland reloaded successfully!');
-    //   setTimeout(() => toast.success(null), 3000);
     } catch (err) {
       toast.error(`Failed to reload Hyprland: ${err}`);
     }
   };
 
-  const handleTest = async () => {
+  const handleTest = async (): Promise<void> => {
     if (!selectedMonitor) return;
 
     const monitor = draggableMonitors.find(m => m.name === selectedMonitor);
@@ -261,7 +352,6 @@ const MonitorsView: React.FC = () => {
       };
       await TestMonitorConfig(config);
       toast.success('Configuration applied temporarily. Save to make permanent.');
-    //   setTimeout(() => toast.success(null), 3000);
     } catch (err) {
       toast.error(`Failed to test configuration: ${err}`);
     }
@@ -304,14 +394,15 @@ const MonitorsView: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: '#0f1416' }}>
-            <Toaster position="top-center" toastOptions={{
-              style: {
-                background: '#F8F6F0',
-              },
-            }} />
+    <div className="flex flex-col h-full" style={{ backgroundColor: '#0a0f12', color: '#e5e7eb' }}>
+      <Toaster position="top-center" toastOptions={{
+        style: {
+          background: '#F8F6F0',
+        },
+      }} />
+
       {/* Header */}
-      <div className="p-4 border-b border-gray-800">
+       <div className="p-4 border-b border-gray-800">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-gray-100 mb-1">Monitor Control</h1>
@@ -378,19 +469,14 @@ const MonitorsView: React.FC = () => {
             </div>
           )}
 
-          {success && (
-            <div className="mb-4 p-3 rounded" style={{ backgroundColor: '#1f3d2f', color: '#22c55e' }}>
-              {success}
-            </div>
-          )}
-
           <div
             ref={canvasRef}
-            className="relative border rounded-lg"
+            className="relative border rounded-lg mx-auto"
             style={{
               backgroundColor: '#141b1e',
               borderColor: '#1e272b',
-              minHeight: '500px',
+              width: `${CANVAS_SIZE}px`,
+              height: `${CANVAS_SIZE}px`,
               backgroundImage: `
                 linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
@@ -401,38 +487,93 @@ const MonitorsView: React.FC = () => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
           >
-            {draggableMonitors.map(mon => (
-              <div
-                key={mon.name}
-                className="absolute border-2 rounded cursor-move transition-all"
-                style={{
-                  left: mon.x,
-                  top: mon.y,
-                  width: mon.width,
-                  height: mon.height,
-                  backgroundColor: selectedMonitor === mon.name ? '#1e3a5f' : '#1e272b',
-                  borderColor: selectedMonitor === mon.name ? '#3b82f6' : '#374151',
-                  minWidth: '100px',
-                  minHeight: '60px',
-                }}
-                onMouseDown={(e) => handleMouseDown(e, mon.name)}
-              >
-                <div className="p-2 text-xs h-full flex flex-col justify-center">
-                  <div className="font-semibold text-gray-100 truncate">{mon.name}</div>
-                  <div className="text-gray-400">{mon.resolution}</div>
-                  <div className="text-gray-500">{mon.position}</div>
+            {/* Center crosshair */}
+            <div
+              className="absolute"
+              style={{
+                left: `${CANVAS_SIZE / 2}px`,
+                top: 0,
+                width: '1px',
+                height: '100%',
+                backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                pointerEvents: 'none'
+              }}
+            />
+            <div
+              className="absolute"
+              style={{
+                left: 0,
+                top: `${CANVAS_SIZE / 2}px`,
+                width: '100%',
+                height: '1px',
+                backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                pointerEvents: 'none'
+              }}
+            />
+            {/* Origin marker */}
+            <div
+              className="absolute text-xs"
+              style={{
+                left: `${CANVAS_SIZE / 2 + 4}px`,
+                top: `${CANVAS_SIZE / 2 + 4}px`,
+                color: 'rgba(59, 130, 246, 0.5)',
+                pointerEvents: 'none'
+              }}
+            >
+              0,0
+            </div>
+
+            {draggableMonitors.map(mon => {
+              // Calculate center position for display
+              const centerX = mon.x + mon.width / 2;
+              const centerY = mon.y + mon.height / 2;
+
+              return (
+                <div key={mon.name}>
+                  {/* Monitor box */}
+                  <div
+                    className="absolute border-2 rounded cursor-move transition-all"
+                    style={{
+                      left: mon.x,
+                      top: mon.y,
+                      width: mon.width,
+                      height: mon.height,
+                      backgroundColor: selectedMonitor === mon.name ? '#1e3a5f' : '#1e272b',
+                      borderColor: selectedMonitor === mon.name ? '#3b82f6' : '#374151',
+                      minWidth: '100px',
+                      minHeight: '60px',
+                    }}
+                    onMouseDown={(e) => handleMouseDown(e, mon.name)}
+                  >
+                    <div className="p-2 text-xs h-full flex flex-col justify-center">
+                      <div className="font-semibold text-gray-100 truncate">{mon.name}</div>
+                      <div className="text-gray-400">{mon.resolution}</div>
+                      <div className="text-gray-500">{mon.position}</div>
+                    </div>
+                  </div>
+
+                  {/* Center point indicator */}
+                  {/* <div
+                    className="absolute pointer-events-none"
+                    style={{
+                      left: centerX - 4,
+                      top: centerY - 4,
+                      width: '8px',
+                      height: '8px',
+                      backgroundColor: selectedMonitor === mon.name ? '#3b82f6' : '#6b7280',
+                      borderRadius: '50%',
+                      border: '2px solid #141b1e'
+                    }}
+                  /> */}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* Properties Panel */}
-        <div className="p-4 w-80 border-l overflow-y-auto" style={{ backgroundColor: '#141b1e', borderColor: '#1e272b' }}>
-          <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
-            <Monitor size={20} />
-            Monitor Properties
-          </h3>
+        <div className="w-80 border-l p-4 overflow-auto" style={{ borderColor: '#1e272b', backgroundColor: '#0f1419' }}>
+          <h2 className="text-lg font-semibold mb-4">Monitor Details</h2>
 
           {selectedMonitorData ? (
             <div className="space-y-4">
@@ -445,51 +586,36 @@ const MonitorsView: React.FC = () => {
                   value={selectedMonitorData.name}
                   disabled
                   className="w-full px-3 py-2 rounded text-sm border"
-                  style={{ backgroundColor: '#0f1416', borderColor: '#1e272b', color: '#9ca3af' }}
+                  style={{ backgroundColor: '#1e272b', borderColor: '#374151', color: '#9ca3af' }}
                 />
               </div>
 
-                <div>
-      <label className="block text-sm font-medium text-gray-300 mb-1">
-        Resolution
-      </label>
-
-      <Select
-        value={selectedMonitorData.resolution}
-        onValueChange={(value: string) =>
-          updateMonitorProperty(selectedMonitorData.name, 'resolution', value)
-        }
-      >
-        <SelectTrigger
-          className="w-full bg-[#0f1416] border border-[#1e272b] text-gray-200 text-sm"
-        >
-          <SelectValue placeholder="Select resolution" />
-        </SelectTrigger>
-        <SelectContent className="bg-[#0f1416] border border-[#1e272b] text-gray-200">
-          {availableResolutions.map((res) => (
-            <SelectItem
-              key={res}
-              value={res}
-              className="text-gray-200 hover:bg-[#1a1f22]"
-            >
-              {res}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      {/* <p className="mt-1 text-xs text-gray-500">Or type custom resolution</p>
-
-      <input
-        type="text"
-        value={selectedMonitorData.resolution}
-        onChange={(e) =>
-          updateMonitorProperty(selectedMonitorData.name, 'resolution', e.target.value)
-        }
-        placeholder="1920x1080"
-        className="w-full px-3 py-2 rounded text-sm border mt-2 bg-[#0f1416] border-[#1e272b] text-gray-200 placeholder-gray-500"
-      /> */}
-    </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Resolution
+                </label>
+                <Select
+                  value={selectedMonitorData.resolution}
+                  onValueChange={(value: string) =>
+                    updateMonitorProperty(selectedMonitorData.name, 'resolution', value)
+                  }
+                >
+                  <SelectTrigger className="w-full bg-[#1e272b] border border-[#374151] text-gray-200 text-sm">
+                    <SelectValue placeholder="Select resolution" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0f1419] border border-[#374151] text-gray-200">
+                    {availableResolutions.map((res) => (
+                      <SelectItem
+                        key={res}
+                        value={res}
+                        className="text-gray-200 hover:bg-[#1e272b]"
+                      >
+                        {res}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -503,7 +629,7 @@ const MonitorsView: React.FC = () => {
                   min="30"
                   max="360"
                   className="w-full px-3 py-2 rounded text-sm border"
-                  style={{ backgroundColor: '#0f1416', borderColor: '#1e272b', color: '#e5e7eb' }}
+                  style={{ backgroundColor: '#1e272b', borderColor: '#374151', color: '#e5e7eb' }}
                 />
               </div>
 
@@ -516,13 +642,13 @@ const MonitorsView: React.FC = () => {
                   value={selectedMonitorData.position}
                   disabled
                   className="w-full px-3 py-2 rounded text-sm border"
-                  style={{ backgroundColor: '#0f1416', borderColor: '#1e272b', color: '#9ca3af' }}
+                  style={{ backgroundColor: '#1e272b', borderColor: '#374151', color: '#9ca3af' }}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  {draggableMonitors.length > 1
-                    ? 'Drag monitor on canvas to change position'
-                    : 'Position is 0x0 for single monitor'}
-                </p>
+  {draggableMonitors.length > 1
+    ? 'Drag monitor center on canvas to change (snaps to 100px increments)'
+    : 'Position is 0x0 for single monitor'}
+</p>
               </div>
 
               <div>
@@ -537,21 +663,21 @@ const MonitorsView: React.FC = () => {
                   min="0.5"
                   max="3"
                   className="w-full px-3 py-2 rounded text-sm border"
-                  style={{ backgroundColor: '#0f1416', borderColor: '#1e272b', color: '#e5e7eb' }}
+                  style={{ backgroundColor: '#1e272b', borderColor: '#374151', color: '#e5e7eb' }}
                 />
                 <p className="mt-1 text-xs text-gray-500">Recommended: 1.0 - 2.0</p>
               </div>
 
               <div className="pt-4 border-t" style={{ borderColor: '#1e272b' }}>
                 <h4 className="text-sm font-medium text-gray-300 mb-2">Preview Config</h4>
-                <pre className="text-xs p-3 rounded overflow-x-auto" style={{ backgroundColor: '#0f1416', color: '#9ca3af' }}>
+                <pre className="text-xs p-3 rounded overflow-x-auto" style={{ backgroundColor: '#1e272b', color: '#9ca3af' }}>
                   {`monitor = ${selectedMonitorData.name}, ${selectedMonitorData.resolution}@${selectedMonitorData.refreshRate.toFixed(2)}, ${selectedMonitorData.position}, ${selectedMonitorData.scale.toFixed(2)}`}
                 </pre>
               </div>
             </div>
           ) : (
-            <div className="text-sm text-gray-400">
-              Select a monitor to edit its properties
+            <div className="text-gray-500 text-sm">
+              Select a monitor to view details
             </div>
           )}
         </div>

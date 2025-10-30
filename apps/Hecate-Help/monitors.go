@@ -78,7 +78,7 @@ func (a *App) SaveMonitorConfig(configs []MonitorConfig) error {
 
 	for _, config := range configs {
 		// Format: monitor = name, resolution@refreshrate, position, scale
-		line := fmt.Sprintf("monitor = %s, %s@%.2f, %s, %.2f\n",
+		line := fmt.Sprintf("monitor = %s, %s@%g, %s, %.2f\n",
 			config.Name,
 			config.Resolution,
 			config.RefreshRate,
@@ -200,7 +200,7 @@ func (a *App) GetAvailableResolutions() []string {
 
 // TestMonitorConfig temporarily applies monitor config without saving
 func (a *App) TestMonitorConfig(config MonitorConfig) error {
-	configStr := fmt.Sprintf("%s,%s@%.2f,%s,%.2f",
+	configStr := fmt.Sprintf("%s,%s@%g,%s,%.2f",
 		config.Name,
 		config.Resolution,
 		config.RefreshRate,

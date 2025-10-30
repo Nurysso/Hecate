@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Keyboard, Terminal, Palette, Waves, HomeIcon, Monitor, LucideIcon } from 'lucide-react';
+import { Keyboard, Terminal, Palette, Waves, HomeIcon, Monitor, LucideIcon, AppWindow } from 'lucide-react';
 import KeybindsView from './components/KeybindsView';
 // import DummyPage from './components/DummyPage';
 import PreferencesView from './components/Prefrence';
@@ -7,6 +7,7 @@ import ThemeView from "./components/Themes";
 import WaybarView from "./components/Waybar";
 import MonitorsView from './components/Monitors';
 import SettingsView from './components/SettingView';
+import WindowRulesView from './components/windowRules';
 import { GetStartupArgs } from '../wailsjs/go/main/App';
 interface MenuItem {
   id: string;
@@ -15,15 +16,16 @@ interface MenuItem {
 }
 
 const App: React.FC = () => {
-  const [activePage, setActivePage] = useState<string>('keybinds');
+  const [activePage, setActivePage] = useState<string>('home');
 
   const menuItems: MenuItem[] = [
     { id: 'home', label: 'Settings', icon: HomeIcon },
     { id: 'keybinds', label: 'Keybinds', icon: Keyboard },
     { id: 'waybar', label: 'Waybar', icon: Waves },
-    { id: 'Prefrences', label: 'Prefrences', icon: Terminal },
+    { id: 'prefrences', label: 'Prefrences', icon: Terminal },
     { id: 'theme', label: 'Theme', icon: Palette },
     { id: 'monitors', label: 'Monitors', icon: Monitor },
+    {id: 'windows', label: 'WindowRulesView', icon: AppWindow},
   ];
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const App: React.FC = () => {
         return <KeybindsView />;
       case 'waybar':
         return <WaybarView />
-      case 'Prefrences':
+      case 'prefrences':
         return <PreferencesView />;
       case 'theme':
         return <ThemeView />;
@@ -59,6 +61,8 @@ const App: React.FC = () => {
         return <SettingsView />;
       case 'monitors':
         return <MonitorsView />;
+    case 'windows':
+        return <WindowRulesView />;
       default:
         return <SettingsView />;
     }
