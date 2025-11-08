@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Keyboard, Terminal, Palette, Waves, HomeIcon, Monitor, LucideIcon, AppWindow } from 'lucide-react';
+import { Keyboard, Terminal, Palette, Waves, HomeIcon, Monitor, LucideIcon, AppWindow, Orbit } from 'lucide-react';
 import KeybindsView from './components/KeybindsView';
 // import DummyPage from './components/DummyPage';
 import PreferencesView from './components/Prefrence';
@@ -8,6 +8,7 @@ import WaybarView from "./components/Waybar";
 import MonitorsView from './components/Monitors';
 import SettingsView from './components/SettingView';
 import WindowRulesView from './components/windowRules';
+import AnimationsView from './components/AnimationView';
 import { GetStartupArgs } from '../wailsjs/go/main/App';
 interface MenuItem {
   id: string;
@@ -25,7 +26,9 @@ const App: React.FC = () => {
     { id: 'prefrences', label: 'Prefrences', icon: Terminal },
     { id: 'theme', label: 'Theme', icon: Palette },
     { id: 'monitors', label: 'Monitors', icon: Monitor },
-    {id: 'windows', label: 'WindowRulesView', icon: AppWindow},
+    {id: 'windows', label: 'Window Rules', icon: AppWindow},
+    {id: 'animations', label: 'Animations', icon: Orbit},
+
   ];
 
   useEffect(() => {
@@ -63,6 +66,8 @@ const App: React.FC = () => {
         return <MonitorsView />;
     case 'windows':
         return <WindowRulesView />;
+    case 'animations':
+        return <AnimationsView />;
       default:
         return <SettingsView />;
     }

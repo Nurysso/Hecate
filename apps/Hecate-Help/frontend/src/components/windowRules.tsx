@@ -410,27 +410,37 @@ useEffect(() => {
 
               <div className="space-y-4">
                 {/* Rule Type Selection */}
-                <div>
-                  <label className="block text-sm text-gray-400 mb-2">Rule Type</label>
-                  <Select value={ruleType} onValueChange={(value) => {
-                    setRuleType(value);
-                    setRuleValue('');
-                  }}>
-                    <SelectTrigger className="w-full bg-[#1a2227] border-[#2a3439] text-gray-200">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1a2227] border-[#2a3439]">
-                      {ruleOptions.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value} className="text-gray-200">
-                          <div className="flex flex-col items-start">
-                            <span>{opt.label}</span>
-                            <span className="text-xs text-gray-500">{opt.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+<div>
+  <label className="block text-sm text-gray-400 mb-2">Rule Type</label>
+
+  <Select
+    value={ruleType}
+    onValueChange={(value) => {
+      setRuleType(value);
+      setRuleValue('');
+    }}
+  >
+    <SelectTrigger className="w-full bg-[#1a2227] border-[#2a3439] text-gray-200">
+      <SelectValue />
+    </SelectTrigger>
+
+    <SelectContent className="bg-[#1a2227] border-[#2a3439] max-h-60 overflow-y-auto ">
+      {ruleOptions.map((opt) => (
+        <SelectItem
+          key={opt.value}
+          value={opt.value}
+          className="text-gray-200"
+        >
+          <div className="flex flex-col items-start">
+            <span>{opt.label}</span>
+            <span className="text-xs text-gray-500">{opt.description}</span>
+          </div>
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
+
 
                 {/* Rule Value Input (if required) */}
                 {currentRuleOption?.requiresValue && (
