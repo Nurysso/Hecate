@@ -142,7 +142,7 @@ const WaybarView: React.FC = () => {
                 background: '#F8F6F0',
               },
             }} />
-      <div className="h-full overflow-y-auto bg-[#0f1416]">
+      <div className="h-full overflow-y-auto">
         <div className="p-6 max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-6 pb-4 border-b border-gray-800">

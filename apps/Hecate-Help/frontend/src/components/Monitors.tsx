@@ -394,7 +394,7 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: '#0a0f12', color: '#e5e7eb' }}>
+    <div className="flex flex-col h-full">
       <Toaster position="top-center" toastOptions={{
         style: {
           background: '#F8F6F0',

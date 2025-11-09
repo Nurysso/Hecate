@@ -129,7 +129,7 @@ const loadKeybinds = async () => {
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-[#0f1416]">
+    <div className="h-full overflow-y-auto">
       <div className="p-6 max-w-4xl mx-auto">
              <div className="mb-6 pb-4 border-b border-gray-800">
           <div className="flex items-center justify-between">

@@ -249,10 +249,10 @@ const AnimationsView: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#0f1416]">
+    <div className="h-full flex flex-col">
       {/* Sticky Header */}
       <div className="sticky top-0 z-40 bg-[#0f1416] border-b border-gray-800">
-        <div className="p-6 max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-4">
             <div className="flex items-center justify-between">

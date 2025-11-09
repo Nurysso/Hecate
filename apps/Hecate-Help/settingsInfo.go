@@ -5,9 +5,15 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	// "runtime"
 	"strings"
-	"regexp"
+	    "image"
+    "image/jpeg"
+    _ "image/png"
+    "bytes"
+    "path/filepath"
+	"encoding/base64"
+
+    "github.com/nfnt/resize"
 )
 
 type SystemInfo struct {
@@ -15,18 +21,13 @@ type SystemInfo struct {
 }
 
 type SystemInfoData struct {
-	HyprlandVersion string `json:"hyprlandVersion"`
-	Kernel          string `json:"kernel"`
 	OS              string `json:"os"`
 	Hostname        string `json:"hostname"`
 	CPU             string `json:"cpu"`
 	Memory          string `json:"memory"`
-	GPU             string `json:"gpu"`
-	GPUDriver       string `json:"gpuDriver"`
 	Uptime          string `json:"uptime"`
-	// Architecture    string `json:"architecture"`
-	Shell           string `json:"shell"`
-	// Resolution      string `json:"resolution"`
+    WallpaperBase64 string `json:"wallpaperBase64"`
+
 }
 
 func NewSystemInfo() *SystemInfo {
@@ -35,47 +36,17 @@ func NewSystemInfo() *SystemInfo {
 
 func (s *SystemInfo) GetSystemInfo() SystemInfoData {
 	return SystemInfoData{
-		HyprlandVersion: s.getHyprlandVersion(),
-		Kernel:          s.getKernel(),
 		OS:              s.getOS(),
 		Hostname:        s.getHostname(),
 		CPU:             s.getCPU(),
 		Memory:          s.getMemory(),
-		GPU:             s.getGPU(),
-		GPUDriver:       s.getGPUDriver(),
 		Uptime:          s.getUptime(),
-		// Architecture:    runtime.GOARCH,
-		Shell:           s.getShell(),
-		// Resolution:      s.getResolution(),
+        WallpaperBase64: s.getWallpaper(),
 	}
 }
 func (a *App) GetSystemInfo() SystemInfoData {
     sysInfo := NewSystemInfo()
     return sysInfo.GetSystemInfo()
-}
-func (s *SystemInfo) getHyprlandVersion() string {
-	out, err := exec.Command("hyprctl", "version").Output()
-	if err != nil {
-		return "Not installed"
-	}
-	lines := strings.Split(string(out), "\n")
-	for _, line := range lines {
-		if strings.Contains(line, "Tag:") {
-			parts := strings.Split(line, ":")
-			if len(parts) > 1 {
-				return strings.TrimSpace(parts[1])
-			}
-		}
-	}
-	return "Unknown"
-}
-
-func (s *SystemInfo) getKernel() string {
-	out, err := exec.Command("uname", "-r").Output()
-	if err != nil {
-		return "Unknown"
-	}
-	return strings.TrimSpace(string(out))
 }
 
 func (s *SystemInfo) getOS() string {
@@ -150,75 +121,6 @@ func (s *SystemInfo) getMemory() string {
 	return "Unknown"
 }
 
-func (s *SystemInfo) getGPU() string {
-	out, err := exec.Command("lspci").Output()
-	if err != nil {
-		return "Unknown"
-	}
-
-	lines := strings.Split(string(out), "\n")
-	for _, line := range lines {
-		lower := strings.ToLower(line)
-		if strings.Contains(lower, "vga") || strings.Contains(lower, "3d controller") {
-			// Remove vendor info like "Advanced Micro Devices, Inc. [AMD/ATI]"
-			reVendor := regexp.MustCompile(`^[^\]]+\]\s*`)
-			lineClean := reVendor.ReplaceAllString(line, "")
-
-			// Remove revision info like "(rev c1)"
-			reRev := regexp.MustCompile(`\s*\(rev.*\)$`)
-			lineClean = reRev.ReplaceAllString(lineClean, "")
-
-			// Remove bracketed codename inside, e.g., "[Radeon RX 6700 XT]" -> "Radeon RX 6700 XT"
-			reBrackets := regexp.MustCompile(`\[([^\]]+)\]`)
-			match := reBrackets.FindStringSubmatch(lineClean)
-			if len(match) > 1 {
-				return strings.TrimSpace(match[1])
-			}
-
-			// Fallback: return everything after first colon
-			parts := strings.SplitN(lineClean, ":", 3)
-			if len(parts) == 3 {
-				return strings.TrimSpace(parts[2])
-			}
-
-			return strings.TrimSpace(lineClean)
-		}
-	}
-	return "Unknown"
-}
-
-func (s *SystemInfo) getGPUDriver() string {
-	// Check for NVIDIA
-	if _, err := exec.Command("nvidia-smi", "--version").Output(); err == nil {
-		out, err := exec.Command("nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader").Output()
-		if err == nil {
-			return "NVIDIA " + strings.TrimSpace(string(out))
-		}
-	}
-
-	// Check for AMD
-	out, err := exec.Command("modinfo", "amdgpu").Output()
-	if err == nil {
-		lines := strings.Split(string(out), "\n")
-		for _, line := range lines {
-			if strings.HasPrefix(line, "version:") {
-				parts := strings.Split(line, ":")
-				if len(parts) > 1 {
-					return "AMDGPU " + strings.TrimSpace(parts[1])
-				}
-			}
-		}
-		return "AMDGPU"
-	}
-
-	// Check for Intel
-	if _, err := exec.Command("modinfo", "i915").Output(); err == nil {
-		return "Intel i915"
-	}
-
-	return "Unknown"
-}
-
 func (s *SystemInfo) getUptime() string {
 	out, err := exec.Command("uptime", "-p").Output()
 	if err != nil {
@@ -228,40 +130,72 @@ func (s *SystemInfo) getUptime() string {
 	return strings.TrimPrefix(uptime, "up ")
 }
 
-func (s *SystemInfo) getShell() string {
-	shell := os.Getenv("SHELL")
-	if shell == "" {
-		return "Unknown"
-	}
-	parts := strings.Split(shell, "/")
-	return parts[len(parts)-1]
+// getWallpaper gets wallpaper based on waypaper
+func (s *SystemInfo) getWallpaper() string {
+    homeDir, err := os.UserHomeDir()
+    if err != nil {
+        return ""
+    }
+
+    configPath := filepath.Join(homeDir, ".config/waypaper/config.ini")
+    data, err := os.ReadFile(configPath)
+    if err != nil {
+        return ""
+    }
+
+    var wallpaperPath string
+    for _, line := range strings.Split(string(data), "\n") {
+        line = strings.TrimSpace(line)
+        // Handle both "wallpaper=path" and "wallpaper = path" formats
+        if strings.HasPrefix(line, "wallpaper") {
+            parts := strings.SplitN(line, "=", 2)
+            if len(parts) == 2 {
+                wallpaperPath = strings.TrimSpace(parts[1])
+                // Expand ~ to home directory
+                if strings.HasPrefix(wallpaperPath, "~/") {
+                    wallpaperPath = filepath.Join(homeDir, wallpaperPath[2:])
+                }
+                break
+            }
+        }
+    }
+
+    if wallpaperPath == "" {
+        return ""
+    }
+
+    return compressImage(wallpaperPath)
 }
 
-// func (s *SystemInfo) getResolution() string {
-// 	// Try hyprctl for Hyprland
-// 	out, err := exec.Command("hyprctl", "monitors", "-j").Output()
-// 	if err == nil && len(out) > 0 {
-// 		// Parse JSON to get resolution
-// 		outStr := string(out)
-// 		if strings.Contains(outStr, "\"width\"") {
-// 			// Simple extraction (for production, use proper JSON parsing)
-// 			return "Check hyprctl monitors"
-// 		}
-// 	}
 
-// 	// Fallback to xrandr
-// 	out, err = exec.Command("xrandr", "--current").Output()
-// 	if err == nil {
-// 		lines := strings.Split(string(out), "\n")
-// 		for _, line := range lines {
-// 			if strings.Contains(line, "*") {
-// 				fields := strings.Fields(line)
-// 				if len(fields) > 0 {
-// 					return fields[0]
-// 				}
-// 			}
-// 		}
-// 	}
+// Compress image to base64
+func compressImage(path string) string {
+    file, err := os.Open(path)
+    if err != nil {
+        return ""
+    }
+    defer file.Close()
 
-// 	return "Unknown"
-// }
+    img, _, err := image.Decode(file)
+    if err != nil {
+        return ""
+    }
+
+    resized := resize.Resize(800, 0, img, resize.Lanczos3)
+
+    var buf bytes.Buffer
+    err = jpeg.Encode(&buf, resized, &jpeg.Options{Quality: 75})
+    if err != nil {
+        return ""
+    }
+
+    // FIX: Use base64 encoding
+    encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
+    return fmt.Sprintf("data:image/jpeg;base64,%s", encoded)
+}
+
+// Add to App struct methods
+func (a *App) LaunchWaypaper() error {
+    cmd := exec.Command("waypaper")
+    return cmd.Start()
+}

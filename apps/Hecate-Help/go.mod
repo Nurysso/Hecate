@@ -2,7 +2,10 @@ module Hecate-Help
 
 go 1.22.0
 
-require github.com/wailsapp/wails/v2 v2.10.2
+require (
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	github.com/wailsapp/wails/v2 v2.10.2
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
