@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Keyboard, Terminal, Info, X, Home, Monitor, ArrowRight, AppWindow, Orbit, Search, Settings } from 'lucide-react';
+import { Keyboard, Info, X, Home, Monitor, ArrowRight, AppWindow, Orbit, Search, Settings } from 'lucide-react';
 // import Hecate from '../public/hecate.svg';
-import PreferencesView from './components/Prefrence';
 import KeybindsView from './components/KeybindsView';
-// import ThemeView from "./components/Themes";
-// import WaybarView from "./components/Waybar";
 import MonitorsView from './components/Monitors';
 import SettingsView from './components/SettingView';
 import WindowRulesView from './components/windowRules';
@@ -22,9 +19,6 @@ const App = () => {
   const menuItems = [
     { id: 'home', label: 'Settings', icon: Home, color: '#60a5fa' },
     { id: 'keybinds', label: 'Keybinds', icon: Keyboard, color: '#60a5fa' },
-    // { id: 'waybar', label: 'Waybar', icon: RectangleEllipsis, color: '#60a5fa' },
-    { id: 'prefrences', label: 'Preferences', icon: Terminal, color: '#60a5fa' },
-    // { id: 'theme', label: 'Theme', icon: Palette, color: '#60a5fa' },
     { id: 'monitors', label: 'Monitors', icon: Monitor, color: '#60a5fa' },
     { id: 'windows', label: 'Window Rules', icon: AppWindow, color: '#60a5fa' },
     { id: 'animations', label: 'Animations', icon: Orbit, color: '#60a5fa' },
@@ -35,7 +29,7 @@ const App = () => {
     home: {
       title: 'General Settings',
       description: 'Configure core Hecate settings and general preferences.',
-      tips: ['Save changes before switching pages', 'Use search to quickly find options', 'Hover over settings for more info']
+      tips: ['General and common changes', 'Save changes before switching pages', 'Use search to quickly find options', 'Hover over settings for more info']
     },
     keybinds: {
       title: 'Keyboard Shortcuts',
@@ -76,9 +70,9 @@ const App = () => {
 
   // Search terms mapped to pages (fuzzy searchable)
   const searchIndex: Record<string, string[]> = {
-    home: ['settings', 'general', 'config', 'configuration', 'main', 'home', 'start', 'waybar', 'status bar', 'bar', 'panel', 'taskbar', 'modules', 'clock', 'battery', 'preferences', 'advanced', 'options', 'terminal', 'shell', 'performance'],
+    home: ['settings', 'general', 'config', 'configuration', 'main', 'home', 'start', 'waybar', 'status bar', 'bar', 'panel', 'taskbar', 'modules', 'clock', 'battery', 'preferences', 'advanced', 'options', 'terminal', 'shell', 'performance', 'theme', 'colors', 'appearance', 'style', 'borders', 'gaps', 'visual', 'palette', 'design'],
     keybinds: ['keyboard', 'shortcuts', 'hotkeys', 'bindings', 'keys', 'keybinds'],
-    theme: ['theme', 'colors', 'appearance', 'style', 'borders', 'gaps', 'visual', 'palette', 'design'],
+    // theme: [],
     monitors: ['monitors', 'displays', 'screens', 'resolution', 'refresh rate', 'layout', 'output'],
     windows: ['window rules', 'rules', 'window', 'floating', 'tiling', 'workspace', 'class', 'title'],
     animations: ['animations', 'effects', 'transitions', 'bezier', 'speed', 'fade', 'slide']
@@ -163,8 +157,8 @@ const App = () => {
     switch (activePage) {
       case 'keybinds':
         return <KeybindsView />;
-      case 'prefrences':
-        return <PreferencesView />;
+    //   case 'prefrences':
+    //     return <PreferencesView />;
       case 'settings':
         return <SettingsView />;
       case 'monitors':
