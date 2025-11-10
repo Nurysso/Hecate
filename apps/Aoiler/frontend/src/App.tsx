@@ -410,9 +410,6 @@ function App() {
                     <span className="font-mono">{suggestion}</span>
                   </button>
                 ))}
-                <div className="px-4 py-2 text-xs text-gray-500 border-t" style={{ borderColor: '#1E3A5F' }}>
-                  Use ↑↓ to navigate, Tab or Enter to select, Esc to close
-                </div>
               </div>
             )}
 

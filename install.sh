@@ -321,7 +321,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - removed browser from here since we handle it separately
-  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim neovim nano webkit2gtk)
+  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp   neovim nano webkit2gtk)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -627,7 +627,7 @@ install_aur_helper() {
 
 # Verify critical packages are installed (returns 0 if ok, 1 if critical failure)
 verify_critical_packages_installed() {
-  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard")
+  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard", "slurp", "tesseract", "webkit2gtk")
   local missing_critical=()
 
   for pkg in "${critical_packages[@]}"; do
@@ -652,7 +652,7 @@ verify_critical_packages() {
   clear
   gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
 
-  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "cliphist" "swaync" "hypridle" "hyprlock" "wallust" "fastfetch" "starship" "wlogout" "noto-fonts-emoji" "grim" "wl-clipboard")
+  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard", "slurp", "tesseract", "webkit2gtk")
   local missing_packages=()
 
   for pkg in "${critical_packages[@]}"; do
@@ -1098,6 +1098,13 @@ set_default_shell() {
   fi
 }
 
+install_extra_tools(){
+  gum style \
+    --foreground 212 --border-foreground 212 \
+    --align center \
+    'Installing Aoiler helper kondo' 'used to organize dirs'
+    curl -fsSL https://raw.githubusercontent.com/aelune/kondo/main/install.sh | bash
+}
 # Configure SDDM theme at the end
 configure_sddm_theme() {
   if [ "$INSTALL_SDDM" != true ]; then
@@ -1241,7 +1248,7 @@ main() {
 
   # Set default shell
   set_default_shell
-
+  install_extra_tools
   # Configure SDDM theme
   configure_sddm_theme
   post_install

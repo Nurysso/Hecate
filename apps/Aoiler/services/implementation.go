@@ -216,20 +216,22 @@ func NewOrganizerService() *OrganizerService {
 
 func (o *OrganizerService) Organize(query, mode string) (OrganizerResult, error) {
 	path := extractPath(query)
+	homeDir, _ := os.UserHomeDir()
 	if path == "" {
 		path = "."
 	}
 
 	if strings.HasPrefix(path, "~") {
-		homeDir, _ := os.UserHomeDir()
 		path = filepath.Join(homeDir, path[1:])
 	}
 
 	var cmd *exec.Cmd
 	if mode == "filename" {
 		cmd = exec.Command("kondo", "-f", "-nui", path)
+		cmd.Env = append(os.Environ(), "PATH="+os.Getenv("PATH")+":"+filepath.Join(homeDir, ".local/bin"))
 	} else {
 		cmd = exec.Command("kondo", "-c", "-nui", path)
+		cmd.Env = append(os.Environ(), "PATH="+os.Getenv("PATH")+":"+filepath.Join(homeDir, ".local/bin"))
 	}
 
 	output, err := cmd.CombinedOutput()

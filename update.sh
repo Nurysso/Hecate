@@ -447,6 +447,14 @@ post_update() {
   fi
 }
 
+install_extra_tools(){
+  gum style \
+    --foreground 212 --border-foreground 212 \
+    --align center \
+    'Installing Aoiler helper kondo' 'used to organize dirs'
+    curl -fsSL https://raw.githubusercontent.com/aelune/kondo/main/install.sh | bash
+}
+
 # Show update complete message
 show_completion_message() {
   local backup_path=$(cat "$HOME/.cache/hecate_last_backup.txt" 2>/dev/null || echo "")
@@ -508,6 +516,8 @@ main() {
   update_hecate_config
   echo ""
   setup_waybar
+  install_extra_tools
+  secho ""
   echo ""
   post_update
 
