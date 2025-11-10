@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, Sparkles } from 'lucide-react';
 import { ProcessQuery, GetPathSuggestions } from '../wailsjs/go/main/App';
 
 interface Message {
@@ -33,6 +33,7 @@ function App() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const exampleQueries = [
     'Where is my waybar layout file?',
@@ -46,16 +47,15 @@ function App() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Reset selected index when suggestions change
   useEffect(() => {
     setSelectedIndex(0);
   }, [suggestions]);
 
-  // Auto-complete logic with actual backend call
   useEffect(() => {
     const getAutoComplete = async () => {
       if (input.length === 0) {
         setShowSuggestions(false);
+        setSuggestions([]);
         return;
       }
 
@@ -66,10 +66,12 @@ function App() {
           setSuggestions(result.suggestions);
           setShowSuggestions(true);
         } else {
+          setSuggestions([]);
           setShowSuggestions(false);
         }
       } catch (error) {
         console.error('Autocomplete error:', error);
+        setSuggestions([]);
         setShowSuggestions(false);
       }
     };
@@ -93,6 +95,7 @@ function App() {
     setInput('');
     setLoading(true);
     setShowSuggestions(false);
+    setSuggestions([]);
 
     try {
       const response: QueryResponse = await ProcessQuery({ query: currentInput });
@@ -100,7 +103,6 @@ function App() {
       let assistantContent = '';
 
       if (response.success) {
-        // Generate appropriate response based on service
         if (response.service === 'filesearch') {
           assistantContent = response.result?.found
             ? `Found the file you're looking for.`
@@ -150,27 +152,33 @@ function App() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Handle autocomplete navigation
     if (showSuggestions && suggestions.length > 0) {
-      if (e.key === 'Tab') {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
         setSelectedIndex(prev => (prev + 1) % suggestions.length);
         return;
       }
 
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
+        return;
+      }
+
+      if (e.key === 'Tab') {
         e.preventDefault();
         handleSuggestionClick(suggestions[selectedIndex]);
         return;
       }
 
       if (e.key === 'Escape') {
+        e.preventDefault();
         setShowSuggestions(false);
+        setSuggestions([]);
         return;
       }
     }
 
-    // Handle normal Enter for submission
     if (e.key === 'Enter' && !e.shiftKey && !showSuggestions) {
       e.preventDefault();
       handleSubmit();
@@ -183,7 +191,6 @@ function App() {
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    // Replace the path portion with the selected suggestion
     const words = input.split(' ');
     let replaced = false;
 
@@ -201,6 +208,7 @@ function App() {
 
     setInput(words.join(' '));
     setShowSuggestions(false);
+    setSuggestions([]);
     inputRef.current?.focus();
   };
 
@@ -208,9 +216,9 @@ function App() {
     if (!msg.result || msg.error) {
       if (msg.error) {
         return (
-          <div className="mt-2 p-2 sm:p-3 rounded-lg text-xs sm:text-sm" style={{ backgroundColor: '#1a2227' }}>
-            <p className="font-medium" style={{ color: '#ef4444' }}>Error</p>
-            <p className="mt-1 break-words" style={{ color: '#e5e7eb' }}>{msg.error}</p>
+          <div className="mt-2 p-3 rounded-lg border border-red-900/30" style={{ backgroundColor: '#141B1E' }}>
+            <p className="font-medium text-red-400 text-sm mb-1">Error</p>
+            <p className="text-sm text-gray-300 break-words">{msg.error}</p>
           </div>
         );
       }
@@ -220,18 +228,18 @@ function App() {
     if (msg.service === 'filesearch') {
       if (msg.result.found) {
         return (
-          <div className="mt-2 p-2 sm:p-3 rounded-lg text-xs sm:text-sm" style={{ backgroundColor: '#1a2227'}}>
-            <p className="font-medium" style={{ color: '#10b981' }}>File Found</p>
-            <p className="mt-1 break-all" style={{ color: '#e5e7eb' }}>
-              <span style={{ color: '#9ca3af' }}>Path:</span> {msg.result.path}
+          <div className="mt-2 p-3 rounded-lg border border-green-900/30" style={{ backgroundColor: '#141B1E' }}>
+            <p className="font-medium text-green-400 text-sm mb-2">File Found</p>
+            <p className="text-sm text-gray-300 break-all mb-1">
+              <span className="text-gray-500">Path:</span> {msg.result.path}
             </p>
-            <p className="mt-1" style={{ color: '#9ca3af' }}>Type: {msg.result.type}</p>
+            <p className="text-sm text-gray-500">Type: {msg.result.type}</p>
           </div>
         );
       } else {
         return (
-          <div className="mt-2 p-2 sm:p-3 rounded-lg text-xs sm:text-sm" style={{ backgroundColor: '#1a2227'}}>
-            <p style={{ color: '#f59e0b' }}>File not found</p>
+          <div className="mt-2 p-3 rounded-lg border border-yellow-900/30" style={{ backgroundColor: '#141B1E' }}>
+            <p className="text-sm text-yellow-400">File not found</p>
           </div>
         );
       }
@@ -239,24 +247,24 @@ function App() {
 
     if (msg.service === 'organizer') {
       return (
-        <div className="mt-2 p-2 sm:p-3 rounded-lg text-xs sm:text-sm" style={{ backgroundColor: '#1a2227'}}>
-          <p className="font-medium" style={{ color: '#3b82f6' }}>Organization Complete</p>
-          <pre className="mt-2 whitespace-pre-wrap break-words" style={{ color: '#e5e7eb' }}>{msg.result.output}</pre>
+        <div className="mt-2 p-3 rounded-lg border border-blue-900/30" style={{ backgroundColor: '#141B1E' }}>
+          <p className="font-medium text-blue-400 text-sm mb-2">Organization Complete</p>
+          <pre className="text-sm text-gray-300 whitespace-pre-wrap break-words">{msg.result.output}</pre>
         </div>
       );
     }
 
     if (msg.service === 'linter') {
       return (
-        <div className="mt-2 p-2 sm:p-3 rounded-lg text-xs sm:text-sm" style={{ backgroundColor: '#1a2227'}}>
-          <p className="font-medium" style={{ color: '#a855f7' }}>
+        <div className="mt-2 p-3 rounded-lg border border-purple-900/30" style={{ backgroundColor: '#141B1E' }}>
+          <p className="font-medium text-purple-400 text-sm mb-2">
             {msg.result.fixed ? 'Formatting Complete' : 'Formatting Failed'}
           </p>
-          <p className="mt-1 break-all" style={{ color: '#e5e7eb' }}>
-            <span style={{ color: '#9ca3af' }}>File:</span> {msg.result.filePath}
+          <p className="text-sm text-gray-300 break-all mb-1">
+            <span className="text-gray-500">File:</span> {msg.result.filePath}
           </p>
           {msg.result.output && (
-            <pre className="mt-2 whitespace-pre-wrap break-words" style={{ color: '#e5e7eb' }}>{msg.result.output}</pre>
+            <pre className="text-sm text-gray-300 mt-2 whitespace-pre-wrap break-words">{msg.result.output}</pre>
           )}
         </div>
       );
@@ -264,10 +272,10 @@ function App() {
 
     if (msg.service === 'ocr') {
       return (
-        <div className="mt-2 p-2 sm:p-3 rounded-lg text-xs sm:text-sm" style={{ backgroundColor: '#1a2227'}}>
-          <p className="font-medium mb-2" style={{ color: '#6366f1' }}>Extracted Text</p>
-          <div className="p-2 rounded" style={{ backgroundColor: '#0f1416' }}>
-            <pre className="whitespace-pre-wrap break-words" style={{ color: '#e5e7eb' }}>{msg.result.text}</pre>
+        <div className="mt-2 p-3 rounded-lg border border-indigo-900/30" style={{ backgroundColor: '#141B1E' }}>
+          <p className="font-medium text-indigo-400 text-sm mb-2">Extracted Text</p>
+          <div className="p-2 rounded" style={{ backgroundColor: '#0F1416' }}>
+            <pre className="text-sm text-gray-300 whitespace-pre-wrap break-words">{msg.result.text}</pre>
           </div>
         </div>
       );
@@ -275,10 +283,10 @@ function App() {
 
     if (msg.service === 'converter') {
       return (
-        <div className="mt-2 p-2 sm:p-3 rounded-lg text-xs sm:text-sm" style={{ backgroundColor: '#1a2227'}}>
-          <p className="font-medium" style={{ color: '#06b6d4' }}>Conversion Complete</p>
-          <p className="mt-1 break-all" style={{ color: '#e5e7eb' }}>
-            <span style={{ color: '#9ca3af' }}>Output:</span> {msg.result.outputPath}
+        <div className="mt-2 p-3 rounded-lg border border-cyan-900/30" style={{ backgroundColor: '#141B1E' }}>
+          <p className="font-medium text-cyan-400 text-sm mb-2">Conversion Complete</p>
+          <p className="text-sm text-gray-300 break-all">
+            <span className="text-gray-500">Output:</span> {msg.result.outputPath}
           </p>
         </div>
       );
@@ -286,9 +294,16 @@ function App() {
 
     if (msg.service === 'llm') {
       return (
-        <div className="mt-2 p-2 sm:p-3 rounded-lg text-xs sm:text-sm" style={{ backgroundColor: '#1a2227'}}>
-          <p className="font-medium mb-2" style={{ color: '#ec4899' }}>LLM Response</p>
-          <p className="whitespace-pre-wrap break-words" style={{ color: '#e5e7eb' }}>{msg.result.response}</p>
+        <div className="mt-2 p-3 rounded-lg border border-pink-900/30" style={{ backgroundColor: '#141B1E' }}>
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-medium text-pink-400 text-sm">LLM Response</p>
+            {msg.result.provider && (
+              <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: '#1E3A5F', color: '#9ca3af' }}>
+                {msg.result.provider}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-300 whitespace-pre-wrap break-words">{msg.result.response}</p>
         </div>
       );
     }
@@ -297,52 +312,58 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen" style={{ backgroundColor: '#0a0e10', minWidth: '250px' }}>
+    <div className="flex flex-col h-screen" style={{ backgroundColor: '#0F1416' }}>
       {/* Header */}
-      <div className="flex-shrink-0 px-3 sm:px-6 py-3 sm:py-4 border-b" style={{ backgroundColor: '#0f1416', borderColor: '#1e272b' }}>
-        <h1 className="text-lg sm:text-xl font-semibold truncate" style={{ color: '#e5e7eb' }}>Aoiler</h1>
-        <p className="text-xs sm:text-sm truncate" style={{ color: '#6b7280' }}>intelligent command center</p>
+      <div className="flex-shrink-0 px-6 py-4 border-b" style={{ backgroundColor: '#141B1E', borderColor: '#1E3A5F' }}>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-gray-100">Aoiler</h1>
+        </div>
+        <p className="text-sm text-gray-500 mt-0.5">intelligent command center</p>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-3 sm:py-4">
+      <div className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full px-2">
-            {/* <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full mb-4 sm:mb-6 flex items-center justify-center" style={{ backgroundColor: '#1e3a5f' }}>
-              <span className="text-2xl sm:text-3xl">🌙</span>
-            </div> */}
-            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-center" style={{ color: '#e5e7eb' }}>How can I help you today?</h2>
-            <p className="text-xs sm:text-sm mb-6 sm:mb-8 text-center px-2" style={{ color: '#6b7280' }}>Try asking me to organize directories, extract text from image or convert files</p>
+          <div className="flex flex-col items-center justify-center h-full px-4">
+            <h2 className="text-2xl font-semibold mb-2 text-gray-100 text-center">
+              How can I help you today?
+            </h2>
+            <p className="text-sm mb-8 text-gray-500 text-center max-w-md">
+              Try asking me to organize directories, extract text from images, or convert files
+            </p>
 
-            <div className="grid grid-cols-1 gap-2 sm:gap-3 w-full max-w-2xl">
+            <div className="grid grid-cols-1 gap-2 w-full max-w-2xl">
               {exampleQueries.map((example, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleExampleClick(example)}
-                  className="p-3 sm:p-4 rounded-lg text-left transition-all"
-                  style={{ backgroundColor: '#1a2227', border: '1px solid #1e272b' }}
+                  className="p-4 rounded-lg text-left transition-all border hover:border-gray-600"
+                  style={{
+                    backgroundColor: '#141B1E',
+                    borderColor: '#1E3A5F'
+                  }}
                 >
-                  <p className="text-xs sm:text-sm break-words" style={{ color: '#e5e7eb' }}>{example}</p>
+                  <p className="text-sm text-gray-300">{example}</p>
                 </button>
               ))}
             </div>
           </div>
         ) : (
-          <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+          <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] sm:max-w-[80%] rounded-lg px-3 py-2 sm:px-4 sm:py-3 ${
-                    msg.type === 'user' ? 'rounded-br-none' : 'rounded-bl-none'
+                  className={`max-w-[85%] rounded-lg px-4 py-3 ${
+                    msg.type === 'user' ? 'rounded-br-sm' : 'rounded-bl-sm'
                   }`}
                   style={{
-                    backgroundColor: msg.type === 'user' ? '#1e3a5f' : '#1a2227',
+                    backgroundColor: msg.type === 'user' ? '#1E3A5F' : '#141B1E',
                   }}
                 >
-                  <p className="text-xs sm:text-sm whitespace-pre-wrap break-words" style={{ color: '#e5e7eb' }}>
+                  <p className="text-sm text-gray-100 whitespace-pre-wrap break-words">
                     {msg.content}
                   </p>
                   {msg.type === 'assistant' && renderResult(msg)}
@@ -351,8 +372,8 @@ function App() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="rounded-lg px-3 py-2 sm:px-4 sm:py-3 rounded-bl-none" style={{ backgroundColor: '#1a2227' }}>
-                  <Loader2 className="animate-spin" size={16} style={{ color: '#6b7280' }} />
+                <div className="rounded-lg px-4 py-3 rounded-bl-sm" style={{ backgroundColor: '#141B1E' }}>
+                  <Loader2 className="animate-spin text-gray-500" size={18} />
                 </div>
               </div>
             )}
@@ -362,64 +383,70 @@ function App() {
       </div>
 
       {/* Input Area */}
-      <div className="flex-shrink-0 border-t" style={{ backgroundColor: '#0f1416', borderColor: '#1e272b' }}>
-        <div className="max-w-3xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
-          {/* Suggestions */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="mb-2 rounded-lg max-h-32 overflow-y-auto" style={{ backgroundColor: '#1a2227', border: '1px solid #1e272b' }}>
-              {suggestions.map((suggestion, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors"
-                  style={{
-                    color: '#e5e7eb',
-                    backgroundColor: idx === selectedIndex ? '#1e272b' : 'transparent'
-                  }}
-                  onMouseEnter={(e) => {
-                    setSelectedIndex(idx);
-                    e.currentTarget.style.backgroundColor = '#1e272b';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (idx !== selectedIndex) {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          )}
-
+      <div className="flex-shrink-0 border-t" style={{ backgroundColor: '#141B1E', borderColor: '#1E3A5F' }}>
+        <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="relative">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask me anything..."
-              disabled={loading}
-              rows={1}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 pr-10 sm:pr-12 rounded-lg resize-none border outline-none text-xs sm:text-sm"
-              style={{
-                backgroundColor: '#1a2227',
-                borderColor: '#1e272b',
-                color: '#e5e7eb',
-              }}
-            />
-            <button
-              onClick={handleSubmit}
-              disabled={loading || !input.trim()}
-              className="absolute right-1.5 bottom-1.5 sm:right-2 sm:bottom-2 p-1.5 sm:p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: '#1e3a5f' }}
-            >
-              {loading ? (
-                <Loader2 className="animate-spin" size={16} style={{ color: '#e5e7eb' }} />
-              ) : (
-                <Send size={16} style={{ color: '#e5e7eb' }} />
-              )}
-            </button>
+            {/* Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div
+                ref={suggestionsRef}
+                className="absolute bottom-full mb-2 w-full rounded-lg border max-h-40 overflow-y-auto"
+                style={{
+                  backgroundColor: '#141B1E',
+                  borderColor: '#1E3A5F'
+                }}
+              >
+                {suggestions.map((suggestion, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="w-full text-left px-4 py-2.5 text-sm transition-colors border-b last:border-b-0"
+                    style={{
+                      color: '#e5e7eb',
+                      backgroundColor: idx === selectedIndex ? '#1E3A5F' : 'transparent',
+                      borderColor: '#1E3A5F'
+                    }}
+                  >
+                    <span className="font-mono">{suggestion}</span>
+                  </button>
+                ))}
+                <div className="px-4 py-2 text-xs text-gray-500 border-t" style={{ borderColor: '#1E3A5F' }}>
+                  Use ↑↓ to navigate, Tab or Enter to select, Esc to close
+                </div>
+              </div>
+            )}
+
+            {/* Input */}
+            <div className="flex items-end gap-2">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask me anything..."
+                disabled={loading}
+                rows={1}
+                className="flex-1 px-4 py-3 rounded-lg resize-none border outline-none text-sm"
+                style={{
+                  backgroundColor: '#0F1416',
+                  borderColor: '#1E3A5F',
+                  color: '#e5e7eb',
+                  maxHeight: '120px'
+                }}
+              />
+              <button
+                onClick={handleSubmit}
+                disabled={loading || !input.trim()}
+                className="p-3 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+                style={{ backgroundColor: '#1E3A5F' }}
+              >
+                {loading ? (
+                  <Loader2 className="animate-spin text-gray-100" size={18} />
+                ) : (
+                  <Send size={18} className="text-gray-100" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

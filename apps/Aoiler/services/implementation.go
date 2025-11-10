@@ -36,10 +36,7 @@ type ConverterResult struct {
 	Success    bool   `json:"success"`
 }
 
-type LLMResult struct {
-	Response string `json:"response"`
-	Success  bool   `json:"success"`
-}
+
 
 type AutoCompleteResult struct {
 	Suggestions []string `json:"suggestions"`
@@ -522,32 +519,6 @@ func (cs *ConverterService) GetPathSuggestions(input string) (AutoCompleteResult
 	return result, nil
 }
 
-// LLMService handles LLM API queries
-type LLMService struct {
-	apiKey string
-	apiURL string
-}
-
-func NewLLMService() *LLMService {
-	return &LLMService{
-		apiKey: os.Getenv("LLM_API_KEY"),
-		apiURL: os.Getenv("LLM_API_URL"),
-	}
-}
-
-func (llm *LLMService) Query(query string) (LLMResult, error) {
-	if llm.apiKey == "" {
-		return LLMResult{
-			Response: "LLM API key not configured. Please set LLM_API_KEY environment variable.",
-			Success:  false,
-		}, nil
-	}
-
-	return LLMResult{
-		Response: fmt.Sprintf("LLM response for: %s (Implementation pending)", query),
-		Success:  true,
-	}, nil
-}
 
 // Helper functions
 func extractPath(query string) string {

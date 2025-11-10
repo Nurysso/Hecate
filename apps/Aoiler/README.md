@@ -1,26 +1,58 @@
-## About
+# Aoiler
 
-Wails template which includes: Vite, React, TS, TailwindCSS out of the box.
+An intelligent command center that routes natural language queries to specialized system services.
 
-Build with `Wails CLI v2.0.0`.
+## What it does
 
-To use this [template](https://wails.io/docs/community/templates):
-```shell
-wails init -n "Your Project Name" -t https://github.com/hotafrika/wails-vite-react-ts-tailwind-template
-cd frontend/src
-npm install
+Aoiler understands what you want and automatically routes your request to the right tool:
+
+- **File Search** - "Where is my waybar config?"
+- **File Organization** - "Organize ~/Downloads by category"
+- **Code Formatting** - "Format main.py"
+- **OCR** - "Extract text from screen"
+- **File Conversion** - "Convert video.mp4 to webm"
+- **LLM Chat** - Ask anything else
+
+## Setup
+
+### Environment Variables
+
+Set at least one LLM API key (optional, only needed for chat) :
+#### in future will add local model support but not right cause i got amd gpu and it sucks 🥲
+
+```bash
+export OPENAI_API_KEY="sk-..."
+# or
+export CLAUDE_API_KEY="sk-ant-..."
+# or
+export GEMINI_API_KEY="..."
 ```
 
-[Here](scripts) you can find useful scripts for building on different platforms and Wails CLI installation.
+### Dependencies
 
-## Live Development
+- **kondo** - File organization
+- **black/gofmt/shfmt/prettier** - Code formatting
+- **tesseract/grim/slurp** - OCR
+- **ffmpeg** - File conversion
 
-To run in live development mode, run `wails dev` in the project directory. In another terminal, go into the `frontend`
-directory and run `npm run dev`. The frontend dev server will run on http://localhost:34115. Connect to this in your
-browser and connect to your application.
+### Run
 
-## Building
+```bash
+wails dev
+```
 
-To build a redistributable, production mode package, use `wails build`.
+## How it works
+
+1. Type a natural language command
+2. Aoiler classifies your intent
+3. Routes to the appropriate service
+4. Returns the result
+
+Path autocomplete works with Tab/Arrow keys when typing file paths.
 
 
+- **Contribution:** LLM logic and path completion implemented by Claude
+- **Architecture:** Designed and built by me
+- **Tools:** grim + slurp + tesseract (OCR), kondo (file organization), ffmpeg (conversion), black, gofmt, prettier, shfmt (Lint), filepath-go module(search)
+
+## Note right now only .config module is searched not the entire homeDir
