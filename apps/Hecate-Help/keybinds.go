@@ -1,14 +1,17 @@
 package main
+
 import (
 	"bufio"
 	"bytes"
 	"embed"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
 )
+
 //go:embed all:frontend/dist
 var assets embed.FS
 
@@ -122,6 +125,77 @@ func (a *App) GetKeybinds() []Keybind {
 	return keybinds
 }
 
+// UpdateKeybind updates a keybind line in the config file by finding and replacing the exact line
+func (a *App) UpdateKeybind(oldLine, bindType, mods, key, action, description string, isCommented bool) bool {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return false
+	}
+
+	configPath := filepath.Join(homeDir, ".config", "hypr", "configs", "keybinds.conf")
+
+	// Validate description is not empty
+	if strings.TrimSpace(description) == "" {
+		return false
+	}
+
+	// Read the entire file
+	content, err := os.ReadFile(configPath)
+	if err != nil {
+		return false
+	}
+
+	// Build the new line
+	commentPrefix := ""
+	if isCommented {
+		commentPrefix = "# "
+	}
+
+	// Determine bind command
+	bindCmd := "bind"
+	if bindType != "default" && bindType != "" {
+		bindCmd = "bind" + bindType
+	}
+
+	// Convert modifiers back to config format (preserve $mainMod)
+	modsForConfig := reverseFormatModifiers(mods)
+
+	// Build the dispatcher with params and description comment
+	// Hyprland syntax: bind = MODS, key, dispatcher, params
+	// If description differs from action, add it as a comment
+	dispatcherWithComment := action
+	if description != action && strings.TrimSpace(description) != "" {
+		dispatcherWithComment = fmt.Sprintf("%s # %s", action, description)
+	}
+
+	// Format: bind = MODS, key, dispatcher params # comment
+	newLine := fmt.Sprintf("%s%s = %s, %s, %s", commentPrefix, bindCmd, modsForConfig, key, dispatcherWithComment)
+
+	// Split content into lines
+	lines := strings.Split(string(content), "\n")
+
+	// Find and replace the exact matching line
+	found := false
+	for i, line := range lines {
+		if line == oldLine {
+			lines[i] = newLine
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return false
+	}
+
+	// Join lines back together
+	newContent := strings.Join(lines, "\n")
+
+	// Write back to file with proper permissions
+	err = os.WriteFile(configPath, []byte(newContent), 0644)
+	return err == nil
+}
+
 // parseActionAndDescription extracts action and description from the action string
 func parseActionAndDescription(action string) (string, string) {
 	actionName := action
@@ -164,8 +238,9 @@ func formatModifiers(mods string) string {
 
 	mods = strings.ToUpper(strings.TrimSpace(mods))
 
-	// Replace common modifier names
+	// Replace common modifier names for DISPLAY only
 	replacements := map[string]string{
+		"$MAINMOD": "SUPER",
 		"SUPER":    "SUPER",
 		"ALT":      "ALT",
 		"CTRL":     "CTRL",
@@ -173,7 +248,6 @@ func formatModifiers(mods string) string {
 		"SHIFT":    "SHIFT",
 		"MOD4":     "SUPER",
 		"MOD1":     "ALT",
-		"$MAINMOD": "SUPER",
 	}
 
 	for old, new := range replacements {
@@ -194,6 +268,22 @@ func formatModifiers(mods string) string {
 	}
 
 	return strings.Join(cleaned, " + ")
+}
+
+// reverseFormatModifiers converts display format back to config format (preserving $mainMod)
+func reverseFormatModifiers(mods string) string {
+	if mods == "" {
+		return ""
+	}
+
+	// Remove spaces around separators
+	mods = strings.ReplaceAll(mods, " + ", "_")
+	mods = strings.ReplaceAll(mods, "+", "_")
+
+	// Convert SUPER back to $mainMod
+	mods = strings.ReplaceAll(mods, "SUPER", "$mainMod")
+
+	return mods
 }
 
 // formatKey formats the key name for display

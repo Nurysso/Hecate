@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Monitor, Save, RotateCcw, Play, AlertCircle, Info } from 'lucide-react';
-import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
+import { Monitor, RotateCcw, AlertCircle } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -361,9 +360,12 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full" style={{ backgroundColor: '#0f1416' }}>
-        <div className="text-gray-400">Loading monitors...</div>
-      </div>
+        <div className="flex items-center justify-center min-h-screen bg-gray-950">
+  <div className="text-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-700 border-t-gray-400 mx-auto mb-4"></div>
+    <p className="text-gray-400 text-sm">Loading Monitors...</p>
+  </div>
+</div>
     );
   }
 
@@ -400,64 +402,6 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
           background: '#F8F6F0',
         },
       }} />
-
-      {/* Header */}
-       <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-100 mb-1">Monitor Control</h1>
-            <p className="text-sm text-gray-500">
-              Manage Monitor Layout
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="ml-2 text-gray-600 hover:text-gray-400 inline-flex items-center">
-                    <Info className="w-3.5 h-3.5" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 bg-gray-900 border-gray-800 text-gray-300 text-sm">
-                  <div className="space-y-2">
-                    <p className="text-sm text-blue-400/80 mt-1">
-                      {draggableMonitors.length === 1
-                        ? 'Single monitor detected. Configure resolution and scale below.'
-                        : 'Drag monitors to arrange them. Click to select and edit properties.'}
-                    </p>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </p>
-          </div>
-          {/* Action Buttons */}
-          <div className="flex gap-2">
-            <button
-              onClick={handleTest}
-              disabled={!selectedMonitor}
-              className="px-4 py-2 rounded flex items-center gap-2 text-sm transition-colors disabled:opacity-50 hover:opacity-80"
-              style={{ backgroundColor: '#1e3a5f', color: 'white' }}
-            >
-              <Play size={16} />
-              Test
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-4 py-2 rounded flex items-center gap-2 text-sm transition-colors disabled:opacity-50 hover:opacity-80"
-              style={{ backgroundColor: '#1e3a5f', color: 'white' }}
-            >
-              <Save size={16} />
-              {saving ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              onClick={handleReload}
-              className="px-4 py-2 rounded flex items-center gap-2 text-sm transition-colors hover:opacity-80"
-              style={{ backgroundColor: '#1e3a5f', color: 'white' }}
-            >
-              <RotateCcw size={16} />
-              Reload Hyprland
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Canvas Area */}
@@ -573,7 +517,7 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
 
         {/* Properties Panel */}
         <div className="w-80 border-l p-4 overflow-auto" style={{ borderColor: '#1e272b', backgroundColor: '#0f1419' }}>
-          <h2 className="text-lg font-semibold mb-4">Monitor Details</h2>
+          <h2 className="text-lg text-gray-100 font-semibold mb-4">Monitor Details</h2>
 
           {selectedMonitorData ? (
             <div className="space-y-4">

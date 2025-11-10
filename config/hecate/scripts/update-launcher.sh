@@ -8,7 +8,7 @@ SCRIPT="$HOME/.config/hecate/scripts/install-updates.sh"
 terminal=$(awk -F'=' '
   /^\[preferences\]/ { in_pref=1; next }
   /^\[/ { in_pref=0 }
-  in_pref && $1 ~ /terminal/ {
+  in_pref && $1 ~ /term/ {
     gsub(/"/, "", $2)
     gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2)
     print $2

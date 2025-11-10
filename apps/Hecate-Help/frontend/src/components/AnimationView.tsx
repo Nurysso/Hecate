@@ -251,20 +251,8 @@ const AnimationsView: React.FC = () => {
   return (
     <div className="h-full flex flex-col">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-40 bg-[#0f1416] border-b border-gray-800">
+      <div className="sticky bg-[#0A0E10] top-0 z-40 border-b border-gray-800 rounded-lg">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-100 mb-1">Animation Manager</h1>
-                <p className="text-sm text-gray-500">
-                  Configure Hyprland animations and bezier curves
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Action Bar */}
           <div
             className="flex items-center justify-between p-4 border rounded-lg"
@@ -342,7 +330,7 @@ const AnimationsView: React.FC = () => {
                     className="rounded-lg p-4 border transition-all hover:shadow-lg relative overflow-hidden"
                     style={{
                       backgroundColor: '#141b1e',
-                      borderColor: anim.enabled ? '#1e3a5f' : '#1e272b',
+                      borderColor: anim.enabled ? '#1e272b' : '1e272b',
                       borderWidth: '1px',
                     }}
                   >

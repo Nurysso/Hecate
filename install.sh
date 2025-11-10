@@ -899,6 +899,19 @@ move_config() {
   else
     gum style --foreground 220 "⚠ Hecate-Settings build directory not found"
   fi
+    if [ -d "$HECATEAPPSDIR/Aoiler/build/bin" ]; then
+    gum style --foreground 120 "Installing Hecate Assistant..."
+    sleep 1
+    if [ -f "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler" ]; then
+      cp "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler" "$HOME/.local/bin/Aoiler"
+      chmod +x "$HOME/.local/bin/Aoiler"
+      gum style --foreground 82 "✓ Assistant installed to ~/.local/bin"
+    else
+      gum style --foreground 220 "⚠ Assistant binary not found at expected location"
+    fi
+  else
+    gum style --foreground 220 "⚠ Assistant build directory not found"
+  fi
 
   # Install hecate CLI tool
   if [ -f "$HECATEDIR/config/hecate.sh" ]; then

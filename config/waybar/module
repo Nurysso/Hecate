@@ -120,11 +120,11 @@
     "format": "  {}",
     "escape": true,
     "return-type": "json",
-    "exec": "~/.config/hecate/scripts/update.sh",
+    "exec": "~/.config/hecate/scripts/check-update.sh",
     "interval": 1800,
     "signal": 1,
     "hide-empty-text": false,
-    "on-click": "~/.config/hecate/scripts/term.sh"
+    "on-click": "~/.config/hecate/scripts/update-launcher.sh"
   },
 "tray": {
     "icon-size": 21,

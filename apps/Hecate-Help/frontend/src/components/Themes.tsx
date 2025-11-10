@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Palette, Save, Check, AlertCircle, Sparkles, Info } from 'lucide-react';
+import { Palette, Save, Check, AlertCircle, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from './ui/sonner';
 import { GetThemeConfig, UpdateThemeMode, ApplyTheme } from '../../wailsjs/go/main/App';
@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 interface ThemeConfig {
   mode: string;
@@ -98,9 +97,9 @@ const ThemeView: React.FC = () => {
 
   if (loading) {
     return (
-       <div className="flex items-center justify-center h-full bg-gray-950">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-700 border-t-gray-400 mx-auto mb-4"></div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-950">
+  <div className="text-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-700 border-t-gray-400 mx-auto mb-4"></div>
           <p className="text-gray-400 text-sm">Loading preferences...</p>
         </div>
       </div>
@@ -126,31 +125,9 @@ const ThemeView: React.FC = () => {
         },
       }} />
       <div className="p-6 max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 pb-4 border-b border-gray-800">
-          <h1 className="text-2xl font-semibold text-gray-100 mb-1">Theme Manager</h1>
-          <p className="text-sm text-gray-500">Configure dynamic or static color themes
-          <Popover>
-    <PopoverTrigger asChild>
-        <button className="ml-2 text-gray-600 hover:text-gray-400 inline-flex items-center">
-            <Info className="w-3.5 h-3.5" />
-        </button>
-    </PopoverTrigger>
-    <PopoverContent className="w-80 bg-gray-900 border-gray-800 text-gray-300 text-sm">
-        <div className="space-y-2">
-              <ul className="space-y-0.5 text-blue-400/80">
-                <li>• Terminal and browser preferences are saved immediately</li>
-                <li>• Shell changes require running a command in your terminal</li>
-                <li>• You may need to restart applications or log back in for changes to take effect</li>
-              </ul>
-            </div>
-    </PopoverContent>
-</Popover>
-</p>
-        </div>
 
         {/* Current Status */}
-        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700 mb-4">
+              <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b] mb-3">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-gray-600 mb-1">Active Mode</p>
@@ -167,7 +144,7 @@ const ThemeView: React.FC = () => {
 
         <div className="space-y-4 mb-6">
           {/* Mode Selection */}
-          <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+              <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b]">
             <label className="block text-sm font-medium text-gray-300 mb-3">
               Theme Mode
             </label>
@@ -220,15 +197,16 @@ const ThemeView: React.FC = () => {
 
           {/* Theme Selection (only in static mode) */}
           {selectedMode === 'static' && (
-            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+            <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b]">
+
               <label className="block text-sm font-medium text-gray-300 mb-3">
                 Select Theme
               </label>
               <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-               <SelectTrigger className="flex-1 bg-gray-800/50 rounded-lg p-2 font-semibold text-white border border-gray-700 focus:border-gray-800/50 focus:ring-0">
+               <SelectTrigger className="flex-1 bg-[#141b1e] rounded-lg p-2 font-semibold text-white border border-[#1e272b] focus:border-gray-800/50 focus:ring-0">
                   <SelectValue placeholder="Choose a theme..." />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-gray-800">
+                    <SelectContent className="bg-[#141b1e] border border-gray-800 rounded-lg">
                   {config.availableThemes.map((theme) => (
                     <SelectItem
                       key={theme.name}
@@ -259,7 +237,7 @@ const ThemeView: React.FC = () => {
 
           {/* Theme Preview */}
           {selectedMode === 'static' && selectedTheme && (
-            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+                          <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b]">
               <p className="text-sm font-medium text-gray-300 mb-3">Color Preview</p>
               <div className="grid grid-cols-8 gap-2">
                 {config.availableThemes
@@ -291,11 +269,11 @@ const ThemeView: React.FC = () => {
 
         {/* Info Box */}
         {selectedMode === 'dynamic' && (
-          <div className="mb-6 p-3 bg-blue-950/30 border border-blue-900/50 rounded text-xs text-blue-300">
+          <div className="mb-6 p-3 bg-blue-800/30 border border-blue-800/50 rounded text-xs text-blue-300">
             <p className="font-medium mb-1">Dynamic Mode</p>
             <p className="text-blue-400/80">
-              Colors are automatically generated from your wallpaper using Pywal.
-              Run <code className="bg-gray-950 px-1 py-0.5 rounded">wal -i /path/to/wallpaper</code> to update colors.
+              Colors are automatically generated from your wallpaper using Pywal and matugen.
+              {/* Run <code className="bg-gray-950 px-1 py-0.5 rounded">wal -i /path/to/wallpaper</code> to update colors. */}
             </p>
           </div>
         )}

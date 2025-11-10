@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, RefreshCw, Edit2, Info, Trash2, Plus, Monitor, Layers, Check, X } from 'lucide-react';
+import { Search, RefreshCw, Edit2, Trash2, Plus, Monitor, Layers, Check, X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 
 // Type definitions
 interface HyprlandClient {
@@ -198,35 +197,7 @@ useEffect(() => {
   return (
         <div className="h-full overflow-y-auto bg-gray-950">
       <div className="p-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 pb-4 border-b border-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-100 mb-1">Window Rules Configuration</h1>
-              <p className="text-sm text-gray-500">
-                Manage Hyprland Window Rules
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button className="ml-2 text-gray-600 hover:text-gray-400 inline-flex items-center">
-                      <Info className="w-3.5 h-3.5" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 bg-gray-900 border border-gray-800 text-gray-300 text-sm p-4 rounded shadow-xl">
-                    <div className="space-y-2">
-                      <p className="font-medium text-gray-200">How it works</p>
-                      <p>Auto-detects open windows using hyprctl and helps create static window rules.</p>
-                      <ul className="space-y-0.5 text-blue-400/80 text-xs">
-                        <li>• Rules are saved to ~/.config/hypr/configs/WindowRules.conf</li>
-                        <li>• Use initial values for static rules (recommended)</li>
-                        <li>• Config is auto-reloaded after changes</li>
-                      </ul>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </p>
-            </div>
-          </div>
-        </div>
+
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b" style={{ borderColor: '#1e272b' }}>

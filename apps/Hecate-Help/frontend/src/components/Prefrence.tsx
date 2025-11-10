@@ -17,7 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from './ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 interface PreferencesConfig {
   term: string;
@@ -133,9 +132,9 @@ const handleSave = async () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-950">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-700 border-t-gray-400 mx-auto mb-4"></div>
+        <div className="flex items-center justify-center min-h-screen bg-gray-950">
+  <div className="text-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-700 border-t-gray-400 mx-auto mb-4"></div>
           <p className="text-gray-400 text-sm">Loading preferences...</p>
         </div>
       </div>
@@ -150,28 +149,7 @@ const handleSave = async () => {
               },
             }} />
       <div className="p-6 max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 pb-4 border-b border-gray-800">
-          <h1 className="text-2xl font-semibold text-gray-100 mb-1">Preferences</h1>
-          <p className="text-sm text-gray-500">Configure your default applications
-            <Popover>
-    <PopoverTrigger asChild>
-        <button className="ml-2 text-gray-600 hover:text-gray-400 inline-flex items-center">
-            <Info className="w-3.5 h-3.5" />
-        </button>
-    </PopoverTrigger>
-    <PopoverContent className="w-80 bg-gray-900 border-gray-800 text-gray-300 text-sm">
-        <div className="space-y-2">
-              <ul className="space-y-0.5 text-blue-400/80">
-                <li>• Terminal and browser preferences are saved immediately</li>
-                <li>• Shell changes require running a command in your terminal</li>
-                <li>• You may need to restart applications or log back in for changes to take effect</li>
-              </ul>
-            </div>
-    </PopoverContent>
-</Popover>
-          </p>
-        </div>
+
 
         {/* Message Banner */}
         {message.type && (
@@ -192,7 +170,7 @@ const handleSave = async () => {
         <div className="space-y-4 mb-6">
                   <div className="grid grid-cols-2 gap-4">
           {/* Terminal Selection */}
-            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+              <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b]">
             <label className="block text-sm font-medium text-gray-300 mb-3">
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4" />
@@ -222,7 +200,7 @@ const handleSave = async () => {
           </div>
 
           {/* Browser Selection */}
-            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+                          <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b]">
             <label className="block text-sm font-medium text-gray-300 mb-3">
               <div className="flex items-center gap-2">
                 <Globe className="w-4 h-4" />
@@ -252,7 +230,7 @@ const handleSave = async () => {
           </div>
 
           {/* Shell Selection with Warning */}
-            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+              <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b]">
             <label className="block text-sm font-medium text-gray-300 mb-3">
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4" />
@@ -284,7 +262,7 @@ const handleSave = async () => {
             </p>
           </div>
           {/* Profile Section */}
-          <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+              <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b]">
             <label className="block text-sm font-medium text-gray-300 mb-3">
               <div className="flex items-center gap-2">
                 <CircleUserIcon className="w-4 h-4" />

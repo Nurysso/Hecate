@@ -19,7 +19,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "Sidebar Assistant",
+		Title:  "Aoiler",
 		Width:  400,
 		Height: 800,
 		AssetServer: &assetserver.Options{
@@ -33,7 +33,7 @@ func main() {
 		Linux: &linux.Options{
 			WindowIsTranslucent: false,
 			WebviewGpuPolicy:    linux.WebviewGpuPolicyOnDemand,
-			ProgramName:         "sidebar-assistant",
+			ProgramName:         "Aoiler",
 		},
 	})
 

@@ -375,6 +375,13 @@ install_config() {
     chmod +x "$HOME/.local/bin/hecate"
   fi
 
+    if [ -d "$HECATEAPPSDIR/Aoiler/build/bin" ] && [ -f "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler" ]; then
+    gum style --foreground 120 "Installing Hecate Assistant..."
+    sleep 2
+    cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Aoiler" "$HOME/.local/bin/Aoiler"
+    chmod +x "$HOME/.local/bin/Aoiler"
+  fi
+
   gum style --foreground 82 "✓ Configuration files updated successfully!"
 }
 

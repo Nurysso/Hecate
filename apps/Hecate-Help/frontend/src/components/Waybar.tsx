@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Save, RotateCcw, Check, AlertCircle, Eye, Archive, Info } from 'lucide-react';
+import { Save, RotateCcw, AlertCircle } from 'lucide-react';
 import { Toaster } from './ui/sonner';
 import { toast } from 'sonner';
 import { GetWaybarConfig, ApplyWaybarConfig, GetWaybarPreview, CreateWaybarBackup } from '../../wailsjs/go/main/App';
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from './ui/popover';
 import {
   Select,
   SelectContent,
@@ -115,9 +110,9 @@ const WaybarView: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full bg-[#141b1e]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-700 border-t-gray-400 mx-auto mb-4"></div>
+  <div className="flex items-center justify-center min-h-screen bg-gray-950">
+  <div className="text-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-700 border-t-gray-400 mx-auto mb-4"></div>
           <p className="text-gray-400 text-sm">Loading preferences...</p>
         </div>
       </div>
@@ -144,53 +139,17 @@ const WaybarView: React.FC = () => {
             }} />
       <div className="h-full overflow-y-auto">
         <div className="p-6 max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-6 pb-4 border-b border-gray-800">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-100 mb-1">Waybar Configuration</h1>
-                <p className="text-sm text-gray-500">
-                  Manage layout and styling
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className="ml-2 text-gray-600 hover:text-gray-400 inline-flex items-center">
-                        <Info className="w-3.5 h-3.5" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80 bg-gray-900 border-gray-800 text-gray-300 text-sm">
-                      <div className="space-y-2">
-                        <p>Select a config and style, then apply to update the symlinks at:</p>
-                        <ul className="space-y-0.5 text-blue-400/80">
-                          <li>~/.config/waybar/config</li>
-                          <li>~/.config/waybar/style.css</li>
-                        </ul>
-                        <p className="text-xs">Waybar will reload automatically.</p>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </p>
-              </div>
-              <button
-                onClick={handleBackup}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-[#141b1e] hover:bg-gray-800 text-gray-300 rounded border border-gray-800 transition-colors"
-              >
-                <Archive className="w-4 h-4" />
-                Backup
-              </button>
-            </div>
-          </div>
-
           {/* Selection Form */}
           <div className="space-y-4 mb-6">
             <div className="grid grid-cols-2 gap-4">
               {/* Config Selection Box */}
-              <div className="bg-[#141b1e] rounded-lg p-3 border border-gray-700">
-                <label className="block font-semibold text-white mb-3">
+              <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b]">
+                <label className="block font-semibold text-gray-300 mb-3">
                   Layout Configuration
                 </label>
                 <div className="flex gap-2">
                   <Select value={selectedConfig} onValueChange={setSelectedConfig}>
-                    <SelectTrigger className="flex-1 bg-[#141b1e] rounded-lg p-2 font-semibold text-white border border-gray-700 focus:border-gray-800/50 focus:ring-0">
+                    <SelectTrigger className="flex-1 bg-[#141b1e] rounded-lg p-2 font-semibold text-white border border-[#1e272b] focus:border-gray-800/50 focus:ring-0">
                       <SelectValue placeholder="Select a config..." />
                     </SelectTrigger>
                     <SelectContent className="bg-[#141b1e] border border-gray-800 rounded-lg">
@@ -215,13 +174,13 @@ const WaybarView: React.FC = () => {
               </div>
 
               {/* Style Selection Box */}
-              <div className="bg-[#141b1e] rounded-lg p-3 border border-gray-700">
-                <label className="block font-semibold text-white mb-3">
+              <div className="bg-[#141b1e] rounded-lg p-3 border border-[#1e272b]">
+                <label className="block font-semibold text-gray-300  mb-3">
                   Style
                 </label>
                 <div className="flex gap-2">
                   <Select value={selectedStyle} onValueChange={setSelectedStyle}>
-                    <SelectTrigger className="flex-1 bg-[#141b1e] rounded-lg p-2 font-semibold text-white border border-gray-700 focus:border-gray-800/50 focus:ring-0">
+                    <SelectTrigger className="flex-1 bg-[#141b1e] rounded-lg p-2 font-semibold text-white border border-[#1e272b] focus:border-gray-800/50 focus:ring-0">
                       <SelectValue placeholder="Select a style..." />
                     </SelectTrigger>
                     <SelectContent className="bg-[#141b1e] border border-gray-800 rounded-lg">
@@ -273,7 +232,7 @@ const WaybarView: React.FC = () => {
             >
               {applying ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-700 border-t-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#1e272b] border-t-white"></div>
                   Applying...
                 </>
               ) : (
