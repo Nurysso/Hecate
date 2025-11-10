@@ -216,6 +216,68 @@ const SettingsView: React.FC = () => {
                       background: '#F8F6F0',
                     },
                   }} />
+
+                  <div>
+        <div className="max-w-6xl mx-auto flex items-center p-2 justify-between">
+          <div className="flex items-center gap-6">
+            {/* User Avatar */}
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg overflow-hidden">
+              {systemInfo.userPfpBase64 ? (
+                <img
+                  src={systemInfo.userPfpBase64}
+                  alt="User"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                systemInfo.hostname.charAt(0).toUpperCase()
+              )}
+            </div>
+
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">{systemInfo.hostname}</h1>
+              <div className="flex items-center gap-3 text-sm text-gray-300">
+                <span> {systemInfo.os} ✦ Hyprland ✦ {systemInfo.uptime}</span>
+                {/* <span></span> */}
+              </div>
+            </div>
+          </div>
+
+          {/* RAM Dial */}
+          <div className="relative w-20 h-20">
+  <svg className="w-full h-full transform -rotate-90">
+    {/* Background circle */}
+    <circle
+      cx="40"
+      cy="40"
+      r="36"
+      stroke="rgba(75, 85, 99, 0.3)"
+      strokeWidth="6"
+      fill="none"
+    />
+    {/* Progress circle */}
+    <circle
+      cx="40"
+      cy="40"
+      r="36"
+      stroke="rgb(59, 130, 246)"
+      strokeWidth="6"
+      fill="none"
+      strokeDasharray={`${2 * Math.PI * 36}`}
+      strokeDashoffset={`${2 * Math.PI * 36 * (1 - memoryPercent / 100)}`}
+      strokeLinecap="round"
+      style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+    />
+  </svg>
+  <div className="absolute inset-0 flex items-center justify-center">
+    <div className="text-center">
+      <div className="text-sm font-bold text-white">RAM</div>
+      <div className="text-[10px] text-gray-400">{Math.round(memoryPercent)}%</div>
+    </div>
+  </div>
+</div>
+        </div>
+      </div>
+
       <div className="max-w-6xl mx-auto px-8 py-8 space-y-8">
         {/* Wallpapers Section */}
         <section>
