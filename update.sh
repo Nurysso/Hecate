@@ -42,46 +42,108 @@ check_hecate_installed() {
   fi
 }
 
-# Parse TOML value
+# Parse TOML value - Enhanced to handle sections
 get_config_value() {
   local key="$1"
+  local section="${2:-}"
+
   if [ ! -f "$CONFIG_FILE" ]; then
     echo ""
     return
   fi
-  grep -E "^\s*$key\s*=" "$CONFIG_FILE" 2>/dev/null |
-    head -n1 |
-    sed -E "s/^\s*$key\s*=\s*\"?([^\"]*)\"?/\1/" || echo ""
+
+  if [ -n "$section" ]; then
+    # Extract value from specific section
+    awk -v section="$section" -v key="$key" '
+      /^\[.*\]/ {
+        current_section = $0
+        gsub(/^\[|\]$/, "", current_section)
+      }
+      current_section == section && $0 ~ "^" key " *= *" {
+        sub("^" key " *= *\"?", "")
+        sub("\"? *(#.*)?$", "")
+        print
+        exit
+      }
+    ' "$CONFIG_FILE"
+  else
+    # Original behavior for backwards compatibility
+    grep -E "^\s*$key\s*=" "$CONFIG_FILE" 2>/dev/null |
+      head -n1 |
+      sed -E "s/^\s*$key\s*=\s*\"?([^\"]*)\"?/\1/" || echo ""
+  fi
 }
 
-# Set TOML value
+# Set TOML value in specific section
 set_config_value() {
   local key="$1"
   local value="$2"
-  sed -i "s|^$key\s*=.*|$key = \"$value\"|" "$CONFIG_FILE"
+  local section="${3:-metadata}"
+
+  # Use awk to update value in correct section
+  awk -v section="$section" -v key="$key" -v value="$value" '
+    /^\[.*\]/ {
+      current_section = $0
+      gsub(/^\[|\]$/, "", current_section)
+      print
+      next
+    }
+    current_section == section && $0 ~ "^" key " *= *" {
+      print key " = \"" value "\""
+      next
+    }
+    { print }
+  ' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
 }
 
-current_version=$(get_config_value "version")
-remote_version=$(curl -s "https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt" 2>/dev/null || echo "")
-USER_TERMINAL=$(get_config_value "term")
-USER_SHELL=$(get_config_value "shell")
+# Read configuration values
+read_user_config() {
+  gum style --border double --padding "1 2" --border-foreground 212 "Reading Configuration"
+
+  # Read from [metadata] section
+  current_version=$(get_config_value "version" "metadata")
+
+  # Read from [preferences] section
+  USER_TERMINAL=$(get_config_value "term" "preferences")
+  USER_BROWSER=$(get_config_value "browser" "preferences")
+  USER_SHELL=$(get_config_value "shell" "preferences")
+  USER_PROFILE=$(get_config_value "profile" "preferences")
+
+  # Read from [theme] section
+  THEME_MODE=$(get_config_value "mode" "theme")
+
+  gum style --foreground 82 "✓ Configuration loaded:"
+  gum style --foreground 82 "  Version: ${current_version}"
+  gum style --foreground 82 "  Terminal: ${USER_TERMINAL}"
+  gum style --foreground 82 "  Browser: ${USER_BROWSER}"
+  gum style --foreground 82 "  Shell: ${USER_SHELL}"
+  gum style --foreground 82 "  Profile: ${USER_PROFILE}"
+  gum style --foreground 82 "  Theme: ${THEME_MODE}"
+
+  # Validate required values
+  if [ -z "$USER_TERMINAL" ] || [ -z "$USER_SHELL" ]; then
+    gum style --foreground 196 "❌ Error: Missing required configuration values!"
+    exit 1
+  fi
+}
 
 # Get current and remote versions
 check_versions() {
-#   gum style --border double --padding "1 2" --border-foreground 212 "Checking for Updates"
+  remote_version=$(curl -s "https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt" 2>/dev/null || echo "")
+
   if [ -z "$remote_version" ]; then
     gum style --foreground 196 "❌ Failed to fetch remote version"
     gum style --foreground 220 "Check your internet connection"
     exit 1
   fi
 
-#   gum style --foreground 62 "Current version: ${current_version:-Unknown}"
-#   gum style --foreground 82 "Latest version:  $remote_version"
-
   if [ "$current_version" = "$remote_version" ]; then
     gum style --foreground 82 "✓ You're already on the latest version!"
     exit 0
   fi
+
+  gum style --foreground 62 "Current version: ${current_version}"
+  gum style --foreground 82 "Latest version:  $remote_version"
 }
 
 # Show update warning and get confirmation
@@ -97,14 +159,6 @@ show_update_warning() {
   gum style --foreground 220 "  2. Replace all Hecate configuration files with new versions"
   echo ""
   gum style --foreground 196 --bold "  3. ⚠️  ANY CUSTOM CHANGES YOU MADE WILL BE GONE BUT YOU CAN COPY THEM FROM BACKUP!"
-  echo ""
-#   gum style --foreground 220 "If you made custom modifications to:"
-#   gum style --foreground 220 "  • Hyprland keybindings"
-#   gum style --foreground 220 "  • Waybar configuration"
-#   gum style --foreground 220 "  • Theme colors"
-#   gum style --foreground 220 "  • Any other config files"
-#   echo ""
-#   gum style --foreground 82 "You will need to manually reapply them after the update."
   echo ""
   gum style --foreground 82 "Your backed up configs will be available at the backup location."
   echo ""
@@ -174,7 +228,7 @@ clone_dotfiles() {
   gum style --foreground 82 "✓ Dotfiles cloned successfully!"
 }
 
-# Backup existing config - FIXED VERSION
+# Backup existing config
 backup_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Creating Backup"
 
@@ -243,6 +297,13 @@ backup_config() {
     cp "$HOME/.config/starship.toml" "$backup_dir/starship/"
   fi
 
+  # Backup hecate.toml
+  if [ -f "$CONFIG_FILE" ]; then
+    gum style --foreground 220 "Backing up: hecate.toml"
+    mkdir -p "$backup_dir/hecate"
+    cp "$CONFIG_FILE" "$backup_dir/hecate/"
+  fi
+
   gum style --foreground 82 --bold "✓ Backup created at:"
   gum style --foreground 82 "  $backup_dir"
   echo "$backup_dir" >"$HOME/.cache/hecate_last_backup.txt"
@@ -289,7 +350,7 @@ verify_critical_packages_installed() {
   return 0
 }
 
-# Install updated config files - FIXED VERSION
+# Install updated config files
 move_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
 
@@ -310,15 +371,15 @@ move_config() {
       alacritty | foot | ghostty | kitty)
         if [ "$folder_name" = "$USER_TERMINAL" ]; then
           gum style --foreground 82 "Installing $folder_name config..."
-          # rm -rf "$CONFIGDIR/$folder_name"
-          cp -rT "$folder" "$CONFIGDIR/"
+          rm -rf "$CONFIGDIR/$folder_name"
+          cp -r "$folder" "$CONFIGDIR/"
         fi
         ;;
       *)
         # Install other configs (hyprland, waybar, etc.)
         gum style --foreground 82 "Installing $folder_name..."
-        # rm -rf "$CONFIGDIR/$folder_name"
-        cp -rT "$folder" "$CONFIGDIR/"
+        rm -rf "$CONFIGDIR/$folder_name"
+        cp -r "$folder" "$CONFIGDIR/"
         ;;
       esac
     fi
@@ -337,6 +398,7 @@ move_config() {
   else
     gum style --foreground 220 "⚠ Pulse build directory not found"
   fi
+
   if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ]; then
     gum style --foreground 82 "Installing Hecate Settings Apps..."
     sleep 1
@@ -350,7 +412,8 @@ move_config() {
   else
     gum style --foreground 220 "⚠ Hecate-Settings build directory not found"
   fi
-    if [ -d "$HECATEAPPSDIR/Aoiler/build/bin" ]; then
+
+  if [ -d "$HECATEAPPSDIR/Aoiler/build/bin" ]; then
     gum style --foreground 120 "Installing Hecate Assistant..."
     sleep 1
     if [ -f "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler" ]; then
@@ -383,35 +446,39 @@ move_config() {
     gum style --foreground 220 "⚠ Starship config not found"
   fi
 
-    if [ -f "$HECATEDIR/config/zshrc" ]; then
-    # gum style --foreground 82 "Installing hecate CLI tool..."
-    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
+  if [ -f "$HECATEDIR/config/zsh" ]; then
+    cp "$HECATEDIR/config/zsh" "$HOME/.zshrc"
     gum style --foreground 82 "✓ ZSH config installed"
   else
     gum style --foreground 220 "⚠ zshrc config not found in config directory"
   fi
-    if [ -f "$HECATEDIR/config/bashrc" ]; then
-    # gum style --foreground 82 "Installing hecate CLI tool..."
-    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
+
+  if [ -f "$HECATEDIR/config/bash" ]; then
+    cp "$HECATEDIR/config/bash" "$HOME/.bashrc"
     gum style --foreground 82 "✓ BASH config installed"
   else
     gum style --foreground 220 "⚠ bashrc config not found in config directory"
   fi
+
   gum style --foreground 82 "✓ Configuration files installed successfully!"
 }
 
 # Update Hecate config file with new version
 update_hecate_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Updating Hecate Configuration"
+
   local update_date=$(date +%Y-%m-%d)
-  set_config_value "version" "$remote_version"
-  set_config_value "last_update" "$update_date"
+
+  # Update metadata section
+  set_config_value "version" "$remote_version" "metadata"
+  set_config_value "last_update" "$update_date" "metadata"
 
   gum style --foreground 82 "✓ Hecate config updated"
   gum style --foreground 82 "  Version: $remote_version"
   gum style --foreground 82 "  Date: $update_date"
 }
 
+# Setup Waybar and links system colors
 setup_Waybar() {
   gum style --foreground 220 "Configuring waybar..."
 
@@ -426,6 +493,7 @@ setup_Waybar() {
   [ -L "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
   [ -L "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
   [ -L "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
+  [ -L "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
 
   # Create new symlinks
   ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
@@ -464,12 +532,12 @@ post_update() {
   fi
 }
 
-install_extra_tools(){
+install_extra_tools() {
   gum style \
     --foreground 212 --border-foreground 212 \
     --align center \
     'Installing Aoiler helper kondo' 'used to organize dirs'
-    curl -fsSL https://raw.githubusercontent.com/aelune/kondo/main/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/aelune/kondo/main/install.sh | bash
 }
 
 # Show update complete message
@@ -498,19 +566,24 @@ show_completion_message() {
 main() {
   clear
 
-#   gum style \
-#     --border double \
-#     --padding "1 2" \
-#     --border-foreground 212 \
-#     --bold \
-#     "🌙 Hecate Update Manager"
+  gum style \
+    --border double \
+    --padding "1 2" \
+    --border-foreground 212 \
+    --bold \
+    "🌙 Hecate Update Manager"
 
-#   echo ""
+  echo ""
 
   # Pre-flight checks
   check_gum
   check_hecate_installed
   check_OS
+
+  echo ""
+
+  # Read user configuration
+  read_user_config
 
   echo ""
 
@@ -533,8 +606,8 @@ main() {
   update_hecate_config
   echo ""
   setup_waybar
+  echo ""
   install_extra_tools
-  secho ""
   echo ""
   post_update
 

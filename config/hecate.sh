@@ -28,26 +28,68 @@ if [ ! -f "$CONFIG_FILE" ]; then
   exit 1
 fi
 
-# Parse TOML value
+# Parse TOML value - Enhanced to handle sections
 get_config_value() {
   local key="$1"
-  # Extract line containing key, remove spaces, quotes, and section headers
-  grep -E "^\s*$key\s*=" "$CONFIG_FILE" \
-    | head -n1 \
-    | sed -E "s/^\s*$key\s*=\s*\"?([^\"]*)\"?/\1/"
+  local section="${2:-}"
+
+  if [ ! -f "$CONFIG_FILE" ]; then
+    echo ""
+    return
+  fi
+
+  if [ -n "$section" ]; then
+    # Extract value from specific section
+    awk -v section="$section" -v key="$key" '
+      /^\[.*\]/ {
+        current_section = $0
+        gsub(/^\[|\]$/, "", current_section)
+      }
+      current_section == section && $0 ~ "^[[:space:]]*" key "[[:space:]]*=" {
+        sub("^[[:space:]]*" key "[[:space:]]*=[[:space:]]*\"?", "")
+        sub("\"?[[:space:]]*(#.*)?$", "")
+        print
+        exit
+      }
+    ' "$CONFIG_FILE"
+  else
+    # Legacy: try to find key anywhere (backwards compatibility)
+    awk -v key="$key" '
+      $0 ~ "^[[:space:]]*" key "[[:space:]]*=" {
+        sub("^[[:space:]]*" key "[[:space:]]*=[[:space:]]*\"?", "")
+        sub("\"?[[:space:]]*(#.*)?$", "")
+        print
+        exit
+      }
+    ' "$CONFIG_FILE"
+  fi
 }
 
-
-# Update TOML value
+# Set TOML value in specific section
 set_config_value() {
   local key="$1"
   local value="$2"
-  sed -i "s|^$key.*|$key = \"$value\"|" "$CONFIG_FILE"
+  local section="${3:-metadata}"
+
+  # Use awk to update value in correct section
+  awk -v section="$section" -v key="$key" -v value="$value" '
+    /^\[.*\]/ {
+      current_section = $0
+      gsub(/^\[|\]$/, "", current_section)
+      print
+      next
+    }
+    current_section == section && $0 ~ "^[[:space:]]*" key "[[:space:]]*=" {
+      print key " = \"" value "\""
+      next
+    }
+    { print }
+  ' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
 }
 
 # Get current version
 get_current_version() {
-  get_config_value "version"
+  get_config_value "version" "metadata"
 }
 
 # Get remote version
@@ -97,6 +139,7 @@ check_network() {
     return 1
   fi
 }
+
 # Check for updates
 check_updates() {
   local mode="${1:-normal}"
@@ -123,7 +166,11 @@ check_updates() {
     echo ""
   fi
 
-  if [ "$current_version" != "$remote_version" ]; then
+  # Extract just version numbers for comparison (ignore stage names like "blind owl")
+  local current_num=$(echo "$current_version" | awk '{print $1}')
+  local remote_num=$(echo "$remote_version" | awk '{print $1}')
+
+  if [ "$current_num" != "$remote_num" ]; then
     if [ "$mode" = "normal" ]; then
       gum style \
         --foreground 82 --border-foreground 82 --border double \
@@ -150,6 +197,7 @@ check_updates() {
     return 1
   fi
 }
+
 # Startup check (network + updates)
 startup_check() {
   local local_version remote_data remote_version remote_stage
@@ -177,8 +225,8 @@ startup_check() {
     local local_stage=$(echo "$local_version" | cut -d' ' -f2-)
 
     if [ "$remote_version" != "$local_num" ]; then
-      # Check if remote > local
-      if printf '%s\n%s\n' "$remote_version" "$local_num" | sort -V | head -n1 | grep -q "$local_num"; then
+      # Check if remote > local using version comparison
+      if printf '%s\n%s\n' "$remote_version" "$local_num" | sort -V | head -n1 | grep -q "^$local_num$"; then
         gum style --foreground 82 --border double --border-foreground 82 \
           --align center --width 60 --margin "1 2" --padding "1 2" \
           "🎉 NEW VERSION AVAILABLE!" \
@@ -213,61 +261,63 @@ startup_check() {
 
 # Update Hecate using update.sh from GitHub
 update_hecate() {
-#   gum style --border double --padding "1 2" --border-foreground 212 "Hecate Update Process"
-
-  # # Check network first
+  # Check network first
   if ! check_network "true"; then
-  	gum style --foreground 196 "✗ Cannot update: No network connection"
-  	gum style --foreground 220 "Can't update without internet. That's just science."
-  	send_notification "Hecate Update Failed" "No network = no update. Pretty simple." "critical"
-  	exit 1
+    gum style --foreground 196 "✗ Cannot update: No network connection"
+    gum style --foreground 220 "Can't update without internet. That's just science."
+    send_notification "Hecate Update Failed" "No network = no update. Pretty simple." "critical"
+    exit 1
   fi
 
   # Download update.sh
   local update_script="/tmp/hecate-update.sh"
 
   gum spin --spinner dot --title "Downloading update script from the cloud..." -- \
-  	curl -fsSL "$UPDATE_SCRIPT_URL" -o "$update_script"
+    curl -fsSL "$UPDATE_SCRIPT_URL" -o "$update_script"
 
   if [ -f "$update_script" ]; then
-  	chmod +x "$update_script"
-  	gum style --foreground 82 "✓ Update script acquired"
-  	gum style --foreground 220 "About to run mystery code from the internet"
-  	gum style --foreground 220 "What could possibly go wrong?"
-  	echo ""
+    chmod +x "$update_script"
+    gum style --foreground 82 "✓ Update script acquired"
+    gum style --foreground 220 "About to run mystery code from the internet"
+    gum style --foreground 220 "What could possibly go wrong?"
+    echo ""
 
-  	sleep 1
+    sleep 1
 
-  	# Run update script
-  	gum style --foreground 220 "Running update script..."
-  	bash "$update_script"
+    # Run update script
+    gum style --foreground 220 "Running update script..."
+    bash "$update_script"
 
-  	# Clean up
-  	rm -f "$update_script"
-  	echo ""
-  	gum style \
-  		--foreground 82 --border-foreground 82 --border double \
-  		--align center --width 50 --margin "1 2" --padding "2 4" \
-  		'✓ UPDATE COMPLETE!' \
-  		'' \
-  		'Your configs are now 0.1% better' \
-  		'Or worse. Who knows?'
+    # Clean up
+    rm -f "$update_script"
 
-  	send_notification "Hecate Updated" \
-  		"Successfully updated to v$new_version\n\nTime to find all the new bugs!" \
-  		"normal"
+    # Get new version after update
+    local new_version=$(get_current_version)
+
+    echo ""
+    gum style \
+      --foreground 82 --border-foreground 82 --border double \
+      --align center --width 50 --margin "1 2" --padding "2 4" \
+      '✓ UPDATE COMPLETE!' \
+      '' \
+      'Your configs are now 0.1% better' \
+      'Or worse. Who knows?'
+
+    send_notification "Hecate Updated" \
+      "Successfully updated to v$new_version\n\nTime to find all the new bugs!" \
+      "normal"
   else
-  	gum style --foreground 196 "✗ Failed to download update script"
-  	gum style --foreground 220 "GitHub refused our download request"
-  	gum style --foreground 220 "Maybe they know something we don't"
-  	send_notification "Hecate Update Failed" "Couldn't download update. Try again later?" "critical"
-  	exit 1
+    gum style --foreground 196 "✗ Failed to download update script"
+    gum style --foreground 220 "GitHub refused our download request"
+    gum style --foreground 220 "Maybe they know something we don't"
+    send_notification "Hecate Update Failed" "Couldn't download update. Try again later?" "critical"
+    exit 1
   fi
 }
 
 # Toggle theme mode
 toggle_theme() {
-  local current_mode=$(get_config_value "mode")
+  local current_mode=$(get_config_value "mode" "theme")
 
   gum style --border double --padding "1 2" --border-foreground 212 "Theme Mode Toggle"
   gum style --foreground 220 "Current mode: $current_mode"
@@ -275,7 +325,7 @@ toggle_theme() {
 
   if [ "$current_mode" = "dynamic" ]; then
     gum spin --spinner dot --title "Switching to static mode..." -- sleep 1
-    set_config_value "mode" "static"
+    set_config_value "mode" "static" "theme"
 
     gum style --foreground 82 "✓ Theme mode: STATIC"
     gum style --foreground 220 "Colors will now stay the same forever"
@@ -286,7 +336,7 @@ toggle_theme() {
       "normal"
   else
     gum spin --spinner dot --title "Switching to dynamic mode..." -- sleep 1
-    set_config_value "mode" "dynamic"
+    set_config_value "mode" "dynamic" "theme"
 
     gum style --foreground 82 "✓ Theme mode: DYNAMIC"
     gum style --foreground 220 "Colors will now change with every wallpaper"
@@ -300,14 +350,14 @@ toggle_theme() {
 
 # Show info
 show_info() {
-  local version=$(get_config_value "version")
-  local install_date=$(get_config_value "install_date")
-  local last_update=$(get_config_value "last_update")
-  local theme_mode=$(get_config_value "mode")
-  local terminal=$(get_config_value "term")
-  local shell=$(get_config_value "shell")
-  local browser=$(get_config_value "browser")
-  local profile=$(get_config_value "profile")
+  local version=$(get_config_value "version" "metadata")
+  local install_date=$(get_config_value "install_date" "metadata")
+  local last_update=$(get_config_value "last_update" "metadata")
+  local theme_mode=$(get_config_value "mode" "theme")
+  local terminal=$(get_config_value "term" "preferences")
+  local shell=$(get_config_value "shell" "preferences")
+  local browser=$(get_config_value "browser" "preferences")
+  local profile=$(get_config_value "profile" "preferences")
 
   gum style \
     --foreground 212 --border-foreground 212 --border double \
@@ -333,11 +383,6 @@ show_info() {
   gum style --foreground 220 "  hecate update     Update dotfiles"
   gum style --foreground 220 "  hecate theme      Toggle theme mode"
   gum style --foreground 220 "  hecate network    Check network"
-
-  echo ""
-  # gum style --foreground 196 "Fun fact: You've been ricing for $(( ($(date +%s) - $(date -d "$install_date" +%s)) / 86400 )) days"
-
-#   send_notification "Hecate Info" "Info displayed. You're welcome." "low"
 }
 
 # Show help
@@ -358,6 +403,7 @@ show_help() {
   gum style --foreground 220 "  update      Update dotfiles (scary)"
   gum style --foreground 220 "  theme       Toggle dynamic/static mode"
   gum style --foreground 220 "  info        Show installation info"
+  gum style --foreground 220 "  term        Show configured terminal"
   gum style --foreground 220 "  help        You're reading it right now"
 
   echo ""
@@ -373,21 +419,24 @@ show_help() {
 }
 
 show_term() {
-    # Use get_config_value to safely extract terminal
-    terminal=$(get_config_value "term")
+  # Use get_config_value to safely extract terminal from preferences section
+  terminal=$(get_config_value "term" "preferences")
 
-    # Fallback if terminal is empty
-    if [ -z "$terminal" ]; then
-        notify-send "error due to: $terminal not found "
-    fi
+  # Fallback if terminal is empty
+  if [ -z "$terminal" ]; then
+    gum style --foreground 196 "Error: Terminal not configured"
+    notify-send "Hecate Error" "Terminal preference not found in config" "critical"
+    return 1
+  fi
 
-    echo "$terminal"
+  echo "$terminal"
 }
+
 # Main command handler
 case "${1:-help}" in
-    term)
-        show_term
-        ;;
+term)
+  show_term
+  ;;
 startup)
   startup_check
   ;;

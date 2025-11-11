@@ -913,16 +913,16 @@ move_config() {
     gum style --foreground 220 "⚠ Starship config not found"
   fi
 
-    if [ -f "$HECATEDIR/config/zshrc" ]; then
+    if [ -f "$HECATEDIR/config/zsh" ]; then
     # gum style --foreground 82 "Installing hecate CLI tool..."
-    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
+    cp "$HECATEDIR/config/zsh" "$HOME/.zshrc"
     gum style --foreground 82 "✓ ZSH config installed"
   else
     gum style --foreground 220 "⚠ zshrc config not found in config directory"
   fi
-    if [ -f "$HECATEDIR/config/bashrc" ]; then
+    if [ -f "$HECATEDIR/config/bash" ]; then
     # gum style --foreground 82 "Installing hecate CLI tool..."
-    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
+    cp "$HECATEDIR/config/bash" "$HOME/.bashrc"
     gum style --foreground 82 "✓ BASH config installed"
   else
     gum style --foreground 220 "⚠ bashrc config not found in config directory"
@@ -1031,6 +1031,7 @@ setup_Waybar() {
   [ -L "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
   [ -L "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
   [ -L "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
+  [ -L "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
 
   # Create new symlinks
   ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
