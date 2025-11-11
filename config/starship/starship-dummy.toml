@@ -1,0 +1,181 @@
+# ────────────────────────────────────────────────────────────────
+# 🌟 Starship Prompt Configuration - DUMMY TEMPLATE
+# This file contains placeholder colors that get replaced by the script
+# DO NOT EDIT THE GENERATED starship.toml - edit ~/.config/starship/starship-dummy.toml !
+# ────────────────────────────────────────────────────────────────
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Add a blank line between prompts for readability
+add_newline = true
+
+# Reduce lag for modules
+command_timeout = 500
+
+# Main prompt layout
+format = """
+(bold color8)$username $directory $git_branch $git_status $cmd_duration$fill
+(bold color8)$character
+"""
+
+# ─── PROMPT SYMBOLS ─────────────────────────────────────────────
+[character]
+success_symbol = "[ ](bold color2)"
+error_symbol = "[  ](bold color1)"
+
+# ─── USER & HOST ────────────────────────────────────────────────
+
+[username]
+style_user = "bold color3"
+style_root = "bold color1"
+format = "[$user]($style)"
+show_always = true
+
+[hostname]
+ssh_only = false
+format = "[@$hostname](bold color4) "
+disabled = false
+
+# ─── DIRECTORY ──────────────────────────────────────────────────
+
+[directory]
+home_symbol = ""
+read_only = ""
+style = "bg:color6 fg:#000000"
+truncation_length = 3
+truncation_symbol = " ••/"
+format = '[](bold fg:color6)[󰉋 $path]($style)[](bold fg:color6)'
+
+# ─── GIT ────────────────────────────────────────────────────────
+
+[git_branch]
+symbol = "󰘬 "
+format = "on [$symbol$branch]($style) "
+style = "bold color5"
+
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style) )'
+style = "bold color1"
+conflicted = "🏳 "
+ahead = "⇡${count} "
+diverged = "⇕⇡${ahead_count}⇣${behind_count} "
+behind = "⇣${count} "
+untracked = "?${count} "
+stashed = "💾${count} "
+modified = "!${count} "
+staged = "+${count} "
+renamed = "»${count} "
+deleted = "✘ ${count} "
+
+# ─── LANGUAGES ──────────────────────────────────────────────────
+
+[nodejs]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "bold color8"
+
+[python]
+symbol = " "
+style = "bold color3"
+
+[rust]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "bold color1"
+
+[java]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "bold color1"
+
+[package]
+symbol = " "
+format = "[$symbol$version]($style)"
+style = "bold color4"
+
+[golang]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "bold color2"
+
+[lua]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "bold color4"
+
+# ─── MISC MODULES ───────────────────────────────────────────────
+
+[cmd_duration]
+min_time = 500
+format = "[took $duration](bold color3) "
+
+[time]
+disabled = false
+format = "[$time](dim color8)"
+time_format = "%R"  # 24h format
+
+[fill]
+symbol = " "
+
+# ─── BATTERY / OS / EXTRAS ──────────────────────────────────────
+
+[battery]
+disabled = false
+full_symbol = "🔋"
+charging_symbol = "⚡"
+discharging_symbol = "💀"
+format = "[$symbol $percentage]($style) "
+
+[[battery.display]]
+threshold = 10
+style = "bold color1"
+
+[[battery.display]]
+threshold = 30
+style = "bold color3"
+
+[[battery.display]]
+threshold = 100
+style = "bold color8"
+
+[os]
+disabled = false
+format = "[$symbol]($style)"
+style = "dim color7"
+
+[os.symbols]
+Arch = " "
+Ubuntu = " "
+Debian = " "
+Fedora = " "
+Manjaro = " "
+NixOS = " "
+Pop = " "
+Raspbian = " "
+
+
+# ─── DOCKER / KUBERNETES ────────────────────────────────────────
+
+[docker_context]
+symbol = " "
+format = "via [$symbol$context](bold color4) "
+
+[kubernetes]
+symbol = "☸ "
+format = 'on [$symbol$context( \($namespace\))](bold color4) '
+disabled = false
+
+# ─── CLOUD PROVIDERS ────────────────────────────────────────────
+
+[aws]
+symbol = " "
+format = 'on [$symbol($profile )($region )](bold color3) '
+
+[gcloud]
+format = 'on [$symbol$account(@$domain)($region)](bold color4) '
+
+[azure]
+symbol = " "
+format = 'on [$symbol($subscription)](bold color4) '
+
+# ─── END OF FILE ────────────────────────────────────────────────

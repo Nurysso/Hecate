@@ -1,0 +1,5 @@
+
+# The source below is for hecate any changes made will be gone when hecate is updated
+source = ~/.config/bash/bashrc
+
+#  Write your custom configs here below this wont be affected at all

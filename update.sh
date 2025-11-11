@@ -68,15 +68,15 @@ USER_SHELL=$(get_config_value "shell")
 
 # Get current and remote versions
 check_versions() {
-  gum style --border double --padding "1 2" --border-foreground 212 "Checking for Updates"
+#   gum style --border double --padding "1 2" --border-foreground 212 "Checking for Updates"
   if [ -z "$remote_version" ]; then
     gum style --foreground 196 "❌ Failed to fetch remote version"
     gum style --foreground 220 "Check your internet connection"
     exit 1
   fi
 
-  gum style --foreground 62 "Current version: ${current_version:-Unknown}"
-  gum style --foreground 82 "Latest version:  $remote_version"
+#   gum style --foreground 62 "Current version: ${current_version:-Unknown}"
+#   gum style --foreground 82 "Latest version:  $remote_version"
 
   if [ "$current_version" = "$remote_version" ]; then
     gum style --foreground 82 "✓ You're already on the latest version!"
@@ -96,15 +96,15 @@ show_update_warning() {
   echo ""
   gum style --foreground 220 "  2. Replace all Hecate configuration files with new versions"
   echo ""
-  gum style --foreground 196 --bold "  3. ⚠️  ANY CUSTOM CHANGES YOU MADE WILL BE OVERWRITTEN!"
+  gum style --foreground 196 --bold "  3. ⚠️  ANY CUSTOM CHANGES YOU MADE WILL BE GONE BUT YOU CAN COPY THEM FROM BACKUP!"
   echo ""
-  gum style --foreground 220 "If you made custom modifications to:"
-  gum style --foreground 220 "  • Hyprland keybindings"
-  gum style --foreground 220 "  • Waybar configuration"
-  gum style --foreground 220 "  • Theme colors"
-  gum style --foreground 220 "  • Any other config files"
-  echo ""
-  gum style --foreground 82 "You will need to manually reapply them after the update."
+#   gum style --foreground 220 "If you made custom modifications to:"
+#   gum style --foreground 220 "  • Hyprland keybindings"
+#   gum style --foreground 220 "  • Waybar configuration"
+#   gum style --foreground 220 "  • Theme colors"
+#   gum style --foreground 220 "  • Any other config files"
+#   echo ""
+#   gum style --foreground 82 "You will need to manually reapply them after the update."
   echo ""
   gum style --foreground 82 "Your backed up configs will be available at the backup location."
   echo ""
@@ -290,8 +290,8 @@ verify_critical_packages_installed() {
 }
 
 # Install updated config files - FIXED VERSION
-install_config() {
-  gum style --border double --padding "1 2" --border-foreground 212 "Installing Updated Configuration"
+move_config() {
+  gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
 
   if [ ! -d "$HECATEDIR/config" ]; then
     gum style --foreground 196 "Error: Config directory not found!"
@@ -302,87 +302,102 @@ install_config() {
   mkdir -p "$HOME/.local/bin"
 
   for folder in "$HECATEDIR/config"/*; do
-    if [ ! -d "$folder" ]; then
-      continue
+    if [ -d "$folder" ]; then
+      local folder_name=$(basename "$folder")
+
+      # Only install selected terminal config
+      case "$folder_name" in
+      alacritty | foot | ghostty | kitty)
+        if [ "$folder_name" = "$USER_TERMINAL" ]; then
+          gum style --foreground 82 "Installing $folder_name config..."
+          # rm -rf "$CONFIGDIR/$folder_name"
+          cp -rT "$folder" "$CONFIGDIR/"
+        fi
+        ;;
+      *)
+        # Install other configs (hyprland, waybar, etc.)
+        gum style --foreground 82 "Installing $folder_name..."
+        # rm -rf "$CONFIGDIR/$folder_name"
+        cp -rT "$folder" "$CONFIGDIR/"
+        ;;
+      esac
     fi
-
-    local folder_name=$(basename "$folder")
-
-    # Skip the 'hecate' directory entirely (preserved from user settings)
-    [ "$folder_name" = "hecate" ] && continue
-
-    case "$folder_name" in
-    alacritty | foot | ghostty | kitty)
-      if [ "$folder_name" = "$USER_TERMINAL" ]; then
-        gum style --foreground 82 "Updating $folder_name config..."
-        mkdir -p "$CONFIGDIR/$folder_name"
-        cp -rf "$folder/"* "$CONFIGDIR/$folder_name/"
-      fi
-      ;;
-    zsh)
-      if [ "$USER_SHELL" = "zsh" ] && [ -f "$folder/.zshrc" ]; then
-        gum style --foreground 82 "Updating .zshrc..."
-        cp "$folder/.zshrc" "$HOME/.zshrc"
-      fi
-      ;;
-    bash)
-      if [ "$USER_SHELL" = "bash" ] && [ -f "$folder/.bashrc" ]; then
-        gum style --foreground 82 "Updating .bashrc..."
-        cp "$folder/.bashrc" "$HOME/.bashrc"
-      fi
-      ;;
-    fish)
-      if [ "$USER_SHELL" = "fish" ]; then
-        gum style --foreground 82 "Updating fish config..."
-        mkdir -p "$CONFIGDIR/fish"
-        cp -rf "$folder/"* "$CONFIGDIR/fish/"
-      fi
-      ;;
-    starship)
-      if [ -f "$folder/starship.toml" ]; then
-        gum style --foreground 82 "Updating Starship config..."
-        cp "$folder/starship.toml" "$HOME/.config/starship.toml"
-      fi
-      ;;
-    *)
-      # For all other configs, copy contents into ~/.config/folder_name/
-      gum style --foreground 82 "Updating $folder_name..."
-      mkdir -p "$CONFIGDIR/$folder_name"
-      cp -rf "$folder/"* "$CONFIGDIR/$folder_name/"
-      ;;
-    esac
   done
 
-  # Update Pulse app
-  if [ -d "$HECATEAPPSDIR/Pulse/build/bin" ] && [ -f "$HECATEAPPSDIR/Pulse/build/bin/Pulse" ]; then
-    gum style --foreground 82 "Updating Pulse..."
-    cp "$HECATEAPPSDIR/Pulse/build/bin/Pulse" "$HOME/.local/bin/Pulse"
-    chmod +x "$HOME/.local/bin/Pulse"
+  # Install apps from apps directory
+  if [ -d "$HECATEAPPSDIR/Pulse/build/bin" ]; then
+    gum style --foreground 82 "Installing Pulse..."
+    if [ -f "$HECATEAPPSDIR/Pulse/build/bin/Pulse" ]; then
+      cp "$HECATEAPPSDIR/Pulse/build/bin/Pulse" "$HOME/.local/bin/Pulse"
+      chmod +x "$HOME/.local/bin/Pulse"
+      gum style --foreground 82 "✓ Pulse installed to ~/.local/bin/Pulse"
+    else
+      gum style --foreground 220 "⚠ Pulse binary not found at expected location"
+    fi
+  else
+    gum style --foreground 220 "⚠ Pulse build directory not found"
+  fi
+  if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ]; then
+    gum style --foreground 82 "Installing Hecate Settings Apps..."
+    sleep 1
+    if [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" ]; then
+      cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" "$HOME/.local/bin/Hecate-Settings"
+      chmod +x "$HOME/.local/bin/Hecate-Settings"
+      gum style --foreground 82 "✓ Hecate Settings Apps installed to ~/.local/bin"
+    else
+      gum style --foreground 220 "⚠ Hecate-Settings binary not found at expected location"
+    fi
+  else
+    gum style --foreground 220 "⚠ Hecate-Settings build directory not found"
+  fi
+    if [ -d "$HECATEAPPSDIR/Aoiler/build/bin" ]; then
+    gum style --foreground 120 "Installing Hecate Assistant..."
+    sleep 1
+    if [ -f "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler" ]; then
+      cp "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler" "$HOME/.local/bin/Aoiler"
+      chmod +x "$HOME/.local/bin/Aoiler"
+      gum style --foreground 82 "✓ Assistant installed to ~/.local/bin"
+    else
+      gum style --foreground 220 "⚠ Assistant binary not found at expected location"
+    fi
+  else
+    gum style --foreground 220 "⚠ Assistant build directory not found"
   fi
 
-  # Update Hecate-Help app
-  if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ] && [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" ]; then
-    gum style --foreground 82 "Updating Hecate Settings App..."
-    sleep 2
-    cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" "$HOME/.local/bin/Hecate-Settings"
-    chmod +x "$HOME/.local/bin/Hecate-Settings"
-  fi
-
-  # Update hecate CLI tool
+  # Install hecate CLI tool
   if [ -f "$HECATEDIR/config/hecate.sh" ]; then
-    gum style --foreground 82 "Updating hecate CLI..."
+    gum style --foreground 82 "Installing hecate CLI tool..."
     cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
     chmod +x "$HOME/.local/bin/hecate"
+    gum style --foreground 82 "✓ hecate command installed to ~/.local/bin/hecate"
+  else
+    gum style --foreground 220 "⚠ hecate.sh not found in config directory"
   fi
 
-    if [ -d "$HECATEAPPSDIR/Aoiler/build/bin" ] && [ -f "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler" ]; then
-    gum style --foreground 120 "Installing Hecate Assistant..."
-    sleep 2
-    cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Aoiler" "$HOME/.local/bin/Aoiler"
-    chmod +x "$HOME/.local/bin/Aoiler"
+  # Install Starship config
+  if [ -f "$HECATEDIR/config/starship/starship.toml" ]; then
+    gum style --foreground 82 "Installing Starship config..."
+    cp "$HECATEDIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
+    gum style --foreground 82 "✓ Starship config installed"
+  else
+    gum style --foreground 220 "⚠ Starship config not found"
   fi
 
-  gum style --foreground 82 "✓ Configuration files updated successfully!"
+    if [ -f "$HECATEDIR/config/zshrc" ]; then
+    # gum style --foreground 82 "Installing hecate CLI tool..."
+    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
+    gum style --foreground 82 "✓ ZSH config installed"
+  else
+    gum style --foreground 220 "⚠ zshrc config not found in config directory"
+  fi
+    if [ -f "$HECATEDIR/config/bashrc" ]; then
+    # gum style --foreground 82 "Installing hecate CLI tool..."
+    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
+    gum style --foreground 82 "✓ BASH config installed"
+  else
+    gum style --foreground 220 "⚠ bashrc config not found in config directory"
+  fi
+  gum style --foreground 82 "✓ Configuration files installed successfully!"
 }
 
 # Update Hecate config file with new version
@@ -397,25 +412,27 @@ update_hecate_config() {
   gum style --foreground 82 "  Date: $update_date"
 }
 
-setup_waybar() {
-  gum style --foreground 220 "Reconfiguring Waybar symlinks..."
+setup_Waybar() {
+  gum style --foreground 220 "Configuring waybar..."
 
-  local WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
-  local WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
-  local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
-  local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
-
-  # Remove existing symlinks
+  # Define the symlink paths
+  WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
+  WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
+  WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
+  SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
+  STATSHIP_SHYMLINK="$HOME/.config/starship.toml"
+  # Remove existing symlinks if they exist
   [ -L "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
   [ -L "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
   [ -L "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
   [ -L "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
 
   # Create new symlinks
-  ln -sf "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
-  ln -sf "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
-  ln -sf "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
-  ln -sf "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
+  ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
+  ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
+  ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
+  ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
+  ln -s "$HOME/.config/starship/starship.toml" "$STATSHIP_SHYMLINK"
 
   gum style --foreground 82 "✓ Waybar configured!"
 }
@@ -481,14 +498,14 @@ show_completion_message() {
 main() {
   clear
 
-  gum style \
-    --border double \
-    --padding "1 2" \
-    --border-foreground 212 \
-    --bold \
-    "🌙 Hecate Update Manager"
+#   gum style \
+#     --border double \
+#     --padding "1 2" \
+#     --border-foreground 212 \
+#     --bold \
+#     "🌙 Hecate Update Manager"
 
-  echo ""
+#   echo ""
 
   # Pre-flight checks
   check_gum
@@ -511,7 +528,7 @@ main() {
   echo ""
   verify_critical_packages_installed
   echo ""
-  install_config
+  move_config
   echo ""
   update_hecate_config
   echo ""

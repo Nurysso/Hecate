@@ -1,0 +1,114 @@
+/* ═══════════════════════════════════════════════════════════════
+   Rofi Icon Grid Configuration - Icons Above, Text Below
+   ═══════════════════════════════════════════════════════════════ */
+
+@import "~/.config/rofi/config.rasi"
+
+/* ─── Configuration ──────────────────────────────────────────── */
+configuration {
+    modi:                       "drun";
+    show-icons:                 true;
+    display-drun:               "";
+    drun-display-format:        "{name}";
+}
+
+/* ─── Window ─────────────────────────────────────────────────── */
+window {
+    width:                      1100px;
+    height:                     650px;
+    border-radius:              24px;
+    background-color:           rgba(0, 0, 0, 0.90);
+}
+
+/* ─── Main Box ──────────────────────────────────────────────── */
+mainbox {
+    padding:                    28px;
+    children:                   [ "inputbar", "listview" ];
+}
+
+/* ─── Inputbar ──────────────────────────────────────────────── */
+inputbar {
+    margin:                     0px 0px 24px 0px;
+    padding:                    20px 24px;
+    border-radius:              18px;
+    children:                   [ "prompt", "entry" ];
+}
+
+prompt {
+    font:                       "FiraCode Nerd Font Bold 15";
+}
+
+entry {
+    font:                       "FiraCode Nerd Font 12";
+    placeholder:                "Search applications...";
+}
+
+/* ─── Listview ──────────────────────────────────────────────── */
+listview {
+    columns:                    6;
+    lines:                      3;
+    spacing:                    16px;
+    cycle:                      true;
+    dynamic:                    true;
+    scrollbar:                  false;
+    layout:                     vertical;
+    fixed-height:               true;
+    fixed-columns:              true;
+}
+
+/* ─── Elements ──────────────────────────────────────────────── */
+element {
+    orientation:                vertical;
+    padding:                    20px 12px;
+    spacing:                    12px;
+    border-radius:              16px;
+    background-color:           @bg1;
+    text-color:                 @fg0;
+    cursor:                     pointer;
+    border:                     2px solid;
+    border-color:               rgba(255, 255, 255, 0.04);
+}
+
+element normal.normal {
+    background-color:           @bg1;
+    text-color:                 @fg0;
+    border-color:               rgba(255, 255, 255, 0.04);
+}
+
+element selected.normal {
+    background-color:           @accent;
+    text-color:                 @bg0;
+    border-color:               @accent;
+}
+
+
+/* ─── Icon Configuration ────────────────────────────────────── */
+element-icon {
+    background-color:           transparent;
+    text-color:                 inherit;
+    size:                       64px;
+    cursor:                     inherit;
+    horizontal-align:           0.5;
+    vertical-align:             0.5;
+}
+
+/* ─── Text Configuration ────────────────────────────────────── */
+element-text {
+    background-color:           transparent;
+    text-color:                 inherit;
+    cursor:                     inherit;
+    vertical-align:             0.5;
+    horizontal-align:           0.5;
+    font:                       "FiraCode Nerd Font 9";
+}
+
+element-text selected.normal {
+    text-color:                 @bg0;
+    font:                       "FiraCode Nerd Font Bold 9";
+}
+
+
+/* ─── Disable Scrollbar ─────────────────────────────────────── */
+scrollbar {
+    enabled:                    false;
+}

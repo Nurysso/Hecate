@@ -1,48 +1,52 @@
-/* Clipboard Config - Modern Style */
+/* ═══════════════════════════════════════════════════════════════
+   Clipboard Manager Config - Enhanced Modern Style
+   ═══════════════════════════════════════════════════════════════ */
 
 @import "~/.config/rofi/config.rasi"
 
-/* ---- Configuration ---- */
+/* ─── Configuration ───────────────────────────────────────────── */
 configuration {
     modi:                    "drun";
+    show-icons:              false;
+    display-drun:            "📋";
 }
 
-/* ---- Window ---- */
+/* ─── Window ─────────────────────────────────────────────────── */
 window {
     transparency:            "real";
     location:                center;
     anchor:                  center;
     fullscreen:              false;
-    width:                   850px;
-    height:                  550px;
+    width:                   900px;
+    height:                  600px;
     border-radius:           20px;
     cursor:                  "default";
-    background-color:        rgba(0, 0, 0, 0.85);
+    background-color:        rgba(0, 0, 0, 0.92);
     border:                  3px;
     border-color:            @accent;
 }
 
-/* ---- Mainbox ---- */
+/* ─── Mainbox ────────────────────────────────────────────────── */
 mainbox {
     enabled:                 true;
     spacing:                 0px;
     margin:                  0px;
-    padding:                 20px;
+    padding:                 24px;
     background-color:        transparent;
     children:                [ "inputbar", "message", "listview" ];
 }
 
-/* ---- Inputbar ---- */
+/* ─── Inputbar ───────────────────────────────────────────────── */
 inputbar {
     enabled:                 true;
     spacing:                 12px;
     margin:                  0px 0px 16px 0px;
-    padding:                 16px 20px;
-    border-radius:           14px;
+    padding:                 18px 22px;
+    border-radius:           16px;
     background-color:        @bg1;
     text-color:              @fg0;
-    border:                  2px;
-    border-color:            rgba(255, 255, 255, 0.05);
+    border:                  2px solid;
+    border-color:            rgba(255, 255, 255, 0.08);
     children:                [ "prompt", "entry" ];
 }
 
@@ -50,24 +54,25 @@ prompt {
     enabled:                 true;
     background-color:        transparent;
     text-color:              @accent;
-    font:                    "FiraCode Nerd Font Bold 13";
+    font:                    "FiraCode Nerd Font Bold 14";
 }
 
-/* ---- Entry ---- */
+/* ─── Entry ──────────────────────────────────────────────────── */
 entry {
     enabled:                 true;
     background-color:        transparent;
     text-color:              @fg0;
     cursor:                  text;
-    placeholder:             "📋 Search Clipboard History...";
-    placeholder-color:       rgba(255, 255, 255, 0.3);
+    placeholder:             "Type to search clipboard history...";
+    placeholder-color:       rgba(255, 255, 255, 0.35);
+    font:                    "FiraCode Nerd Font 12";
 }
 
-/* ---- Listview ---- */
+/* ─── Listview ───────────────────────────────────────────────── */
 listview {
     enabled:                 true;
     columns:                 1;
-    lines:                   8;
+    lines:                   9;
     cycle:                   true;
     dynamic:                 true;
     scrollbar:               true;
@@ -75,51 +80,49 @@ listview {
     reverse:                 false;
     fixed-height:            true;
     fixed-columns:           true;
-
-    spacing:                 8px;
+    spacing:                 10px;
     margin:                  0px;
     padding:                 0px;
     background-color:        transparent;
 }
 
-/* ---- Scrollbar ---- */
+/* ─── Scrollbar ──────────────────────────────────────────────── */
 scrollbar {
-    handle-width:            6px;
+    handle-width:            4px;
     handle-color:            @accent;
-    border-radius:           6px;
-    background-color:        rgba(255, 255, 255, 0.05);
-    margin:                  0px 0px 0px 8px;
+    border-radius:           8px;
+    background-color:        rgba(255, 255, 255, 0.08);
+    margin:                  0px 0px 0px 12px;
+    padding:                 2px;
 }
 
-/* ---- Elements ---- */
+/* ─── Elements ───────────────────────────────────────────────── */
 element {
     enabled:                 true;
-    spacing:                 10px;
+    spacing:                 12px;
     margin:                  0px;
-    padding:                 14px 18px;
-    border-radius:           12px;
+    padding:                 16px 20px;
+    border-radius:           14px;
     background-color:        @bg1;
     text-color:              @fg0;
     cursor:                  pointer;
-    border:                  2px;
+    border:                  2px solid;
+    border-color:            transparent;
     orientation:             horizontal;
 }
 
 element normal.normal {
     background-color:        @bg1;
     text-color:              @fg0;
+    border-color:            rgba(255, 255, 255, 0.05);
 }
 
 element selected.normal {
     background-color:        @accent;
     text-color:              @bg0;
-    border:                  2px;
+    border-color:            @accent;
 }
 
-element alternate.normal {
-    background-color:        @bg1;
-    text-color:              @fg0;
-}
 
 element-icon {
     background-color:        transparent;
@@ -134,26 +137,42 @@ element-text {
     cursor:                  inherit;
     horizontal-align:        0.0;
     vertical-align:          0.5;
+    font:                    "FiraCode Nerd Font 11";
 }
 
 element-text selected.normal {
     text-color:              @bg0;
-    font:                    "FiraCode Nerd Font Bold 10";
+    font:                    "FiraCode Nerd Font Bold 11";
 }
 
-/* ---- Message ---- */
+/* ─── Message ────────────────────────────────────────────────── */
 message {
     enabled:                 true;
-    margin:                  0px 0px 12px 0px;
+    margin:                  0px 0px 14px 0px;
     padding:                 0px;
-    border-radius:           12px;
+    border-radius:           14px;
     background-color:        transparent;
 }
 
 textbox {
-    padding:                 14px;
-    border-radius:           12px;
+    padding:                 16px 20px;
+    border-radius:           14px;
     background-color:        @bg1;
     text-color:              @accent;
     horizontal-align:        0.0;
+    vertical-align:          0.5;
+    border:                  2px solid;
+    border-color:            rgba(255, 255, 255, 0.05);
+    font:                    "FiraCode Nerd Font 11";
+    markup:                  true;
+}
+
+/* ─── Error Message ──────────────────────────────────────────── */
+error-message {
+    padding:                 20px;
+    border-radius:           14px;
+    background-color:        rgba(255, 0, 0, 0.1);
+    text-color:              #ff6b6b;
+    border:                  2px solid;
+    border-color:            rgba(255, 0, 0, 0.3);
 }

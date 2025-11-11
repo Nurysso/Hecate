@@ -213,8 +213,7 @@ startup_check() {
 
 # Update Hecate using update.sh from GitHub
 update_hecate() {
-  gum style --border double --padding "1 2" --border-foreground 212 "Hecate Update Process"
-  gum style --foreground 12 --bold "it does nothing for now"
+#   gum style --border double --padding "1 2" --border-foreground 212 "Hecate Update Process"
 
   # # Check network first
   if ! check_network "true"; then

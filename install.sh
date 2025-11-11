@@ -844,25 +844,6 @@ move_config() {
           cp -rT "$folder" "$CONFIGDIR/"
         fi
         ;;
-      zsh)
-        if [ "$USER_SHELL" = "zsh" ] && [ -f "$folder/.zshrc" ]; then
-          gum style --foreground 82 "Installing .zshrc..."
-          cp "$folder/.zshrc" "$HOME/.zshrc"
-        fi
-        ;;
-      bash)
-        if [ "$USER_SHELL" = "bash" ] && [ -f "$folder/.bashrc" ]; then
-          gum style --foreground 82 "Installing .bashrc..."
-          cp "$folder/.bashrc" "$HOME/.bashrc"
-        fi
-        ;;
-      fish)
-        if [ "$USER_SHELL" = "fish" ]; then
-          gum style --foreground 82 "Installing fish config..."
-          mkdir -p "$CONFIGDIR/fish"
-          cp -r "$folder/"* "$CONFIGDIR/fish/"
-        fi
-        ;;
       *)
         # Install other configs (hyprland, waybar, etc.)
         gum style --foreground 82 "Installing $folder_name..."
@@ -932,14 +913,20 @@ move_config() {
     gum style --foreground 220 "⚠ Starship config not found"
   fi
 
-  # Install Hyprland plugin installer if it exists
-  #   if [ -f "$HECATEDIR/config/install-hyprland-plugins.sh" ]; then
-  #     gum style --foreground 82 "Installing Hyprland plugin installer..."
-  #     cp "$HECATEDIR/config/install-hyprland-plugins.sh" "$HOME/.local/bin/install-hyprland-plugins"
-  #     chmod +x "$HOME/.local/bin/install-hyprland-plugins"
-  #     gum style --foreground 82 "✓ Plugin installer: install-hyprland-plugins"
-  #   fi
-
+    if [ -f "$HECATEDIR/config/zshrc" ]; then
+    # gum style --foreground 82 "Installing hecate CLI tool..."
+    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
+    gum style --foreground 82 "✓ ZSH config installed"
+  else
+    gum style --foreground 220 "⚠ zshrc config not found in config directory"
+  fi
+    if [ -f "$HECATEDIR/config/bashrc" ]; then
+    # gum style --foreground 82 "Installing hecate CLI tool..."
+    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
+    gum style --foreground 82 "✓ BASH config installed"
+  else
+    gum style --foreground 220 "⚠ bashrc config not found in config directory"
+  fi
   gum style --foreground 82 "✓ Configuration files installed successfully!"
 }
 
@@ -1038,7 +1025,7 @@ setup_Waybar() {
   WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
   WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
   SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
-
+  STATSHIP_SHYMLINK="$HOME/.config/starship.toml"
   # Remove existing symlinks if they exist
   [ -L "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
   [ -L "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
@@ -1050,6 +1037,7 @@ setup_Waybar() {
   ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
+  ln -s "$HOME/.config/starship/starship.toml" "$STATSHIP_SHYMLINK"
 
   gum style --foreground 82 "✓ Waybar configured!"
 }

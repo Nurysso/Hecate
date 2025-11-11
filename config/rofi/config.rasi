@@ -1,269 +1,306 @@
-/* ---- Configuration ---- */
+/* ═══════════════════════════════════════════════════════════════
+   Rofi Configuration
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Configuration ──────────────────────────────────────────── */
 configuration {
-    modi:                    "drun";
-    show-icons:              true;
-    display-drun:            "󰀻";
-    drun-display-format:     "{name}";
-    hover-select:            true;
-    me-select-entry:         "MouseSecondary";
-    me-accept-entry:         "MousePrimary";
-    window-format:           "{w} · {c} · {t}";
-    font:                    "FiraCode Nerd Font 10";
+    modi:                       "drun,run,window,ssh";
+    show-icons:                 true;
+    display-drun:               "󰀻 Apps";
+    display-run:                " Run";
+    display-window:             " Windows";
+    display-ssh:                "󰣀 SSH";
+    drun-display-format:        "{name}";
+    hover-select:               true;
+    me-select-entry:            "MouseSecondary";
+    me-accept-entry:            "MousePrimary";
+    me-accept-custom:           "MouseMiddle";
+    window-format:              "{w} · {c} · {t}";
+    font:                       "FiraCode Nerd Font 10";
+    icon-theme:                 "Papirus-Dark";
+    disable-history:            false;
+    sidebar-mode:               true;
+    click-to-exit:              true;
+    location:                   0;
 }
 
-/* ---- Load wallust colors ---- */
+/* ─── Load wallust colors ──────────────────────────────────────── */
 @theme "~/.config/rofi/theme/colors-rofi.rasi"
 
-/* ---- Global Properties ---- */
+/* ─── Global Properties ──────────────────────────────────────────── */
 * {
-    bg0:                     @background;
-    bg1:                     @color1;
-    bg2:                     @color0;
+    bg0:                        @background;
+    bg1:                        @color1;
+    bg2:                        @color0;
+    bg3:                        rgba(255, 255, 255, 0.03);
+    fg0:                        @foreground;
+    fg1:                        @color7;
+    fg2:                        rgba(255, 255, 255, 0.7);
+    accent:                     @color4;
+    accent-alt:                 @color12;
+    urgent:                     @color9;
+    active:                     @color10;
 
-    fg0:                     @foreground;
-    fg1:                     @color7;
+    background-color:           transparent;
+    text-color:                 @fg0;
+    border-color:               @accent;
+    separatorcolor:             rgba(255, 255, 255, 0.08);
 
-    accent:                  @color4;
-    accent-alt:              @color12;
-    urgent:                  @color9;
-    active:                  @color10;
-
-    background-color:        transparent;
-    text-color:              @fg0;
-
-    border-color:            @accent;
-    separatorcolor:          rgba(255, 255, 255, 0.1);
+    /* Spacing */
+    element-padding:            14px 18px;
+    element-spacing:            12px;
+    element-radius:             12px;
 }
 
-/* ---- Window ---- */
+/* ─── Window ─────────────────────────────────────────────────────── */
 window {
-    transparency:            "real";
-    location:                center;
-    anchor:                  center;
-    fullscreen:              false;
-    width:                   750px;
-    border-radius:           20px;
-    cursor:                  "default";
-    background-color:        rgba(0, 0, 0, 0.85);
-    border:                  3px;
-    border-color:            @accent;
+    transparency:               "real";
+    location:                   center;
+    anchor:                     center;
+    fullscreen:                 false;
+    width:                      800px;
+    border-radius:              22px;
+    cursor:                     "default";
+    background-color:           rgba(0, 0, 0, 0.88);
+    border:                     3px solid;
+    border-color:               @accent;
 }
 
-/* ---- Main Box ---- */
+/* ─── Main Box ───────────────────────────────────────────────────── */
 mainbox {
-    enabled:                 true;
-    spacing:                 0px;
-    margin:                  0px;
-    padding:                 20px;
-    background-color:        transparent;
-    children:                [ "inputbar", "mode-switcher", "listview" ];
+    enabled:                    true;
+    spacing:                    0px;
+    margin:                     0px;
+    padding:                    24px;
+    background-color:           transparent;
+    children:                   [ "inputbar", "mode-switcher", "listview", "num-filtered-rows" ];
 }
 
-/* ---- Inputbar ---- */
+/* ─── Inputbar ───────────────────────────────────────────────────── */
 inputbar {
-    enabled:                 true;
-    spacing:                 12px;
-    margin:                  0px 0px 16px 0px;
-    padding:                 16px 20px;
-    border-radius:           14px;
-    background-color:        @bg1;
-    text-color:              @fg0;
-    border:                  2px;
-    border-color:            rgba(255, 255, 255, 0.05);
-    children:                [ "prompt", "entry" ];
+    enabled:                    true;
+    spacing:                    12px;
+    margin:                     0px 0px 18px 0px;
+    padding:                    18px 22px;
+    border-radius:              16px;
+    background-color:           @bg1;
+    text-color:                 @fg0;
+    border:                     2px solid;
+    border-color:               rgba(255, 255, 255, 0.06);
+    children:                   [ "prompt", "entry" ];
 }
 
 prompt {
-    enabled:                 true;
-    background-color:        transparent;
-    text-color:              @accent;
-    font:                    "FiraCode Nerd Font Bold 13";
+    enabled:                    true;
+    background-color:           transparent;
+    text-color:                 @accent;
+    font:                       "FiraCode Nerd Font Bold 14";
+    padding:                    0px 8px 0px 0px;
 }
 
 textbox-prompt-colon {
-    enabled:                 true;
-    expand:                  false;
-    str:                     "::";
-    background-color:        transparent;
-    text-color:              @accent;
+    enabled:                    true;
+    expand:                     false;
+    str:                        "::";
+    background-color:           transparent;
+    text-color:                 @accent;
+    padding:                    0px 8px 0px 0px;
 }
 
 entry {
-    enabled:                 true;
-    background-color:        transparent;
-    text-color:              @fg0;
-    cursor:                  text;
-    placeholder:             "Type to search...";
-    placeholder-color:       rgba(255, 255, 255, 0.3);
+    enabled:                    true;
+    background-color:           transparent;
+    text-color:                 @fg0;
+    cursor:                     text;
+    placeholder:                "Search applications...";
+    placeholder-color:          rgba(255, 255, 255, 0.35);
+    font:                       "FiraCode Nerd Font 11";
 }
 
-/* ---- Mode Switcher ---- */
-mode-switcher{
-    enabled:                 true;
-    spacing:                 6px;
-    margin:                  0px 0px 12px 0px;
-    padding:                 0px;
-    background-color:        transparent;
+/* ─── Mode Switcher ──────────────────────────────────────────────── */
+mode-switcher {
+    enabled:                    true;
+    spacing:                    8px;
+    margin:                     0px 0px 14px 0px;
+    padding:                    0px;
+    background-color:           transparent;
 }
 
 button {
-    padding:                 12px 18px;
-    border-radius:           10px;
-    background-color:        @bg1;
-    text-color:              @fg1;
-    cursor:                  pointer;
-    border:                  2px;
-    font:                    "FiraCode Nerd Font Bold 12";
+    padding:                    14px 20px;
+    border-radius:              12px;
+    background-color:           @bg1;
+    text-color:                 @fg2;
+    cursor:                     pointer;
+    border:                     2px solid;
+    border-color:               transparent;
+    font:                       "FiraCode Nerd Font Bold 11";
 }
 
 button selected {
-    background-color:        @accent;
-    text-color:              @bg0;
+    background-color:           @accent;
+    text-color:                 @bg0;
+    border-color:               @accent;
 }
 
 button hover {
-    background-color:        @bg2;
-    text-color:              @accent;
-    border:                  2px;
+    background-color:           @bg2;
+    text-color:                 @accent;
+    border-color:               rgba(255, 255, 255, 0.1);
 }
 
-/* ---- Listview ---- */
+/* ─── Listview ───────────────────────────────────────────────────── */
 listview {
-    enabled:                 true;
-    columns:                 2;
-    lines:                   5;
-    cycle:                   true;
-    dynamic:                 true;
-    scrollbar:               true;
-    layout:                  vertical;
-    reverse:                 false;
-    fixed-height:            true;
-    fixed-columns:           true;
-
-    spacing:                 8px;
-    margin:                  0px;
-    padding:                 0px;
-    background-color:        transparent;
+    enabled:                    true;
+    columns:                    2;
+    lines:                      6;
+    cycle:                      true;
+    dynamic:                    true;
+    scrollbar:                  true;
+    layout:                     vertical;
+    reverse:                    false;
+    fixed-height:               true;
+    fixed-columns:              true;
+    spacing:                    10px;
+    margin:                     0px;
+    padding:                    0px;
+    background-color:           transparent;
 }
 
-/* ---- Scrollbar ---- */
-scrollbar {
-    handle-width:            6px;
-    handle-color:            @accent;
-    border-radius:           6px;
-    background-color:        rgba(255, 255, 255, 0.05);
-    margin:                  0px 0px 0px 8px;
-}
-
-/* ---- Elements ---- */
+/* ─── Elements ───────────────────────────────────────────────────── */
 element {
-    enabled:                 true;
-    spacing:                 10px;
-    margin:                  0px;
-    padding:                 14px;
-    border-radius:           12px;
-    background-color:        @bg1;
-    text-color:              @fg0;
-    cursor:                  pointer;
-    border:                  2px;
+    enabled:                    true;
+    spacing:                    @element-spacing;
+    margin:                     0px;
+    padding:                    @element-padding;
+    border-radius:              @element-radius;
+    background-color:           @bg1;
+    text-color:                 @fg0;
+    cursor:                     pointer;
+    border:                     2px solid;
+    border-color:               rgba(255, 255, 255, 0.04);
+    orientation:                horizontal;
 }
 
 element normal.normal {
-    background-color:        @bg1;
-    text-color:              @fg0;
+    background-color:           @bg1;
+    text-color:                 @fg0;
+    border-color:               rgba(255, 255, 255, 0.04);
 }
 
+
+
 element selected.normal {
-    background-color:        @accent;
-    text-color:              @bg0;
-    border:                  2px;
+    background-color:           @accent;
+    text-color:                 @bg0;
+    border-color:               @accent;
+}
+
+
+element hover.normal {
+    text-color: @accent;
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 element normal.urgent {
-    background-color:        rgba(255, 100, 100, 0.15);
-    text-color:              @urgent;
-    border:                  2px;
+    background-color:           rgba(255, 100, 100, 0.12);
+    text-color:                 @urgent;
+    border-color:               rgba(255, 100, 100, 0.3);
 }
 
 element selected.urgent {
-    background-color:        @urgent;
-    text-color:              @bg0;
+    background-color:           @urgent;
+    text-color:                 @bg0;
+    border-color:               @urgent;
 }
 
 element normal.active {
-    background-color:        rgba(150, 255, 150, 0.1);
-    text-color:              @active;
+    background-color:           rgba(150, 255, 150, 0.08);
+    text-color:                 @active;
+    border-color:               rgba(150, 255, 150, 0.2);
 }
 
 element selected.active {
-    background-color:        @active;
-    text-color:              @bg0;
-    border:                  2px;
+    background-color:           @active;
+    text-color:                 @bg0;
+    border-color:               @active;
 }
 
 element-icon {
-    background-color:        transparent;
-    text-color:              inherit;
-    size:                    36px;
-    cursor:                  inherit;
+    background-color:           transparent;
+    text-color:                 inherit;
+    size:                       38px;
+    cursor:                     inherit;
 }
 
 element-text {
-    background-color:        transparent;
-    text-color:              inherit;
-    cursor:                  inherit;
-    horizontal-align:        0.0;
+    background-color:           transparent;
+    text-color:                 inherit;
+    cursor:                     inherit;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
 }
 
 element-text selected.normal {
-    text-color:              @bg0;
-    font:                    "FiraCode Nerd Font Bold 10";
+    text-color:                 @bg0;
+    font:                       "FiraCode Nerd Font Bold 10";
 }
 
-/* ---- Message ---- */
+/* ─── Message ────────────────────────────────────────────────────── */
 message {
-    enabled:                 true;
-    margin:                  0px 0px 12px 0px;
-    padding:                 0px;
-    border-radius:           12px;
-    background-color:        transparent;
+    enabled:                    true;
+    margin:                     0px 0px 14px 0px;
+    padding:                    0px;
+    border-radius:              14px;
+    background-color:           transparent;
 }
 
 textbox {
-    padding:                 14px;
-    border-radius:           12px;
-    background-color:        @bg1;
-    text-color:              @accent;
-    horizontal-align:        0.0;
+    padding:                    16px 20px;
+    border-radius:              14px;
+    background-color:           @bg1;
+    text-color:                 @accent;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    border:                     2px solid;
+    border-color:               rgba(255, 255, 255, 0.06);
 }
 
 error-message {
-    padding:                 14px;
-    border-radius:           12px;
-    background-color:        rgba(255, 100, 100, 0.15);
-    text-color:              @urgent;
+    padding:                    16px 20px;
+    border-radius:              14px;
+    background-color:           rgba(255, 100, 100, 0.12);
+    text-color:                 @urgent;
+    border:                     2px solid;
+    border-color:               rgba(255, 100, 100, 0.3);
 }
 
-/* ---- Listbox (container for message and listview) ---- */
-listbox {
-    spacing:                 0px;
-    padding:                 0px;
-    background-color:        transparent;
-    children:                [ "message", "listview" ];
-}
-
-/* ---- Additional polish ---- */
+/* ─── Counters ───────────────────────────────────────────────────── */
 num-filtered-rows,
 num-rows {
-    expand:                  false;
-    background-color:        transparent;
-    text-color:              rgba(255, 255, 255, 0.4);
-    font:                    "FiraCode Nerd Font 9";
+    expand:                     false;
+    background-color:           transparent;
+    text-color:                 rgba(255, 255, 255, 0.4);
+    font:                       "FiraCode Nerd Font 9";
+    margin:                     12px 0px 0px 0px;
 }
 
 textbox-num-sep {
-    expand:                  false;
-    str:                     "/";
-    background-color:        transparent;
-    text-color:              rgba(255, 255, 255, 0.4);
+    expand:                     false;
+    str:                        " / ";
+    background-color:           transparent;
+    text-color:                 rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Case Indicator ─────────────────────────────────────────────── */
+case-indicator {
+    enabled:                    true;
+    background-color:           transparent;
+    text-color:                 @accent;
+    spacing:                    0;
+}
+
+/* ─── History and sorting ────────────────────────────────────────── */
+element-index {
+    enabled:                    false;
 }

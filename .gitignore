@@ -62,6 +62,7 @@ dist/
 # Node / React / Vite frontend
 # ─────────────────────────────
 /apps/**/frontend/node_modules/
+# /apps/Pulse/frontend/node_modules
 /apps/**/frontend/dist/
 /apps/**/frontend/.vite/
 *.tsbuildinfo
