@@ -1,4 +1,4 @@
 # The source below is for hecate any changes made will be gone when hecate is updated
-source = ~/.config/zsh/zshrc
+source ~/.config/zsh/zshrc
 
 #  Write your custom configs here below this wont be affected at all
