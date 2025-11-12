@@ -147,64 +147,55 @@ clone_dotfiles() {
   gum style --foreground 82 "✓ Dotfiles cloned successfully!"
 }
 
-# Backup config based on Hecate/config contents
+# Backup existing configs to cache instead of .config
 backup_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Backing Up Existing Configs"
 
   local timestamp=$(date +%Y%m%d_%H%M%S)
-  local backup_dir="$CONFIGDIR/Hecate-backup/config-$timestamp"
+  local backup_dir="$HOME/.cache/hecate-backup/hecate-$timestamp"
 
-  if [ -d "$HECATEDIR/config" ]; then
-    local backed_up=false
+  # List of config directories to check (excluding shell rc files)
+  local config_dirs=(
+    "alacritty" "fish" "hecate" "rofi" "waypaper" "bash" "foot"
+    "hypr" "starship" "swaync" "wlogout" "cava" "ghostty" "kitty"
+    "eww" "gtk-3.0" "matugen" "wallust" "fastfetch" "gtk-4.0"
+    "quickshell" "waybar"
+  )
 
-    for folder in "$HECATEDIR/config"/*; do
-      if [ -d "$folder" ]; then
-        local folder_name=$(basename "$folder")
+  # Check for shell rc files separately
+  local shell_files=()
+  [ -f "$HOME/.zshrc" ] && shell_files+=(".zshrc")
+  [ -f "$HOME/.bashrc" ] && shell_files+=(".bashrc")
 
-        # Check if config exists in user's .config
-        if [ -d "$CONFIGDIR/$folder_name" ]; then
-          if [ "$backed_up" = false ]; then
-            mkdir -p "$backup_dir"
-            backed_up=true
-          fi
-          gum style --foreground 220 "Backing up: $folder_name"
-          cp -r "$CONFIGDIR/$folder_name" "$backup_dir/"
-        fi
+  local backed_up=false
 
-        # Backup shell rc files
-        case "$folder_name" in
-        zsh)
-          if [ -f "$HOME/.zshrc" ]; then
-            [ "$backed_up" = false ] && mkdir -p "$backup_dir" && backed_up=true
-            gum style --foreground 220 "Backing up: .zshrc"
-            cp "$HOME/.zshrc" "$backup_dir/.zshrc"
-          fi
-          ;;
-        bash)
-          if [ -f "$HOME/.bashrc" ]; then
-            [ "$backed_up" = false ] && mkdir -p "$backup_dir" && backed_up=true
-            gum style --foreground 220 "Backing up: .bashrc"
-            cp "$HOME/.bashrc" "$backup_dir/.bashrc"
-          fi
-          ;;
-        fish)
-          if [ -f "$HOME/.config/fish/config.fish" ]; then
-            [ "$backed_up" = false ] && mkdir -p "$backup_dir" && backed_up=true
-            gum style --foreground 220 "Backing up: fish config"
-            mkdir -p "$backup_dir/fish"
-            cp -r "$HOME/.config/fish"/* "$backup_dir/fish/"
-          fi
-          ;;
-        esac
+  # Backup config directories
+  for dir in "${config_dirs[@]}"; do
+    if [ -d "$HOME/.config/$dir" ]; then
+      if [ "$backed_up" = false ]; then
+        mkdir -p "$backup_dir/config"
+        backed_up=true
       fi
-    done
-
-    if [ "$backed_up" = true ]; then
-      gum style --foreground 82 "✓ Backup created at: $backup_dir"
-      echo "$backup_dir" >"$HOME/.config/hecate_last_backup.txt"
-    else
-      gum style --foreground 220 "No existing configs found to backup"
+      gum style --foreground 220 "Backing up: $dir"
+      cp -r "$HOME/.config/$dir" "$backup_dir/config/"
     fi
+  done
+
+  # Backup shell rc files
+  for file in "${shell_files[@]}"; do
+    if [ "$backed_up" = false ]; then
+      mkdir -p "$backup_dir"
+      backed_up=true
+    fi
+    gum style --foreground 220 "Backing up: $file"
+    cp "$HOME/$file" "$backup_dir/"
+  done
+
+  if [ "$backed_up" = true ]; then
+    gum style --foreground 82 "✓ Backup created at: $backup_dir"
+    echo "$backup_dir" > "$HOME/.cache/hecate_last_backup.txt"
+  else
+    gum style --foreground 220 "No existing configs found to backup"
   fi
 }
 
@@ -627,7 +618,7 @@ install_aur_helper() {
 
 # Verify critical packages are installed (returns 0 if ok, 1 if critical failure)
 verify_critical_packages_installed() {
-  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard", "slurp", "tesseract", "webkit2gtk")
+  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk")
   local missing_critical=()
 
   for pkg in "${critical_packages[@]}"; do
@@ -652,7 +643,7 @@ verify_critical_packages() {
   clear
   gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
 
-  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard", "slurp", "tesseract", "webkit2gtk")
+  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk")
   local missing_packages=()
 
   for pkg in "${critical_packages[@]}"; do
@@ -819,79 +810,55 @@ FZFEOF
   gum style --foreground 82 "✓ Bash setup complete!"
 }
 
-# Move config files
+# Move configs from cloned repo to ~/.config
 move_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
 
   if [ ! -d "$HECATEDIR/config" ]; then
-    gum style --foreground 196 "Error: Config directory not found!"
+    gum style --foreground 196 "Error: Config directory not found at $HECATEDIR/config"
     exit 1
   fi
 
   mkdir -p "$CONFIGDIR"
   mkdir -p "$HOME/.local/bin"
 
-  for folder in "$HECATEDIR/config"/*; do
-    if [ -d "$folder" ]; then
-      local folder_name=$(basename "$folder")
+  # Copy all config directories except shell rc files and hecate.sh
+  for item in "$HECATEDIR/config"/*; do
+    if [ -d "$item" ]; then
+      local item_name=$(basename "$item")
 
-      # Only install selected terminal config
-      case "$folder_name" in
-      alacritty | foot | ghostty | kitty)
-        if [ "$folder_name" = "$USER_TERMINAL" ]; then
-          gum style --foreground 82 "Installing $folder_name config..."
-          # rm -rf "$CONFIGDIR/$folder_name"
-          cp -rT "$folder" "$CONFIGDIR/"
-        fi
-        ;;
-      *)
-        # Install other configs (hyprland, waybar, etc.)
-        gum style --foreground 82 "Installing $folder_name..."
-        # rm -rf "$CONFIGDIR/$folder_name"
-        cp -rT "$folder" "$CONFIGDIR/"
-        ;;
+      # Handle terminal configs - only install selected terminal
+      case "$item_name" in
+        alacritty|foot|ghostty|kitty)
+          if [ "$item_name" = "$USER_TERMINAL" ]; then
+            gum style --foreground 82 "Installing $item_name config..."
+            cp -rT "$item" "$CONFIGDIR/$item_name"
+          fi
+          ;;
+        *)
+          # Install all other configs
+          gum style --foreground 82 "Installing $item_name..."
+          cp -rT "$item" "$CONFIGDIR/$item_name"
+          ;;
       esac
     fi
   done
 
-  # Install apps from apps directory
-  if [ -d "$HECATEAPPSDIR/Pulse/build/bin" ]; then
-    gum style --foreground 82 "Installing Pulse..."
-    if [ -f "$HECATEAPPSDIR/Pulse/build/bin/Pulse" ]; then
-      cp "$HECATEAPPSDIR/Pulse/build/bin/Pulse" "$HOME/.local/bin/Pulse"
-      chmod +x "$HOME/.local/bin/Pulse"
-      gum style --foreground 82 "✓ Pulse installed to ~/.local/bin/Pulse"
-    else
-      gum style --foreground 220 "⚠ Pulse binary not found at expected location"
-    fi
+  # Handle shell rc files
+  if [ -f "$HECATEDIR/config/zshrc" ]; then
+    gum style --foreground 82 "Installing .zshrc..."
+    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
+    gum style --foreground 82 "✓ ZSH config installed"
   else
-    gum style --foreground 220 "⚠ Pulse build directory not found"
+    gum style --foreground 220 "⚠ zshrc not found in config directory"
   fi
-  if [ -d "$HECATEAPPSDIR/Hecate-Help/build/bin" ]; then
-    gum style --foreground 82 "Installing Hecate Settings Apps..."
-    sleep 1
-    if [ -f "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" ]; then
-      cp "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings" "$HOME/.local/bin/Hecate-Settings"
-      chmod +x "$HOME/.local/bin/Hecate-Settings"
-      gum style --foreground 82 "✓ Hecate Settings Apps installed to ~/.local/bin"
-    else
-      gum style --foreground 220 "⚠ Hecate-Settings binary not found at expected location"
-    fi
+
+  if [ -f "$HECATEDIR/config/bashrc" ]; then
+    gum style --foreground 82 "Installing .bashrc..."
+    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
+    gum style --foreground 82 "✓ BASH config installed"
   else
-    gum style --foreground 220 "⚠ Hecate-Settings build directory not found"
-  fi
-    if [ -d "$HECATEAPPSDIR/Aoiler/build/bin" ]; then
-    gum style --foreground 120 "Installing Hecate Assistant..."
-    sleep 1
-    if [ -f "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler" ]; then
-      cp "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler" "$HOME/.local/bin/Aoiler"
-      chmod +x "$HOME/.local/bin/Aoiler"
-      gum style --foreground 82 "✓ Assistant installed to ~/.local/bin"
-    else
-      gum style --foreground 220 "⚠ Assistant binary not found at expected location"
-    fi
-  else
-    gum style --foreground 220 "⚠ Assistant build directory not found"
+    gum style --foreground 220 "⚠ bashrc not found in config directory"
   fi
 
   # Install hecate CLI tool
@@ -899,37 +866,33 @@ move_config() {
     gum style --foreground 82 "Installing hecate CLI tool..."
     cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
     chmod +x "$HOME/.local/bin/hecate"
-    gum style --foreground 82 "✓ hecate command installed to ~/.local/bin/hecate"
+    gum style --foreground 82 "✓ hecate command installed"
   else
     gum style --foreground 220 "⚠ hecate.sh not found in config directory"
   fi
 
-  # Install Starship config
-  if [ -f "$HECATEDIR/config/starship/starship.toml" ]; then
-    gum style --foreground 82 "Installing Starship config..."
-    cp "$HECATEDIR/config/starship/starship.toml" "$HOME/.config/starship.toml"
-    gum style --foreground 82 "✓ Starship config installed"
-  else
-    gum style --foreground 220 "⚠ Starship config not found"
-  fi
+  # Install apps from apps directory
+  install_app "Pulse" "$HECATEAPPSDIR/Pulse/build/bin/Pulse"
+  install_app "Hecate-Settings" "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings"
+  install_app "Aoiler" "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler"
 
-    if [ -f "$HECATEDIR/config/zsh" ]; then
-    # gum style --foreground 82 "Installing hecate CLI tool..."
-    cp "$HECATEDIR/config/zsh" "$HOME/.zshrc"
-    gum style --foreground 82 "✓ ZSH config installed"
-  else
-    gum style --foreground 220 "⚠ zshrc config not found in config directory"
-  fi
-    if [ -f "$HECATEDIR/config/bash" ]; then
-    # gum style --foreground 82 "Installing hecate CLI tool..."
-    cp "$HECATEDIR/config/bash" "$HOME/.bashrc"
-    gum style --foreground 82 "✓ BASH config installed"
-  else
-    gum style --foreground 220 "⚠ bashrc config not found in config directory"
-  fi
   gum style --foreground 82 "✓ Configuration files installed successfully!"
 }
+# Helper function to install apps
+install_app() {
+  local app_name="$1"
+  local app_path="$2"
+  local app_display="${3:-$app_name}"
 
+  if [ -f "$app_path" ]; then
+    gum style --foreground 82 "Installing $app_display..."
+    cp "$app_path" "$HOME/.local/bin/$app_name"
+    chmod +x "$HOME/.local/bin/$app_name"
+    gum style --foreground 82 "✓ $app_display installed to ~/.local/bin/$app_name"
+  else
+    gum style --foreground 220 "⚠ $app_display binary not found at $app_path"
+  fi
+}
 # Build preferred app keybind
 build_preferd_app_keybind() {
   gum style --border double --padding "1 2" --border-foreground 212 "Configuring App Keybinds"
@@ -1016,33 +979,33 @@ EOF
   gum style --foreground 220 "Theme mode: $theme_mode"
 }
 
-# Setup Waybar and links system colors
+# Setup Waybar and link system colors
 setup_Waybar() {
   gum style --foreground 220 "Configuring waybar..."
 
-  # Define the symlink paths
-  WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
-  WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
-  WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
-  SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
-  STATSHIP_SHYMLINK="$HOME/.config/starship.toml"
-  # Remove existing symlinks if they exist
-  [ -L "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
-  [ -L "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
-  [ -L "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
-  [ -L "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
-  [ -L "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
+  # Define symlink paths
+  local WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
+  local WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
+  local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
+  local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
+  local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
+
+  # Remove old symlinks or files
+  [ -e "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
+  [ -e "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
+  [ -e "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
+  [ -e "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
+  [ -e "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
 
   # Create new symlinks
   ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
   ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
-  ln -s "$HOME/.config/starship/starship.toml" "$STATSHIP_SHYMLINK"
+  ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
 
   gum style --foreground 82 "✓ Waybar configured!"
 }
-
 
 # Set default shell
 set_default_shell() {
@@ -1268,9 +1231,8 @@ main() {
     'Post-Install TODO:' \
     '1. Reboot (or live dangerously and just re-login)' \
     '2. Log into Hyprland' \
-    '3. Run: install-hyprland-plugins' \
-    '4. Take screenshot' \
-    '5. Post to r/unixporn'
+    '3. Take screenshot' \
+    '4. Post to r/unixporn'
   echo ""
   gum style --foreground 92 "May your wallpapers be dynamic and your RAM usage low."
   echo ""
