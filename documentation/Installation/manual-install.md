@@ -40,52 +40,49 @@ ls ~/Hecate/config
 ## Step 2: Backup Your Existing Configs
 ### You can do it either manually in your file manager or by following the commands
 
-**Create timestamped backup:**
+**Create timestamped backup in cache:**
 ```bash
-# Set backup location
-BACKUP_DIR="$HOME/.config/Hecate-backup/config-$(date +%Y%m%d_%H%M%S)"
-mkdir -p "$BACKUP_DIR"
+# Set backup location in cache directory
+BACKUP_DIR="$HOME/.cache/hecate-backup/hecate-$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$BACKUP_DIR/config"
 
 # Save backup path for reference
-echo "$BACKUP_DIR" > ~/.config/hecate_last_backup.txt
+echo "$BACKUP_DIR" > ~/.cache/hecate_last_backup.txt
 ```
 
 **Backup configs that Hecate will replace:**
 ```bash
 # List of directories that will be replaced
 CONFIGS_TO_BACKUP=(
-  "hypr"
-  "waybar"
-  "swaync"
-  "rofi"
-  "wlogout"
-  "quickshell"
-  "eww"
-  "kitty"
   "alacritty"
-  "foot"
-  "ghostty"
+  "bash"
+  "cava"
+  "eww"
+  "fastfetch"
   "fish"
-  "alacritty"
   "foot"
   "ghostty"
-  "kitty"
-  "wallust"
-  "eww"
   "gtk-3.0"
   "gtk-4.0"
+  "hecate"
+  "hypr"
+  "kitty"
   "matugen"
-  "fastfetch"
-  "waypaper"
-  "fish"
+  "quickshell"
+  "rofi"
   "starship"
+  "swaync"
+  "wallust"
+  "waybar"
+  "waypaper"
+  "wlogout"
 )
 
-# Backup each if it exists
+# Backup each config directory if it exists
 for config in "${CONFIGS_TO_BACKUP[@]}"; do
   if [ -d "$HOME/.config/$config" ]; then
     echo "Backing up: $config"
-    cp -r "$HOME/.config/$config" "$BACKUP_DIR/"
+    cp -r "$HOME/.config/$config" "$BACKUP_DIR/config/"
   fi
 done
 
@@ -99,7 +96,11 @@ echo "✓ Backup complete: $BACKUP_DIR"
 **To restore later:**
 ```bash
 # Restore a specific config
-cp -r /path/to/backup/hypr ~/.config/
+cp -r /path/to/backup/config/hypr ~/.config/
+
+# Restore shell rc files
+cp /path/to/backup/.zshrc ~/
+cp /path/to/backup/.bashrc ~/
 ```
 
 ---
@@ -204,6 +205,8 @@ jq
 bc
 neovim (or vim)
 nano
+tesseract
+webkit2gtk
 ```
 
 #### Terminal
@@ -215,7 +218,7 @@ foot
 ghostty
 ```
 
-#### Shell
+#### Shell (of your choice)
 
 ```
 zsh
@@ -223,7 +226,7 @@ bash
 fish
 ```
 
-#### Browser
+#### Browser (of your choice)
 
 ```
 firefox
@@ -232,6 +235,8 @@ brave-browser
 google-chrome
 ```
 
+---
+
 ## Step 4: Copy Configuration Files
 
 ### Directory Structure
@@ -239,74 +244,31 @@ google-chrome
 Hecate configs are organized in `~/Hecate/config/`:
 ```
 ~/Hecate/config/
-├── hypr/              # Hyprland configuration
-├── waybar/            # Status bar
-├── swaync/            # Notification center
-├── rofi/              # Application launcher
-├── wlogout/           # Logout menu
-├── hecate/            # Theme system
-├── starship/          # Shell prompt
-├── kitty/             # Kitty terminal
 ├── alacritty/         # Alacritty terminal
+├── bash/              # Bash shell
+├── bashrc             # Bash rc file
+├── cava/              # Audio visualizer
+├── eww/               # Elkowar's Wacky Widgets
+├── fastfetch/         # System info
+├── fish/              # Fish shell
 ├── foot/              # Foot terminal
 ├── ghostty/           # Ghostty terminal
-├── zsh/               # Zsh shell
-├── bash/              # Bash shell
-├── fish/              # Fish shell
-└── hecate.sh          # CLI tool
-```
-
-### Copy Core Configs
-
-```bash
-# Ensure .config directory exists
-mkdir -p ~/.config
-
-# Copy core configurations
-cp -r ~/Hecate/config/hypr ~/.config/
-cp -r ~/Hecate/config/waybar ~/.config/
-cp -r ~/Hecate/config/swaync ~/.config/
-cp -r ~/Hecate/config/rofi ~/.config/
-cp -r ~/Hecate/config/wlogout ~/.config/
-cp -r ~/Hecate/config/hecate ~/.config/
-```
-
-### Copy Terminal Config
-
-**Copy only YOUR chosen terminal:**
-```bash
-# Kitty
-cp -r ~/Hecate/config/kitty ~/.config/
-
-# OR Alacritty
-cp -r ~/Hecate/config/alacritty ~/.config/
-
-# OR Foot
-cp -r ~/Hecate/config/foot ~/.config/
-
-# OR Ghostty
-cp -r ~/Hecate/config/ghostty ~/.config/
-```
-
-### Copy Shell Config
-
-**Copy only YOUR chosen shell:**
-```bash
-# Zsh
-cp ~/Hecate/config/zsh/.zshrc ~/.zshrc
-
-# OR Bash
-cp ~/Hecate/config/bash/.bashrc ~/.bashrc
-
-# OR Fish
-mkdir -p ~/.config/fish
-cp -r ~/Hecate/config/fish/* ~/.config/fish/
-```
-
-### Copy Starship Config
-
-```bash
-cp ~/Hecate/config/starship/starship.toml ~/.config/starship.toml
+├── gtk-3.0/           # GTK3 theme
+├── gtk-4.0/           # GTK4 theme
+├── hecate/            # Theme system
+├── hecate.sh          # CLI tool
+├── hypr/              # Hyprland configuration
+├── kitty/             # Kitty terminal
+├── matugen/           # Material theme generator
+├── quickshell/        # Quick shell
+├── rofi/              # Application launcher
+├── starship/          # Shell prompt
+├── swaync/            # Notification center
+├── wallust/           # Wallpaper color generator
+├── waybar/            # Status bar
+├── waypaper/          # Wallpaper selector
+├── wlogout/           # Logout menu
+└── zshrc              # Zsh rc file
 ```
 
 ### Install CLI Tools
@@ -316,30 +278,86 @@ cp ~/Hecate/config/starship/starship.toml ~/.config/starship.toml
 mkdir -p ~/.local/bin
 
 # Copy hecate CLI tool
-cp ~/Hecate/config/hecate.sh ~/.local/bin/hecate
+mv ~/Hecate/config/hecate.sh ~/.local/bin/hecate
 chmod +x ~/.local/bin/hecate
-cp ~/Hecate/apps/Pulse/build/bin/Pulse ~/.local/bin/Pulse
-cp ~/Hecate/apps/Hecate-Help/build/bin/Hecate-Help ~/.local/bin/Hecate-Help
+echo "✓ Hecate CLI tool installed"
 
-# Add to PATH if not already there
+# Copy Pulse (if built)
+if [ -f ~/Hecate/apps/Pulse/build/bin/Pulse ]; then
+  mv ~/Hecate/apps/Pulse/build/bin/Pulse ~/.local/bin/Pulse
+  chmod +x ~/.local/bin/Pulse
+  echo "✓ Pulse installed"
+fi
+
+# Copy Hecate-Settings (if built)
+if [ -f ~/Hecate/apps/Hecate-Help/build/bin/Hecate-Settings ]; then
+  mv ~/Hecate/apps/Hecate-Help/build/bin/Hecate-Settings ~/.local/bin/Hecate-Settings
+  chmod +x ~/.local/bin/Hecate-Settings
+  echo "✓ Hecate-Settings installed"
+fi
+
+# Copy Aoiler (if built)
+# Aoiler needs a little more setup and is in alpha stage may not work out of the box right now
+if [ -f ~/Hecate/apps/Aoiler/build/bin/Aoiler ]; then
+  mv ~/Hecate/apps/Aoiler/build/bin/Aoiler ~/.local/bin/Aoiler
+  chmod +x ~/.local/bin/Aoiler
+  echo "✓ Aoiler (Assistant) installed"
+fi
+
+# Add to local/bin to PATH if not already there
 # Add this line to your shell rc file (~/.bashrc, ~/.zshrc, etc.)
 export PATH="$HOME/.local/bin:$PATH"
+
+# for fish use this
+set -gx PATH $HOME/.local/bin $PATH
 ```
+
+### Copy Shell RC Files
+
+```bash
+# Copy shell rc files to home directory
+cp ~/Hecate/config/zshrc ~/.zshrc
+echo "✓ Zsh config copied to ~/.zshrc"
+
+cp ~/Hecate/config/bashrc ~/.bashrc
+echo "✓ Bash config copied to ~/.bashrc"
+```
+
+
+### Move Configs
+
+either move manually or copy paste the commands
+
+```bash
+# Copy all config directories to ~/.config
+for dir in ~/Hecate/config/*/; do
+  dir_name=$(basename "$dir")
+  echo "Copying $dir_name..."
+  cp -r "$dir" ~/.config/
+done
+
+echo "✓ All config directories copied"
+```
+
+
+
+
 
 ---
 
 ## Step 5: Set Up Theme System
 
 ### Create Hecate Configuration
+<p> change your app prefrences term,browser,shell, profile(profile currenlt does nothing other than install additional packages at install which isnt really necessary at manual setup and maybe in future will add specific themes or something) </p>
 
 ```bash
 mkdir -p ~/.config/hecate
-
-cat > ~/.config/hecate/hecate.toml <<'EOF'
+remote_version=$(curl -s "https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt" )
+cat > ~/.config/hecate/hecate.toml <<EOF
 # Hecate Dotfiles Configuration
 [metadata]
-version = "0.3.9 blind owl"
-install_date = "$(date +%Y-%m-%d)
+version = "$remote_version"
+install_date = "$(date +%Y-%m-%d)"
 last_update = "$(date +%Y-%m-%d)"
 repo_url = "https://github.com/Aelune/Hecate.git"
 
@@ -354,28 +372,37 @@ browser = "firefox" # Change to: firefox, chromium, brave, etc.
 shell = "zsh"       # Change to: zsh, bash, fish
 profile = "minimal"
 EOF
+
+echo "✓ Hecate config created"
 ```
 
 ### Create Color Symlinks
 
 ```bash
-# Link Waybar and SwayNC to master color file
-ln -sf ~/.config/hecate/hecate.css ~/.config/waybar/color.css
-ln -sf ~/.config/hecate/hecate.css ~/.config/swaync/color.css
+# Remove any existing symlinks or files
+[ -e ~/.config/waybar/style.css ] && rm -f ~/.config/waybar/style.css
+[ -e ~/.config/waybar/config ] && rm -f ~/.config/waybar/config
+[ -e ~/.config/waybar/color.css ] && rm -f ~/.config/waybar/color.css
+[ -e ~/.config/swaync/color.css ] && rm -f ~/.config/swaync/color.css
+[ -e ~/.config/starship.toml ] && rm -f ~/.config/starship.toml
 
-# Link Waybar style and config to defaults
-ln -sf ~/.config/waybar/style/default.css ~/.config/waybar/style.css
-ln -sf ~/.config/waybar/configs/top ~/.config/waybar/config
+# Create symlinks
+ln -s ~/.config/waybar/style/default.css ~/.config/waybar/style.css
+ln -s ~/.config/waybar/configs/top ~/.config/waybar/config
+ln -s ~/.config/hecate/hecate.css ~/.config/waybar/color.css
+ln -s ~/.config/hecate/hecate.css ~/.config/swaync/color.css
+ln -s ~/.config/starship/starship.toml ~/.config/starship.toml
+
+echo "✓ Symlinks created"
 ```
 
 ---
 
-## Step 6: Configure Applications
-
+## Step 6: Configure Quick Applications
 ### Set Default Applications
 
 ```bash
-mkdir -p ~/.config/Hecate/quickApps.conf
+mkdir -p ~/.config/hecate
 
 # Edit with your preferences
 cat > ~/.config/hecate/quickapps.conf <<'EOF'
@@ -388,15 +415,17 @@ Files=dolphin
 Editor=code
 Music=spotify
 EOF
+
+echo "✓ Quick apps configured"
 ```
 
 ### Configure Waypaper Post-Command
 
-This makes colors update automatically when you change wallpaper:
-For more info, check [dynamic-colors.md](../Hecate/dynamic-colors.md)
+This script makes colors update automatically when you change wallpaper:
+For more info, check [dynamic-colors.md](../Hecate/dynamic-colors.md). Check if the script exists and is there any error
 
 ```bash
- ~/.config/hecate/scripts/hecate-system-colors.sh
+~/.config/hecate/scripts/hecate-system-colors.sh
 ```
 
 ### Set Default Shell (Optional)
@@ -425,10 +454,14 @@ wal -i ~/Pictures/your-wallpaper.jpg
 ~/.config/hecate/scripts/update_hecate_colors.sh
 ```
 
-### or change wallpaer by waypaper
+### Or change wallpaper by waypaper
+```bash
+waypaper
+```
+
 ---
 
-## 🎯 Optional: Install Shell Plugins
+## Install Shell Plugins
 
 ### Zsh Plugins
 
@@ -470,22 +503,22 @@ fisher install jorgebucaran/nvm.fish
 
 ---
 
-## 🎯 Optional: SDDM Login Manager
+## Optional: SDDM Login Manager
 
 ### Enable SDDM
 
 ```bash
-# Enable SDDM service (command varies by distro)
+# Enable SDDM service (command varies by distro choose your distro command)
+sudo pacman -S sddm
+sudo dnf install sddm
+sudo apt install sddm
 
-# Systemd-based systems:
+# enable sddm:
 sudo systemctl enable sddm
 sudo systemctl set-default graphical.target
-
-# Reboot to use SDDM
-sudo reboot
 ```
 
-### Install Astronaut Theme (Optional)
+### Install Astronaut Theme (Optional)(Its a different project not owned by me I just contributed in install script)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/keyitdev/sddm-astronaut-theme/master/setup.sh | bash
@@ -495,13 +528,11 @@ curl -fsSL https://raw.githubusercontent.com/keyitdev/sddm-astronaut-theme/maste
 
 ## ✅ Post-Installation
 
-### 1. Reboot or Re-login
+### 1. Reboot
 
 ```bash
 # Reboot
 sudo reboot
-
-# Or just log out and back in
 ```
 
 ### 2. Start Hyprland
@@ -512,22 +543,28 @@ sudo reboot
 ### 3. Test Key Bindings
 
 ```
-Super + Return         Terminal
-Super + D              App launcher (Rofi)
-Super + E              File manager
-Super + B              Browser
-Super + Q              Close window
+SUPER + Return         Terminal
+SUPER + D              App launcher (Rofi)
+SUPER + E              File manager
+SUPER + B              Browser
+SUPER + Q              Close window
+SUPER + H              Hecate settings app (keybinds)
+SUPER + Space          Aoiler ai assistant(in alpha stage may not work smoothly)
 ```
 
 ### 4. Set Wallpaper
 
 ```bash
-# Open waypaper
+# Open waypaper by command or keybind
 waypaper
 
+# Keybind
+SUPER + CTRL + W
 # Select wallpaper
 # Colors auto-update if theme mode is "dynamic"
+# Change theme from static to dynamic or vis versa just type hecate theme or change in hecate settings app under home page
 ```
+
 
 ---
 
@@ -543,7 +580,7 @@ pgrep waybar
 pgrep swaync
 
 # Check wallpaper daemon
-pgrep hyprpaper  # or pgrep swww
+pgrep swww  # or pgrep hyprpaper
 ```
 
 ### Restart Components
@@ -601,11 +638,13 @@ firefox  # Should open browser
 | `~/.config/hecate/` | Theme system |
 | `~/.config/hecate/hecate.toml` | Main config |
 | `~/.config/hecate/hecate.css` | Master colors |
-| `~/.config/starship.toml` | Shell prompt |
-| `~/.zshrc` / `~/.bashrc` | Shell config |
+| `~/.config/starship.toml` | Shell prompt (symlink) |
+| `~/.zshrc` | Zsh config |
+| `~/.bashrc` | Bash config |
 | `~/.cache/wal/colors.json` | Pywal colors |
 | `~/.local/bin/hecate` | CLI tool |
-| `~/.config/Hecate-backup/` | Your backups |
+| `~/.cache/hecate-backup/` | Your backups |
+| `~/.cache/hecate_last_backup.txt` | Last backup path |
 
 ---
 
@@ -649,15 +688,61 @@ vim ~/.config/waybar/configs/top
 ```
 
 ---
-## Resources
+
+## 🗑️ Uninstallation
+
+### Restore Previous Configs
+
+```bash
+# Find your backup
+BACKUP_PATH=$(cat ~/.cache/hecate_last_backup.txt)
+echo "Restoring from: $BACKUP_PATH"
+
+# Restore all configs
+cp -r "$BACKUP_PATH/config/"* ~/.config/
+
+# Restore shell rc files
+[ -f "$BACKUP_PATH/.zshrc" ] && cp "$BACKUP_PATH/.zshrc" ~/
+[ -f "$BACKUP_PATH/.bashrc" ] && cp "$BACKUP_PATH/.bashrc" ~/
+
+echo "✓ Configs restored"
+```
+
+### Remove Hecate
+
+```bash
+# Remove Hecate configs
+rm -rf ~/.config/hypr
+rm -rf ~/.config/waybar
+rm -rf ~/.config/swaync
+rm -rf ~/.config/rofi
+rm -rf ~/.config/hecate
+
+# Remove CLI tools
+rm -f ~/.local/bin/hecate
+rm -f ~/.local/bin/Pulse
+rm -f ~/.local/bin/Hecate-Settings
+rm -f ~/.local/bin/Aoiler
+
+# Remove repository
+rm -rf ~/Hecate
+
+echo "✓ Hecate removed"
+```
+
+---
+
+## 📚 Resources
 
 - **Issues:** Report on GitHub
-- **Automated Installer:** Use `./install.sh` for Arch-based systems (other distro are going to be added soon..)
+- **Automated Installer:** Use `./install.sh` for Arch-based systems (other distros are going to be added soon..)
 - **Theme Documentation:** See [dynamic-colors.md](../Hecate/dynamic-colors.md)
 
 ---
 
+**Installation Stats:**
 - **Installation Time:** 15-30 minutes
 - **Difficulty:** Intermediate
 - **Distro Support:** Universal (package names may vary)
-- **Last Updated:** 2025-10-25
+- **Backup Location:** `~/.cache/hecate-backup/`
+- **Last Updated:** 2025-11-12
