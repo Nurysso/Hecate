@@ -57,7 +57,7 @@ check_OS() {
   if [ -f /etc/os-release ]; then
     . /etc/os-release
     case "$ID" in
-    arch | manjaro | endeavouros)
+    arch | manjaro | endeavouros | cachyos )
       OS="arch"
       gum style --foreground 82 "✓ Detected OS: $OS"
       ;;
