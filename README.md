@@ -27,7 +27,7 @@
 <!-- <p align="center">
   <a href="#-features"><kbd> <br> Features <br> </kbd></a>
   <a href="#-installation"><kbd> <br> Installation <br> </kbd></a>
-  <a href="#-hecate-helper-gui"><kbd> <br> GUI Helper <br> </kbd></a>
+  <a href="#-Hecate-Settingser-gui"><kbd> <br> GUI Helper <br> </kbd></a>
   <a href="#-quickshell-widgets"><kbd> <br> Widgets <br> </kbd></a>
   <a href="#-configuration"><kbd> <br> Configuration <br> </kbd></a>
   <a href="#-contributing"><kbd> <br> Contributing <br> </kbd></a>
@@ -49,14 +49,14 @@
 
 ### 💿 Installation
 
-<img src="assets/gifs/hecate-install.gif" alt="Installation Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
+<img src="https://raw.githubusercontent.com/Aelune/assets/refs/heads/main/hecate/gifs/hecate-install.gif" alt="Installation Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
 
 </td>
 <td width="50%" align="center">
 
 ### ✨ Usage
 
-<img src="assets/gifs/hecate-demo.gif" alt="Usage Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
+<img src="https://raw.githubusercontent.com/Aelune/assets/refs/heads/main/hecate/gifs/hecate-demo.gif" alt="Usage Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
 
 </td>
 </tr>
@@ -102,7 +102,7 @@ Hecate automatically extracts colors from your wallpaper and applies them across
 
 <br>
 
-### **Hecate Helper GUI** <sup>⭐ NEW</sup>
+### **Hecate Settings GUI** <sup>⭐ NEW</sup>
 
 > *Customization made visual*
 
@@ -319,7 +319,7 @@ chmod +x install.sh
 
 <br>
 
-## 🎨 Hecate Helper GUI
+## 🎨 Hecate Settings GUI
 
 <div align="center">
 
@@ -327,7 +327,7 @@ chmod +x install.sh
 
 <br>
 
-<img src="assets/img/hecate-help .png" alt="Hecate Helper GUI" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
+<img src="https://raw.githubusercontent.com/Aelune/assets/refs/heads/main/hecate/gifs/settings.gif" alt="Hecate Helper GUI" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
 
 <br><br>
 
@@ -399,7 +399,7 @@ chmod +x install.sh
 
 ```bash
 # Run from anywhere
-hecate-help
+Hecate-Settings
 
 # Or use the keybinding
 SUPER + H
@@ -423,7 +423,7 @@ SUPER + H
 
 <br>
 
-<img src="assets/img/hecate-widget.png" alt="QuickShell Widgets" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
+<img src="https://raw.githubusercontent.com/Aelune/assets/refs/heads/main/hecate/img/hecate-widget.png" alt="QuickShell Widgets" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
 
 </div>
 
@@ -653,7 +653,7 @@ Press `SUPER+CTRL+W` to open the wallpaper selector
 
 ### 🎨 **Launch GUI Helper**
 
-Press `SUPER+H` or run `hecate-help `
+Press `SUPER+H` or run `Hecate-Settings `
 
 *Access the configuration interface*
 
@@ -711,7 +711,7 @@ Press `SUPER+W` to toggle desktop widgets
 </tr>
 <tr>
 <td><code>SUPER + H</code></td>
-<td><strong>Hecate Helper GUI</strong></td>
+<td><strong>Hecate Settings Keybind GUI</strong></td>
 </tr>
 <tr>
 <td><code>SUPER + CTRL + W</code></td>
@@ -739,7 +739,7 @@ Press `SUPER+W` to toggle desktop widgets
 <br>
 
 > [!TIP]
-> Full keybinding list available in `~/.config/hypr/keybinds.conf` or in the **Hecate Helper GUI**
+> Full keybinding list available in `~/.config/hypr/keybinds.conf` or in the **Hecate-Settings GUI**
 
 <br>
 
@@ -856,7 +856,7 @@ Press `SUPER+W` to toggle desktop widgets
 
 ```bash
 # try running in terminal to see error
-hecate-help
+Hecate-Settings
 ```
 
 </details>
