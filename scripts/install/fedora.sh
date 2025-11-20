@@ -194,23 +194,9 @@ ask_preferences() {
 
   while true; do
     USER_PROFILE=$(gum choose --header "Select your profile:" \
-      "minimal" \
-      "developer" \
-      "gamer" \
-      "madlad")
+      "minimal")
     gum style --foreground 82 "✓ Profile: $USER_PROFILE"
     echo ""
-
-    if [ "$USER_PROFILE" = "madlad" ]; then
-      gum style --foreground 220 "⚠️ This could take easily more than an hour or 2 to install"
-      if gum confirm "Do you want to continue?"; then
-        break
-      else
-        continue
-      fi
-    else
-      break
-    fi
   done
 
   # Summary
@@ -233,7 +219,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - Fedora equivalents
-  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard waybar swaync rofi-wayland rofi dunst fastfetch thunar python3-pywal btop wl-clipboard jq hyprpaper jetbrains-mono-fonts-all tesseract google-noto-emoji-fonts swwy hyprlock hypridle starship google-noto-sans-fonts grim slurp neovim nano webkit2gtk4.1)
+  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard waybar SwayNotificationCenter rofi-wayland rofi dunst fastfetch thunar btop wl-clipboard jq hyprpaper jetbrains-mono-fonts-all tesseract google-noto-emoji-fonts swww hyprlock hypridle starship google-noto-sans-fonts grim slurp neovim nano webkit2gtk4.1)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -282,123 +268,10 @@ build_package_list() {
     INSTALL_PACKAGES+=(sddm qt5-qtgraphicaleffects qt5-qtquickcontrols2 qt5-qtsvg)
   fi
 
-  # Profile-based packages
-  case "$USER_PROFILE" in
-  developer)
-    add_developer_packages
-    ;;
-  gamer)
-    add_gamer_packages
-    ;;
-  madlad)
-    gum style --foreground 220 "Adding all packages..."
-    add_developer_packages
-    add_gamer_packages
-    ;;
-  esac
-
   # Show package list
   gum style --foreground 220 "Total packages to install: ${#INSTALL_PACKAGES[@]}"
 }
 
-# Add developer packages
-add_developer_packages() {
-  local dev_types=$(gum choose --no-limit --header "Select development areas (Space to select, Enter to confirm):" \
-    "AI/ML" \
-    "Web Development" \
-    "Server/Backend" \
-    "Database" \
-    "Mobile Development" \
-    "DevOps" \
-    "Game Development" \
-    "Skip")
-
-  if echo "$dev_types" | grep -q "Skip"; then
-    gum style --foreground 220 "Skipping developer packages"
-    return
-  fi
-
-  if echo "$dev_types" | grep -q "AI/ML"; then
-    gum style --foreground 220 "Adding AI/ML packages..."
-    INSTALL_PACKAGES+=(python3 python3-pip python3-numpy python3-pandas python3-matplotlib python3-scikit-learn)
-  fi
-
-  if echo "$dev_types" | grep -q "Web Development"; then
-    gum style --foreground 220 "Adding Web Development packages..."
-    INSTALL_PACKAGES+=(nodejs npm yarnpkg)
-  fi
-
-  if echo "$dev_types" | grep -q "Server/Backend"; then
-    gum style --foreground 220 "Adding Server/Backend packages..."
-    INSTALL_PACKAGES+=(docker docker-compose)
-  fi
-
-  if echo "$dev_types" | grep -q "Database"; then
-    gum style --foreground 220 "Adding Database packages..."
-    INSTALL_PACKAGES+=(postgresql postgresql-server sqlite)
-
-    if gum confirm "Install MySQL/MariaDB?"; then
-      INSTALL_PACKAGES+=(mariadb mariadb-server)
-    fi
-
-    if gum confirm "Install Redis?"; then
-      INSTALL_PACKAGES+=(redis)
-    fi
-  fi
-
-  if echo "$dev_types" | grep -q "Mobile Development"; then
-    gum style --foreground 220 "Adding Mobile Development packages..."
-    INSTALL_PACKAGES+=(android-tools)
-  fi
-
-  if echo "$dev_types" | grep -q "DevOps"; then
-    gum style --foreground 220 "Adding DevOps packages..."
-    INSTALL_PACKAGES+=(docker kubernetes-client terraform ansible)
-  fi
-
-  if echo "$dev_types" | grep -q "Game Development"; then
-    gum style --foreground 220 "Adding Game Development packages..."
-    INSTALL_PACKAGES+=(godot blender)
-  fi
-}
-
-# Add gamer packages
-add_gamer_packages() {
-  gum style --foreground 220 "Adding gaming packages..."
-
-  # Enable RPM Fusion repositories if not already enabled
-  NEED_RPMFUSION=true
-
-  INSTALL_PACKAGES+=(steam lutris wine winetricks gamemode mangohud)
-
-  if gum confirm "Install Discord?"; then
-    INSTALL_PACKAGES+=(discord)
-  fi
-
-  if gum confirm "Install emulators?"; then
-    local emulators=$(gum choose --no-limit --header "Select emulators (Space to select, Enter to confirm):" \
-      "RetroArch" \
-      "PCSX2" \
-      "Dolphin" \
-      "RPCS3" \
-      "Skip")
-
-    if ! echo "$emulators" | grep -q "Skip"; then
-      echo "$emulators" | grep -q "RetroArch" && INSTALL_PACKAGES+=(retroarch)
-      echo "$emulators" | grep -q "PCSX2" && INSTALL_PACKAGES+=(pcsx2)
-      echo "$emulators" | grep -q "Dolphin" && INSTALL_PACKAGES+=(dolphin-emu)
-      # RPCS3 needs to be built from source or installed via AppImage on Fedora
-      if echo "$emulators" | grep -q "RPCS3"; then
-        gum style --foreground 220 "RPCS3 needs to be installed manually from rpcs3.net"
-      fi
-    fi
-  fi
-
-  if gum confirm "Install ProtonUp-Qt (for managing Proton-GE)?"; then
-    # ProtonUp-Qt available via Flatpak or manual install
-    NEED_PROTONUP=true
-  fi
-}
 
 # Setup required repositories
 setup_repositories() {
@@ -436,12 +309,8 @@ EOF
     sudo dnf copr enable -y "$repo"
   done
 
-  # Enable Hyprland COPR if Hyprland needs to be installed
-  if [ "$HYPRLAND_NEWLY_INSTALLED" = true ]; then
-    gum style --foreground 220 "Enabling Hyprland COPR repository..."
-    sudo dnf copr enable -y solopasha/hyprland
-    gum style --foreground 82 "✓ Hyprland COPR enabled"
-  fi
+    sudo dnf copr enable materka/swww
+    sudo dnf copr enable erikreider/SwayNotificationCenter
 
   echo ""
 }
@@ -905,6 +774,7 @@ setup_Waybar() {
   local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
   local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
   local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
+  local HYPRLOCK_SYMLINK="$HOME/.config/hypr/hyprlock.conf"
 
   # Remove old symlinks or files
   [ -e "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
@@ -912,6 +782,7 @@ setup_Waybar() {
   [ -e "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
   [ -e "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
   [ -e "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
+  [ -e "$HYPRLOCK_SYMLINK" ] && rm -f "$HYPRLOCK_SYMLINK"
 
   # Create new symlinks
   ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
@@ -919,7 +790,7 @@ setup_Waybar() {
   ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
   ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
-
+  ln -s "$HOME/.config/hypr/hyprlock/hecate-lock.conf" "$HYPRLOCK_SYMLINK"
   gum style --foreground 82 "✓ Waybar configured!"
 }
 
@@ -1089,7 +960,6 @@ main() {
 
   # Ask all user preferences
   ask_preferences
-
 
   # Build complete package list
   build_package_list

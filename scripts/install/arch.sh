@@ -920,6 +920,7 @@ setup_Waybar() {
   local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
   local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
   local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
+  local HYPRLOCK_SYMLINK="$HOME/.config/hypr/hyprlock.conf"
 
   # Remove old symlinks or files
   [ -e "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
@@ -927,6 +928,7 @@ setup_Waybar() {
   [ -e "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
   [ -e "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
   [ -e "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
+  [ -e "$HYPRLOCK_SYMLINK" ] && rm -f "$HYPRLOCK_SYMLINK"
 
   # Create new symlinks
   ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
@@ -934,7 +936,7 @@ setup_Waybar() {
   ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
   ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
-
+  ln -s "$HOME/.config/hypr/hyprlock/hecate-lock.conf" "$HYPRLOCK_SYMLINK"
   gum style --foreground 82 "✓ Waybar configured!"
 }
 
