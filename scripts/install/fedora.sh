@@ -223,7 +223,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - Fedora equivalents
-  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard waybar SwayNotificationCenter rofi-wayland rofi dunst fastfetch thunar btop wl-clipboard jq hyprpaper jetbrains-mono-fonts-all tesseract google-noto-emoji-fonts swww hyprlock hypridle starship google-noto-sans-fonts grim slurp neovim nano webkit2gtk4.1)
+  INSTALL_PACKAGES+=(git wget curl unzip waybar SwayNotificationCenter rofi dunst fastfetch thunar btop wl-clipboard jq hyprpaper jetbrains-mono-fonts-all tesseract google-noto-emoji-fonts swww hyprlock hypridle starship google-noto-sans-fonts grim slurp neovim nano webkit2gtk4.1)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -240,13 +240,13 @@ build_package_list() {
   # Shell packages
   case "$USER_SHELL" in
   zsh)
-    INSTALL_PACKAGES+=(zsh fzf bat exa fd-find)
+    INSTALL_PACKAGES+=(zsh fzf bat eza fd-find starship-zsh)
     ;;
   bash)
-    INSTALL_PACKAGES+=(bash fzf bat exa fd-find bash-completion)
+    INSTALL_PACKAGES+=(bash fzf bat eza fd-find bash-completion starship-bash)
     ;;
   fish)
-    INSTALL_PACKAGES+=(fish fzf bat exa)
+    INSTALL_PACKAGES+=(fish fzf bat eza starship-fish)
     ;;
   esac
 
@@ -337,7 +337,7 @@ install_packages() {
 
   # Try to install all packages at once
   set +e
-  sudo dnf install -y "${INSTALL_PACKAGES[@]}" 2>&1 | tee /tmp/hecate_install.log
+  sudo dnf install -y --skip-broken --skip-unavailable --allowerasing "${INSTALL_PACKAGES[@]}" 2>&1 | tee /tmp/hecate_install.log
   local install_exit_code=$?
   set -e
 
