@@ -1098,12 +1098,6 @@ main() {
   # check_OS
   get_packageManager
 
-  # Clone repo early to check configs
-  clone_dotfiles
-
-  # Backup existing configs
-  backup_config
-
   # Ask all user preferences
   ask_preferences
 
@@ -1116,13 +1110,21 @@ main() {
 
   # Verify critical packages installed successfully
   verify_critical_packages
-  # Install configuration files
-  move_config
+
   # Enable SDDM if it was installed
   enable_sddm
 
   # Setup shell plugins
   setup_shell_plugins
+
+  # Clone repo early to check configs
+  clone_dotfiles
+
+  # Backup existing configs
+  backup_config
+
+  # Install configuration files
+  move_config
 
   # Setup Waybar symlinks
   setup_Waybar
