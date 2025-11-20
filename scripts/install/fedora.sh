@@ -192,12 +192,16 @@ ask_preferences() {
   gum style --foreground 220 "Choose profile based on your needs"
   sleep 2
 
-  while true; do
-    USER_PROFILE=$(gum choose --header "Select your profile:" \
-      "minimal")
-    gum style --foreground 82 "✓ Profile: $USER_PROFILE"
-    echo ""
-  done
+#   while true; do
+#     USER_PROFILE=$(gum choose --header "Select your profile:" \
+#       "minimal")
+#     gum style --foreground 82 "✓ Profile: $USER_PROFILE"
+#     echo ""
+#   done
+USER_PROFILE=$(gum choose --header "Select your profile:" \
+  "minimal")
+gum style --foreground 82 "✓ Profile: $USER_PROFILE"
+echo ""
 
   # Summary
   gum style --border double --padding "1 2" --border-foreground 212 "Installation Summary"
