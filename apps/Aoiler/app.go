@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	// "fmt"
+	"os/exec"
+	"strings"
 	"Aoiler/services"
 )
 
@@ -81,4 +82,24 @@ func (a *App) GetPathSuggestions(input string) services.AutoCompleteResult {
 type ServiceInfo struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+func (a *App) PickFile(fileType string) (string, error) {
+    var cmd *exec.Cmd
+
+    switch fileType {
+    case "directory":
+        cmd = exec.Command("yad", "--file", "--directory", "--title=Select Directory")
+    case "image":
+        cmd = exec.Command("yad", "--file", "--title=Select Image",
+            "--file-filter=Images | *.png *.jpg *.jpeg *.bmp *.gif *.tiff")
+    default:
+        cmd = exec.Command("yad", "--file", "--title=Select File")
+    }
+
+    output, err := cmd.Output()
+    if err != nil {
+        return "", err
+    }
+
+    return strings.TrimSpace(string(output)), nil
 }

@@ -47,7 +47,7 @@
 },
   "clock": {
     "interval": 1,
-    "format": "󰥔 {:%I:%M %p}",
+    "format": "󰥔 \n{:%I\n:%M\n %p}",
     "format-alt": "󰃭 {:%H:%M:%S}",
     "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>",
     "calendar": {
@@ -116,9 +116,79 @@
       "on-scroll-down": "shift_down"
     }
   },
+  "clock#left": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%a\n%d\n%m}",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "rotate": 90,
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 3,
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "format": {
+        "months": "<span color='#88c0d0'><b>{}</b></span>",
+        "days": "<span color='#e5e9f0'><b>{}</b></span>",
+        "weeks": "<span color='#81a1c1'><b>W{}</b></span>",
+        "weekdays": "<span color='#d08770'><b>{}</b></span>",
+        "today": "<span color='#a3be8c'><b><u>{}</u></b></span>"
+      }
+    },
+    "actions": {
+      "on-click-right": "mode",
+      "on-scroll-up": "shift_up",
+      "on-scroll-down": "shift_down"
+    }
+  },
+  "clock#right": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%a\n%d\n%m}",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "rotate": 270,
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 3,
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "format": {
+        "months": "<span color='#88c0d0'><b>{}</b></span>",
+        "days": "<span color='#e5e9f0'><b>{}</b></span>",
+        "weeks": "<span color='#81a1c1'><b>W{}</b></span>",
+        "weekdays": "<span color='#d08770'><b>{}</b></span>",
+        "today": "<span color='#a3be8c'><b><u>{}</u></b></span>"
+      }
+    },
+    "actions": {
+      "on-click-right": "mode",
+      "on-scroll-up": "shift_up",
+      "on-scroll-down": "shift_down"
+    }
+  },
   "custom/updates": {
     "format": "  {}",
     "escape": true,
+    "return-type": "json",
+    "exec": "~/.config/hecate/scripts/check-update.sh",
+    "interval": 1800,
+    "signal": 1,
+    "hide-empty-text": false,
+    "on-click": "~/.config/hecate/scripts/update-launcher.sh"
+  },
+    "custom/updates_Left": {
+    "format": "  {}",
+    "escape": true,
+    "rotate": 180,
+    "return-type": "json",
+    "exec": "~/.config/hecate/scripts/check-update.sh",
+    "interval": 1800,
+    "signal": 1,
+    "hide-empty-text": false,
+    "on-click": "~/.config/hecate/scripts/update-launcher.sh"
+  },
+    "custom/updates_Right": {
+    "format": "  {}",
+    "escape": true,
+    "rotate": 270,
     "return-type": "json",
     "exec": "~/.config/hecate/scripts/check-update.sh",
     "interval": 1800,
