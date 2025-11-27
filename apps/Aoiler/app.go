@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	// "fmt"
+	"os/exec"
+	"strings"
 	"Aoiler/services"
 )
 
@@ -81,4 +82,27 @@ func (a *App) GetPathSuggestions(input string) services.AutoCompleteResult {
 type ServiceInfo struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+// PickFile opens a file picker dialog using yad
+func (a *App) PickFile(fileType string) string {
+    var cmd *exec.Cmd
+
+    switch fileType {
+    case "directory":
+        cmd = exec.Command("yad", "--file", "--directory", "--title=Select Directory")
+    case "image":
+        cmd = exec.Command("yad", "--file", "--title=Select Image",
+            "--file-filter=Images | *.png *.jpg *.jpeg *.bmp *.gif *.tiff")
+    default:
+        cmd = exec.Command("yad", "--file", "--title=Select File")
+    }
+
+    output, err := cmd.Output()
+    if err != nil {
+        return "" // User cancelled or error occurred
+    }
+
+    // yad returns the path with a newline, so trim it
+    return strings.TrimSpace(string(output))
 }
