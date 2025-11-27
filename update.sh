@@ -21,14 +21,103 @@ REPO_URL="https://github.com/Aelune/Hecate.git"
 CONFIG_FILE="$HOME/.config/hecate/hecate.toml"
 VERSION_FILE="$HECATEDIR/version.txt"
 
-# Check if gum is installed
-check_gum() {
-  if ! command -v gum &>/dev/null; then
-    echo -e "${RED}Gum is not installed!${NC}"
-    echo -e "${YELLOW}Gum is required for this updater to work.${NC}"
+# Use tte if available, otherwise fallback to echo
+fancy_echo() {
+  local text="$1"
+  local effect="${2:-slide}"
+
+  if command -v tte &>/dev/null; then
+    echo "$text" | tte "$effect" --movement-speed 0.5 2>/dev/null || echo "$text"
+  else
+    echo "$text"
+  fi
+}
+# Check if tte is installed
+check_tte() {
+  if ! command -v tte &>/dev/null; then
+    gum style --foreground 220 "⚠ TTE (Terminal Text Effects) not found"
+    gum style --foreground 220 "Install with: pip install terminaltexteffects"
     echo ""
-    echo "Please install Gum using:"
-    echo "  sudo pacman -S gum"
+    if gum confirm "Continue without TTE effects?"; then
+      return 0
+    else
+      exit 1
+    fi
+  fi
+}
+
+check_dependencies() {
+  local missing=()
+
+  # Check gum
+  if ! command -v gum &>/dev/null; then missing+=("gum"); fi
+  # Check figlet
+  if ! command -v figlet &>/dev/null; then missing+=("figlet"); fi
+  # Check tte
+  if ! command -v tte &>/dev/null; then missing+=("tte"); fi
+
+  if [ ${#missing[@]} -eq 0 ]; then
+    return 0
+  fi
+
+  echo -e "${RED}Missing dependencies: ${missing[*]}${NC}"
+  echo -e "${YELLOW}Required for this installer to work.${NC}"
+  echo ""
+
+  # Detect AUR helper
+  local aur_helper=""
+  if command -v paru &>/dev/null; then
+    aur_helper="paru"
+  elif command -v yay &>/dev/null; then
+    aur_helper="yay"
+  fi
+
+  # Prompt user to install
+  read -p "Would you like to install missing dependencies now? (y/n): " -n 1 -r
+  echo ""
+
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if install_dependencies "${missing[@]}"; then
+      echo ""
+      echo -e "${GREEN}All dependencies installed successfully!${NC}"
+      echo -e "${GREEN}Continuing with installation...${NC}"
+      echo ""
+      sleep 1
+    else
+      echo -e "${RED}Failed to install dependencies. Exiting.${NC}"
+      exit 1
+    fi
+  else
+    echo ""
+    echo -e "${YELLOW}Installation cancelled.${NC}"
+    echo -e "${BLUE}Install dependencies manually and run this script again.${NC}"
+    echo ""
+    echo "Manual installation instructions (Arch):"
+    echo -e "${GREEN}  sudo pacman -S figlet gum${NC}"
+    echo -e "${GREEN}  $aur_helper -S terminaltexteffects${NC}"
+    echo ""
+    echo "Other distros:"
+    case "$OS" in
+      fedora)
+        echo -e "${GREEN}  sudo dnf install gum figlet${NC}"
+        echo -e "${GREEN}  pip install terminaltexteffects${NC}"
+        ;;
+      ubuntu)
+        echo -e "${GREEN}  sudo apt install figlet${NC}"
+        echo -e "${GREEN}  # Gum (Charm repo):${NC}"
+        echo -e "${GREEN}  sudo mkdir -p /etc/apt/keyrings${NC}"
+        echo -e "${GREEN}  curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg${NC}"
+        echo -e "${GREEN}  echo \"deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *\" | sudo tee /etc/apt/sources.list.d/charm.list${NC}"
+        echo -e "${GREEN}  sudo apt update && sudo apt install gum${NC}"
+        echo -e "${GREEN}  pip install terminaltexteffects${NC}"
+        ;;
+      *)
+        echo "  Visit: https://github.com/charmbracelet/gum"
+        echo "  sudo pacman -S figlet (or equivalent)"
+        echo "  pip install terminaltexteffects"
+        ;;
+    esac
+    echo ""
     exit 1
   fi
 }
@@ -591,7 +680,7 @@ main() {
   echo ""
 
   # Pre-flight checks
-  check_gum
+  check_dependencies
   check_hecate_installed
   detect_os
 
