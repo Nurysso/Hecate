@@ -756,20 +756,20 @@ install_shell_scripts() {
 
   # Install hecate.sh
   if [ -f "$scripts_dir/hecate.sh" ]; then
-    fancy_echo "Installing hecate script..." "slide"
+    echo "Installing hecate script..." "slide"
     cp "$scripts_dir/hecate.sh" "$HOME/.local/bin/hecate"
     chmod +x "$HOME/.local/bin/hecate"
-    fancy_echo "✓ hecate installed to ~/.local/bin/hecate" "slide"
+    echo "✓ hecate installed to ~/.local/bin/hecate" "slide"
   else
     gum style --foreground 220 "⚠ hecate.sh not found at $scripts_dir/hecate.sh"
   fi
 
   # Install freya.sh
   if [ -f "$scripts_dir/file_convert.sh" ]; then
-    fancy_echo "Installing freya script..." "slide"
+    echo "Installing freya script..." "slide"
     cp "$scripts_dir/file_convert.sh" "$HOME/.local/bin/file_convert"
     chmod +x "$HOME/.local/bin/file_convert"
-    fancy_echo "✓ freya installed to ~/.local/bin/file_convert" "slide"
+    echo "✓ freya installed to ~/.local/bin/file_convert" "slide"
   else
     gum style --foreground 220 "⚠ freya.sh not found at $scripts_dir/file_convert.sh"
   fi
@@ -804,13 +804,13 @@ move_config() {
       case "$item_name" in
         alacritty|foot|ghostty|kitty)
           if [ "$item_name" = "$USER_TERMINAL" ]; then
-            fancy_echo "Installing $item_name config..." "slide"
+            echo "Installing $item_name config..." "slide"
             cp -rT "$item" "$CONFIGDIR/$item_name"
           fi
           ;;
         *)
           # Install all other configs
-          fancy_echo "Installing $item_name..." "slide"
+          echo "Installing $item_name..." "slide"
           cp -rT "$item" "$CONFIGDIR/$item_name"
           ;;
       esac
@@ -819,17 +819,17 @@ move_config() {
 
   # Handle shell rc files
   if [ -f "$HECATEDIR/config/zshrc" ]; then
-    fancy_echo "Installing .zshrc..." "slide"
+    echo "Installing .zshrc..." "slide"
     cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
-    fancy_echo "✓ ZSH config installed" "slide"
+    echo "✓ ZSH config installed" "slide"
   else
     gum style --foreground 220 "⚠ zshrc not found in config directory"
   fi
 
   if [ -f "$HECATEDIR/config/bashrc" ]; then
-    fancy_echo "Installing .bashrc..." "slide"
+    echo "Installing .bashrc..." "slide"
     cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
-    fancy_echo "✓ BASH config installed" "slide"
+    echo "✓ BASH config installed" "slide"
   else
     gum style --foreground 220 "⚠ bashrc not found in config directory"
   fi
@@ -843,7 +843,7 @@ move_config() {
   install_app "Aoiler" "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler"
 
   echo ""
-  fancy_echo "✓ Configuration files installed successfully!" "beams"
+  echo "✓ Configuration files installed successfully!" "beams"
 }
 
 # Helper function to install apps
@@ -853,10 +853,10 @@ install_app() {
   local app_display="${3:-$app_name}"
 
   if [ -f "$app_path" ]; then
-    fancy_echo "Installing $app_display..." "slide"
+    echo "Installing $app_display..." "slide"
     cp "$app_path" "$HOME/.local/bin/$app_name"
     chmod +x "$HOME/.local/bin/$app_name"
-    fancy_echo "✓ $app_display installed to ~/.local/bin/$app_name" "slide"
+    echo "✓ $app_display installed to ~/.local/bin/$app_name" "slide"
   else
     gum style --foreground 220 "⚠ $app_display binary not found at $app_path"
   fi
