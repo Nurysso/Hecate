@@ -1,0 +1,30 @@
+
+{
+"include": [
+  "$HOME/.config/waybar/module"],
+"layer": "top",
+"width": 40,
+"position": "right",
+"exclusive": true,
+"passthrough": false,
+"gtk-layer-shell": true,
+"start_hidden" : false,
+"fixed-center": true,
+"swap-icon-label": false,
+"modules-left": [
+ "custom/dMenu",
+ "hyprland/workspaces"
+],
+"modules-center": [
+    "wlr/taskbar",
+    "clock#right"
+],
+"modules-right": [
+    "custom/updates_Right",
+    "pulseaudio",
+    "pulseaudio#microphone",
+    "group/notify",
+    "network",
+    "custom/power"
+]
+}

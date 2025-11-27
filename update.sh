@@ -177,21 +177,26 @@ show_update_warning() {
 }
 
 # Checks user OS
-check_OS() {
+detect_os() {
   if [ -f /etc/os-release ]; then
     . /etc/os-release
     case "$ID" in
-    arch | manjaro | endeavouros)
+    arch | manjaro | endeavouros | cachyos)
       OS="arch"
-      gum style --foreground 82 "✓ Detected OS: $OS"
+      ;;
+    fedora)
+      OS="fedora"
+      ;;
+    ubuntu | debian | pop | linuxmint)
+      OS="ubuntu"
       ;;
     *)
-      gum style --foreground 196 --bold "❌ Error: OS '$ID' is not supported by updater!"
+      echo -e "${RED}Error: OS '$ID' is not supported!${NC}"
       exit 1
       ;;
     esac
   else
-    gum style --foreground 196 --bold "Error: Cannot detect OS!"
+    echo -e "${RED}Error: Cannot detect OS!${NC}"
     exit 1
   fi
 }
@@ -201,19 +206,16 @@ clone_dotfiles() {
   gum style --border double --padding "1 2" --border-foreground 212 "Cloning Hecate Dotfiles"
 
   if [ -d "$HECATEDIR" ]; then
-    if gum confirm "Hecate directory already exists. Move it to backup?"; then
-      local timestamp=$(date +%Y%m%d_%H%M%S)
-      mkdir -p "$HOME/.cache/hecate-backup"
-      mv "$HECATEDIR" "$HOME/.cache/hecate-backup/hecate-source-$timestamp"
-      gum style --foreground 82 "✓ Old Hecate directory moved to backup"
-    else
-      gum style --foreground 220 "Removing existing Hecate directory..."
+    if gum confirm "Hecate directory already exists. Remove and re-clone?"; then
       rm -rf "$HECATEDIR"
+    else
+      gum style --foreground 220 "Using existing directory..."
+      return
     fi
   fi
 
   gum style --foreground 220 "Cloning repository..."
-  if ! git clone "$REPO_URL" "$HECATEDIR"; then
+  if ! git clone --depth 1 "$REPO_URL" "$HECATEDIR"; then
     gum style --foreground 196 "✗ Error cloning repository!"
     gum style --foreground 196 "Check your internet connection and try again."
     exit 1
@@ -225,22 +227,104 @@ clone_dotfiles() {
     exit 1
   fi
 
-  gum style --foreground 82 "✓ Dotfiles cloned successfully!"
+  fancy_echo "✓ Dotfiles cloned successfully!" "beams"
 }
 
-# Backup existing configs to cache instead of .config
+# Move configs from cloned repo to ~/.config
+move_config() {
+  gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
+
+  if [ ! -d "$HECATEDIR/config" ]; then
+    gum style --foreground 196 "Error: Config directory not found at $HECATEDIR/config"
+    exit 1
+  fi
+
+  mkdir -p "$CONFIGDIR"
+  mkdir -p "$HOME/.local/bin"
+
+  # Copy all config directories except shell rc files
+  for item in "$HECATEDIR/config"/*; do
+    if [ -d "$item" ]; then
+      local item_name=$(basename "$item")
+
+      # Skip local-bin directory (handled separately)
+      if [ "$item_name" = "local-bin" ]; then
+        continue
+      fi
+
+      # Handle terminal configs - only install selected terminal
+      case "$item_name" in
+        alacritty|foot|ghostty|kitty)
+          if [ "$item_name" = "$USER_TERMINAL" ]; then
+            fancy_echo "Installing $item_name config..." "slide"
+            cp -rT "$item" "$CONFIGDIR/$item_name"
+          fi
+          ;;
+        *)
+          # Install all other configs
+          fancy_echo "Installing $item_name..." "slide"
+          cp -rT "$item" "$CONFIGDIR/$item_name"
+          ;;
+      esac
+    fi
+  done
+
+  # Handle shell rc files
+  if [ -f "$HECATEDIR/config/zshrc" ]; then
+    fancy_echo "Installing .zshrc..." "slide"
+    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
+    fancy_echo "✓ ZSH config installed" "slide"
+  else
+    gum style --foreground 220 "⚠ zshrc not found in config directory"
+  fi
+
+  if [ -f "$HECATEDIR/config/bashrc" ]; then
+    fancy_echo "Installing .bashrc..." "slide"
+    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
+    fancy_echo "✓ BASH config installed" "slide"
+  else
+    gum style --foreground 220 "⚠ bashrc not found in config directory"
+  fi
+
+  # Install shell scripts
+  install_shell_scripts
+
+  # Install apps from apps directory
+  install_app "Pulse" "$HECATEAPPSDIR/Pulse/build/bin/Pulse"
+  install_app "Hecate-Settings" "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings"
+  install_app "Aoiler" "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler"
+
+  echo ""
+  fancy_echo "✓ Configuration files installed successfully!" "beams"
+}
+
+# Helper function to install apps
+install_app() {
+  local app_name="$1"
+  local app_path="$2"
+  local app_display="${3:-$app_name}"
+
+  if [ -f "$app_path" ]; then
+    fancy_echo "Installing $app_display..." "slide"
+    cp "$app_path" "$HOME/.local/bin/$app_name"
+    chmod +x "$HOME/.local/bin/$app_name"
+    fancy_echo "✓ $app_display installed to ~/.local/bin/$app_name" "slide"
+  else
+    gum style --foreground 220 "⚠ $app_display binary not found at $app_path"
+  fi
+}
+
 backup_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Backing Up Existing Configs"
 
   local timestamp=$(date +%Y%m%d_%H%M%S)
   local backup_dir="$HOME/.cache/hecate-backup/hecate-$timestamp"
 
-  # List of config directories to check (excluding shell rc files)
+  # List of config directories to check
   local config_dirs=(
-    "alacritty" "fish" "hecate" "rofi" "waypaper" "bash" "foot"
-    "hypr" "starship" "swaync" "wlogout" "cava" "ghostty" "kitty"
-    "eww" "gtk-3.0" "matugen" "wallust" "fastfetch" "gtk-4.0"
-    "quickshell" "waybar"
+    "alacritty" "cava" "fastfetch" "foot" "gtk-3.0" "hecate" "kitty"
+    "quickshell" "starship" "wallust" "waypaper" "zsh" "bash" "fish"
+    "ghostty" "gtk-4.0" "hypr" "matugen" "rofi" "swaync" "waybar" "wlogout"
   )
 
   # Check for shell rc files separately
@@ -257,7 +341,7 @@ backup_config() {
         mkdir -p "$backup_dir/config"
         backed_up=true
       fi
-      gum style --foreground 220 "Backing up: $dir"
+      fancy_echo "Backing up: $dir" "slide"
       cp -r "$HOME/.config/$dir" "$backup_dir/config/"
     fi
   done
@@ -268,139 +352,19 @@ backup_config() {
       mkdir -p "$backup_dir"
       backed_up=true
     fi
-    gum style --foreground 220 "Backing up: $file"
+    fancy_echo "Backing up: $file" "slide"
     cp "$HOME/$file" "$backup_dir/"
   done
 
   if [ "$backed_up" = true ]; then
-    gum style --foreground 82 "✓ Backup created at: $backup_dir"
+    echo ""
+    fancy_echo "✓ Backup created at: $backup_dir" "beams"
     echo "$backup_dir" > "$HOME/.cache/hecate_last_backup.txt"
   else
     gum style --foreground 220 "No existing configs found to backup"
   fi
 }
 
-verify_critical_packages_installed() {
-  local critical_packages=(
-    "$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync"
-    "hyprlock" "hypridle" "wallust" "starship" "wlogout"
-    "grim" "wl-clipboard" "webkit2gtk" "quickshell-git"
-    "python-pywal" "fastfetch" "matugen-bin" "waypaper"
-  )
-  local missing_critical=()
-
-  for pkg in "${critical_packages[@]}"; do
-    if ! command -v "$pkg" &>/dev/null; then
-      if ! pacman -Q "$pkg" &>/dev/null 2>&1 && ! paru -Q "$pkg" &>/dev/null 2>&1; then
-        missing_critical+=("$pkg")
-      fi
-    fi
-  done
-
-  if [ ${#missing_critical[@]} -gt 0 ]; then
-    gum style --foreground 196 "Missing critical packages:"
-    for pkg in "${missing_critical[@]}"; do
-      gum style --foreground 196 "  • $pkg"
-    done
-
-    if gum confirm "Install missing packages now?"; then
-      if command -v paru &>/dev/null; then
-        paru -S --needed "${missing_critical[@]}"
-      else
-        sudo pacman -S --needed "${missing_critical[@]}"
-      fi
-    else
-      return 1
-    fi
-  fi
-
-  return 0
-}
-
-# Move configs from cloned repo to ~/.config
-move_config() {
-  gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
-
-  if [ ! -d "$HECATEDIR/config" ]; then
-    gum style --foreground 196 "Error: Config directory not found at $HECATEDIR/config"
-    exit 1
-  fi
-
-  mkdir -p "$CONFIGDIR"
-  mkdir -p "$HOME/.local/bin"
-
-  # Copy all config directories except shell rc files and hecate.sh
-  for item in "$HECATEDIR/config"/*; do
-    if [ -d "$item" ]; then
-      local item_name=$(basename "$item")
-
-      # Handle terminal configs - only install selected terminal
-      case "$item_name" in
-        alacritty|foot|ghostty|kitty)
-          if [ "$item_name" = "$USER_TERMINAL" ]; then
-            gum style --foreground 82 "Installing $item_name config..."
-            cp -rT "$item" "$CONFIGDIR/$item_name"
-          fi
-          ;;
-        *)
-          # Install all other configs
-          gum style --foreground 82 "Installing $item_name..."
-          cp -rT "$item" "$CONFIGDIR/$item_name"
-          ;;
-      esac
-    fi
-  done
-
-  # Handle shell rc files
-  if [ -f "$HECATEDIR/config/zshrc" ]; then
-    gum style --foreground 82 "Installing .zshrc..."
-    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
-    gum style --foreground 82 "✓ ZSH config installed"
-  else
-    gum style --foreground 220 "⚠ zshrc not found in config directory"
-  fi
-
-  if [ -f "$HECATEDIR/config/bashrc" ]; then
-    gum style --foreground 82 "Installing .bashrc..."
-    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
-    gum style --foreground 82 "✓ BASH config installed"
-  else
-    gum style --foreground 220 "⚠ bashrc not found in config directory"
-  fi
-
-  # Install hecate CLI tool
-  if [ -f "$HECATEDIR/config/hecate.sh" ]; then
-    gum style --foreground 82 "Installing hecate CLI tool..."
-    cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
-    chmod +x "$HOME/.local/bin/hecate"
-    gum style --foreground 82 "✓ hecate command installed"
-  else
-    gum style --foreground 220 "⚠ hecate.sh not found in config directory"
-  fi
-
-  # Install apps from apps directory
-  install_app "Pulse" "$HECATEAPPSDIR/Pulse/build/bin/Pulse"
-  install_app "Hecate-Settings" "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings"
-  install_app "Aoiler" "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler"
-
-  gum style --foreground 82 "✓ Configuration files installed successfully!"
-}
-
-# Helper function to install apps
-install_app() {
-  local app_name="$1"
-  local app_path="$2"
-  local app_display="${3:-$app_name}"
-
-  if [ -f "$app_path" ]; then
-    gum style --foreground 82 "Installing $app_display..."
-    cp "$app_path" "$HOME/.local/bin/$app_name"
-    chmod +x "$HOME/.local/bin/$app_name"
-    gum style --foreground 82 "✓ $app_display installed to ~/.local/bin/$app_name"
-  else
-    gum style --foreground 220 "⚠ $app_display binary not found at $app_path"
-  fi
-}
 # Update Hecate config file with new version
 update_hecate_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Updating Hecate Configuration"
@@ -444,33 +408,6 @@ setup_Waybar() {
   gum style --foreground 82 "✓ Waybar configured!"
 }
 
-# Post-update actions
-post_update() {
-  gum style --border double --padding "1 2" --border-foreground 212 "Finalizing Update"
-
-  # Reload Hyprland if running
-  if [[ "${XDG_SESSION_DESKTOP,,}" == "hyprland" ]]; then
-    gum style --foreground 82 "Hyprland session detected, reloading..."
-
-    if command -v hyprctl &>/dev/null; then
-      hyprctl reload 2>/dev/null || true
-
-      # Restart widgets and waybar
-      if [ -f "$HOME/.config/hypr/scripts/launch-widgets.sh" ]; then
-        "$HOME/.config/hypr/scripts/launch-widgets.sh" &
-      fi
-
-      if [ -f "$HOME/.config/hypr/scripts/launch-waybar.sh" ]; then
-        "$HOME/.config/hypr/scripts/launch-waybar.sh" &
-      fi
-
-      gum style --foreground 82 "✓ Hyprland reloaded"
-    fi
-  else
-    gum style --foreground 220 "Not in Hyprland session. Please log out and back in to apply changes."
-  fi
-}
-
 install_extra_tools(){
   gum style \
     --foreground 212 --border-foreground 212 \
@@ -500,7 +437,146 @@ show_completion_message() {
   echo ""
   gum style --foreground 82 "Thank you for using Hecate! 🌙"
 }
+# Setup wallpapers
+setup_wallpapers() {
+  gum style --border double --padding "1 2" --border-foreground 212 "Wallpaper Setup"
+  local wallpaper_dir="$HOME/Pictures/wallpapers"
+  echo ""
+  gum style --foreground 220 "Would you like to download the full wallpaper collection?"
+  echo ""
+  if gum confirm "Download full wallpaper repository?"; then
+    # User wants full collection
+    gum style --foreground 82 "Cloning wallpaper repository..."
 
+    if [ -d "$wallpaper_dir" ]; then
+      # Check if it's a git repository
+      if [ -d "$wallpaper_dir/.git" ]; then
+        # Get the remote URL
+        local remote_url=$(git -C "$wallpaper_dir" config --get remote.origin.url 2>/dev/null)
+
+        if [ -n "$remote_url" ]; then
+          # Normalize URLs for comparison (handle both HTTPS and SSH formats)
+          local normalized_remote=$(echo "$remote_url" | sed -e 's|\.git$||' -e 's|https://github.com/||' -e 's|git@github.com:||')
+          local normalized_freya=$(echo "$FREYA_URL" | sed -e 's|\.git$||' -e 's|https://github.com/||' -e 's|git@github.com:||')
+
+          if [ "$normalized_remote" = "$normalized_freya" ]; then
+            # Same repo - do a git pull preserving user changes
+            gum style --foreground 82 "Existing Freya wallpaper repository found. Updating..."
+
+            # Stash any local changes
+            git -C "$wallpaper_dir" stash push -m "Auto-stash before Freya update" 2>/dev/null
+
+            # Pull latest changes
+            if git -C "$wallpaper_dir" pull --rebase origin main 2>/dev/null || \
+               git -C "$wallpaper_dir" pull --rebase origin master 2>/dev/null; then
+
+              # Try to reapply stashed changes (don't fail if there's a conflict)
+              git -C "$wallpaper_dir" stash pop 2>/dev/null || {
+                gum style --foreground 220 "⚠ Some local changes were preserved in stash"
+                gum style --foreground 220 "  Run 'git -C $wallpaper_dir stash list' to see them"
+              }
+
+              echo "✓ Wallpaper repository updated!" "beams"
+            else
+              gum style --foreground 196 "✗ Failed to update repository"
+              return 1
+            fi
+            return 0
+          else
+            # Different repo - backup existing directory
+            local backup_dir="$HOME/Pictures/wallpapers-personal"
+            local counter=1
+
+            # Find a unique backup directory name
+            while [ -d "$backup_dir" ]; do
+              backup_dir="$HOME/Pictures/wallpapers-personal-$counter"
+              ((counter++))
+            done
+
+            gum style --foreground 220 "Found different wallpaper repository."
+            gum style --foreground 220 "Moving to: $backup_dir"
+
+            if mv "$wallpaper_dir" "$backup_dir"; then
+              gum style --foreground 82 "✓ Personal wallpapers backed up"
+            else
+              gum style --foreground 196 "✗ Failed to backup existing wallpapers"
+              return 1
+            fi
+          fi
+        fi
+      else
+        # Not a git repo - backup the directory
+        local backup_dir="$HOME/Pictures/wallpapers-personal"
+        local counter=1
+
+        while [ -d "$backup_dir" ]; do
+          backup_dir="$HOME/Pictures/wallpapers-personal-$counter"
+          ((counter++))
+        done
+
+        gum style --foreground 220 "Found existing non-git wallpaper directory."
+        gum style --foreground 220 "Moving to: $backup_dir"
+
+        if mv "$wallpaper_dir" "$backup_dir"; then
+          gum style --foreground 82 "✓ Personal wallpapers backed up"
+        else
+          gum style --foreground 196 "✗ Failed to backup existing wallpapers"
+          return 1
+        fi
+      fi
+    fi
+
+    # Clone the repository
+    mkdir -p "$HOME/Pictures"
+    if git clone --depth 1 "$FREYA_URL" "$HOME/Pictures/Freya-temp"; then
+      # Move only the walls directory and rename to wallpapers
+      if [ -d "$HOME/Pictures/Freya-temp/walls" ]; then
+        mv "$HOME/Pictures/Freya-temp/walls" "$wallpaper_dir"
+        rm -rf "$HOME/Pictures/Freya-temp"
+        echo "✓ Full wallpaper collection downloaded!" "beams"
+      else
+        gum style --foreground 196 "✗ Walls directory not found in repository"
+        rm -rf "$HOME/Pictures/Freya-temp"
+        return 1
+      fi
+    else
+      gum style --foreground 196 "✗ Failed to clone wallpaper repository"
+      return 1
+    fi
+  else
+    # User wants only default wallpapers
+    gum style --foreground 82 "Downloading default wallpapers..."
+    mkdir -p "$wallpaper_dir"
+    local lock_screen_url="https://raw.githubusercontent.com/Aelune/Freya/main/walls/hecate-default/lock-screen.png"
+    local wallpaper_url="https://raw.githubusercontent.com/Aelune/Freya/main/walls/hecate-default/wallpaper.png"
+    local success=0
+    # Download lock screen
+    echo "Downloading lock-screen.png..." "slide"
+    if curl -fsSL "$lock_screen_url" -o "$wallpaper_dir/lock-screen.png"; then
+      echo "✓ lock-screen.png downloaded" "slide"
+      ((success++))
+    else
+      gum style --foreground 196 "✗ Failed to download lock-screen.png"
+    fi
+    # Download wallpaper
+    echo "Downloading wallpaper.png..." "slide"
+    if curl -fsSL "$wallpaper_url" -o "$wallpaper_dir/wallpaper.png"; then
+      echo "✓ wallpaper.png downloaded" "slide"
+      ((success++))
+    else
+      gum style --foreground 196 "✗ Failed to download wallpaper.png"
+    fi
+    if [ $success -eq 2 ]; then
+      echo ""
+      echo "✓ Default wallpapers downloaded!" "beams"
+    else
+      echo ""
+      gum style --foreground 220 "⚠ Some wallpapers failed to download"
+    fi
+  fi
+  echo ""
+  gum style --foreground 82 "Wallpapers saved to: $wallpaper_dir"
+}
 # Main update flow
 main() {
   clear
@@ -517,7 +593,7 @@ main() {
   # Pre-flight checks
   check_gum
   check_hecate_installed
-  check_OS
+  detect_os
 
   echo ""
 
@@ -529,26 +605,16 @@ main() {
   # Check versions and get confirmation
   check_versions
   echo ""
-  show_update_warning
-
-  echo ""
-
+#   show_update_warning
   # Perform update
   clone_dotfiles
-  echo ""
   backup_config
-  echo ""
-  verify_critical_packages_installed
-  echo ""
+#   verify_critical_packages_installed
   move_config
-  echo ""
   update_hecate_config
-  echo ""
   setup_waybar
-  echo ""
   install_extra_tools
-  echo ""
-  post_update
+  setup_wallpapers
 
   # Show completion
   show_completion_message

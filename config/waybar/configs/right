@@ -1,0 +1,27 @@
+{
+  "layer": "top",
+  "position": "right",
+  "width": 45,
+  "spacing": 5,
+  "margin-top": 10,
+  "margin-bottom": 10,
+  "margin-right": 5,
+  "modules-left": [
+    "cpu",
+    "memory",
+    "temperature"
+  ],
+  "modules-center": [
+    "disk",
+    "disk#home",
+    "custom/gpu"
+  ],
+  "modules-right": [
+    "pulseaudio",
+    "backlight",
+    "network",
+    "bluetooth",
+    "battery",
+    "group/notify"
+  ]
+}
