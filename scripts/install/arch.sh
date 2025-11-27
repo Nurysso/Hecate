@@ -18,6 +18,7 @@ HECATEDIR="$HOME/Hecate"
 HECATEAPPSDIR="$HOME/Hecate/apps"
 CONFIGDIR="$HOME/.config"
 REPO_URL="https://github.com/Aelune/Hecate.git"
+FREYA_URL="https://github.com/Aelune/freya.git"
 OS="arch"
 PACKAGE_MANAGER=""
 HYPRLAND_NEWLY_INSTALLED=false
@@ -68,7 +69,6 @@ clone_dotfiles() {
   gum style --foreground 220 "Cloning repository..."
   if ! git clone "$REPO_URL" "$HECATEDIR"; then
     gum style --foreground 196 "✗ Error cloning repository!"
-    gum style --foreground 196 "Check your internet connection and try again."
     exit 1
   fi
 
@@ -741,6 +741,43 @@ FZFEOF
   gum style --foreground 82 "✓ Bash setup complete!"
 }
 
+# Install shell scripts to ~/.local/bin
+install_shell_scripts() {
+  gum style --border double --padding "1 2" --border-foreground 212 "Installing Shell Scripts"
+
+  mkdir -p "$HOME/.local/bin"
+
+  local scripts_dir="$HECATEDIR/config/local-bin"
+
+  if [ ! -d "$scripts_dir" ]; then
+    gum style --foreground 220 "⚠ Scripts directory not found at $scripts_dir"
+    return
+  fi
+
+  # Install hecate.sh
+  if [ -f "$scripts_dir/hecate.sh" ]; then
+    fancy_echo "Installing hecate script..." "slide"
+    cp "$scripts_dir/hecate.sh" "$HOME/.local/bin/hecate"
+    chmod +x "$HOME/.local/bin/hecate"
+    fancy_echo "✓ hecate installed to ~/.local/bin/hecate" "slide"
+  else
+    gum style --foreground 220 "⚠ hecate.sh not found at $scripts_dir/hecate.sh"
+  fi
+
+  # Install freya.sh
+  if [ -f "$scripts_dir/file_convert.sh" ]; then
+    fancy_echo "Installing freya script..." "slide"
+    cp "$scripts_dir/file_convert.sh" "$HOME/.local/bin/file_convert"
+    chmod +x "$HOME/.local/bin/file_convert"
+    fancy_echo "✓ freya installed to ~/.local/bin/file_convert" "slide"
+  else
+    gum style --foreground 220 "⚠ freya.sh not found at $scripts_dir/file_convert.sh"
+  fi
+
+  echo ""
+  gum style --foreground 82 "✓ Shell scripts installed successfully!"
+}
+
 # Move configs from cloned repo to ~/.config
 move_config() {
   gum style --border double --padding "1 2" --border-foreground 212 "Installing Configuration Files"
@@ -753,22 +790,27 @@ move_config() {
   mkdir -p "$CONFIGDIR"
   mkdir -p "$HOME/.local/bin"
 
-  # Copy all config directories except shell rc files and hecate.sh
+  # Copy all config directories except shell rc files
   for item in "$HECATEDIR/config"/*; do
     if [ -d "$item" ]; then
       local item_name=$(basename "$item")
+
+      # Skip local-bin directory (handled separately)
+      if [ "$item_name" = "local-bin" ]; then
+        continue
+      fi
 
       # Handle terminal configs - only install selected terminal
       case "$item_name" in
         alacritty|foot|ghostty|kitty)
           if [ "$item_name" = "$USER_TERMINAL" ]; then
-            gum style --foreground 82 "Installing $item_name config..."
+            fancy_echo "Installing $item_name config..." "slide"
             cp -rT "$item" "$CONFIGDIR/$item_name"
           fi
           ;;
         *)
           # Install all other configs
-          gum style --foreground 82 "Installing $item_name..."
+          fancy_echo "Installing $item_name..." "slide"
           cp -rT "$item" "$CONFIGDIR/$item_name"
           ;;
       esac
@@ -777,38 +819,33 @@ move_config() {
 
   # Handle shell rc files
   if [ -f "$HECATEDIR/config/zshrc" ]; then
-    gum style --foreground 82 "Installing .zshrc..."
+    fancy_echo "Installing .zshrc..." "slide"
     cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
-    gum style --foreground 82 "✓ ZSH config installed"
+    fancy_echo "✓ ZSH config installed" "slide"
   else
     gum style --foreground 220 "⚠ zshrc not found in config directory"
   fi
 
   if [ -f "$HECATEDIR/config/bashrc" ]; then
-    gum style --foreground 82 "Installing .bashrc..."
+    fancy_echo "Installing .bashrc..." "slide"
     cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
-    gum style --foreground 82 "✓ BASH config installed"
+    fancy_echo "✓ BASH config installed" "slide"
   else
     gum style --foreground 220 "⚠ bashrc not found in config directory"
   fi
 
-  # Install hecate CLI tool
-  if [ -f "$HECATEDIR/config/hecate.sh" ]; then
-    gum style --foreground 82 "Installing hecate CLI tool..."
-    cp "$HECATEDIR/config/hecate.sh" "$HOME/.local/bin/hecate"
-    chmod +x "$HOME/.local/bin/hecate"
-    gum style --foreground 82 "✓ hecate command installed"
-  else
-    gum style --foreground 220 "⚠ hecate.sh not found in config directory"
-  fi
+  # Install shell scripts
+  install_shell_scripts
 
   # Install apps from apps directory
   install_app "Pulse" "$HECATEAPPSDIR/Pulse/build/bin/Pulse"
   install_app "Hecate-Settings" "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings"
   install_app "Aoiler" "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler"
 
-  gum style --foreground 82 "✓ Configuration files installed successfully!"
+  echo ""
+  fancy_echo "✓ Configuration files installed successfully!" "beams"
 }
+
 # Helper function to install apps
 install_app() {
   local app_name="$1"
@@ -816,14 +853,15 @@ install_app() {
   local app_display="${3:-$app_name}"
 
   if [ -f "$app_path" ]; then
-    gum style --foreground 82 "Installing $app_display..."
+    fancy_echo "Installing $app_display..." "slide"
     cp "$app_path" "$HOME/.local/bin/$app_name"
     chmod +x "$HOME/.local/bin/$app_name"
-    gum style --foreground 82 "✓ $app_display installed to ~/.local/bin/$app_name"
+    fancy_echo "✓ $app_display installed to ~/.local/bin/$app_name" "slide"
   else
     gum style --foreground 220 "⚠ $app_display binary not found at $app_path"
   fi
 }
+
 # Build preferred app keybind
 build_preferd_app_keybind() {
   gum style --border double --padding "1 2" --border-foreground 212 "Configuring App Keybinds"
@@ -990,6 +1028,8 @@ install_extra_tools(){
     'Installing Aoiler helper kondo' 'used to organize dirs'
     curl -fsSL https://raw.githubusercontent.com/aelune/kondo/main/install.sh | bash
 }
+
+
 # Configure SDDM theme at the end
 configure_sddm_theme() {
   if [ "$INSTALL_SDDM" != true ]; then
@@ -1018,17 +1058,86 @@ configure_sddm_theme() {
   fi
 }
 
-post_install(){
-  # Convert $XDG_SESSION_DESKTOP to lowercase and compare
-  if [[ "${XDG_SESSION_DESKTOP,,}" == "hyprland" ]]; then
-    echo "Hyprland session detected."
-    # Insert commands specific to Hyprland here
-    hyprctl reload
-    ~/.config/hypr/scripts/launch-widgets.sh
-    ~/.config/hypr/scripts/launch-waybar.sh
+# Setup wallpapers
+setup_wallpapers() {
+  gum style --border double --padding "1 2" --border-foreground 212 "Wallpaper Setup"
+
+  local wallpaper_dir="$HOME/Pictures/wallpapers"
+
+  echo ""
+  gum style --foreground 220 "Would you like to download the full wallpaper collection?"
+  echo ""
+
+  if gum confirm "Download full wallpaper repository?"; then
+    # User wants full collection
+    gum style --foreground 82 "Cloning wallpaper repository..."
+
+    if [ -d "$wallpaper_dir" ]; then
+      if gum confirm "Wallpaper directory already exists. Remove and re-clone?"; then
+        rm -rf "$wallpaper_dir"
+      else
+        gum style --foreground 220 "Using existing wallpaper directory..."
+        return 0
+      fi
+    fi
+
+    mkdir -p "$HOME/Pictures"
+
+    if git clone "$FREYA_URL" "$HOME/Pictures/Freya-temp"; then
+      # Move only the walls directory and rename to wallpapers
+      if [ -d "$HOME/Pictures/Freya-temp/walls" ]; then
+        mv "$HOME/Pictures/Freya-temp/walls" "$wallpaper_dir"
+        rm -rf "$HOME/Pictures/Freya-temp"
+        echo "✓ Full wallpaper collection downloaded!" "beams"
+      else
+        gum style --foreground 196 "✗ Walls directory not found in repository"
+        rm -rf "$HOME/Pictures/Freya-temp"
+        return 1
+      fi
+    else
+      gum style --foreground 196 "✗ Failed to clone wallpaper repository"
+      return 1
+    fi
   else
-    echo "Not in a Hyprland session. Skipping Hyprland-specific commands."
+    # User wants only default wallpapers
+    gum style --foreground 82 "Downloading default wallpapers..."
+
+    mkdir -p "$wallpaper_dir"
+
+    local lock_screen_url="https://raw.githubusercontent.com/Aelune/Freya/main/walls/hecate-default/lock-screen.png"
+    local wallpaper_url="https://raw.githubusercontent.com/Aelune/Freya/main/walls/hecate-default/wallpaper.png"
+
+    local success=0
+
+    # Download lock screen
+    echo "Downloading lock-screen.png..." "slide"
+    if curl -fsSL "$lock_screen_url" -o "$wallpaper_dir/lock-screen.png"; then
+      echo "✓ lock-screen.png downloaded" "slide"
+      ((success++))
+    else
+      gum style --foreground 196 "✗ Failed to download lock-screen.png"
+    fi
+
+    # Download wallpaper
+    echo "Downloading wallpaper.png..." "slide"
+    if curl -fsSL "$wallpaper_url" -o "$wallpaper_dir/wallpaper.png"; then
+      echo "✓ wallpaper.png downloaded" "slide"
+      ((success++))
+    else
+      gum style --foreground 196 "✗ Failed to download wallpaper.png"
+    fi
+
+    if [ $success -eq 2 ]; then
+      echo ""
+      echo "✓ Default wallpapers downloaded!" "beams"
+    else
+      echo ""
+      gum style --foreground 220 "⚠ Some wallpapers failed to download"
+    fi
   fi
+
+  echo ""
+  gum style --foreground 82 "Wallpapers saved to: $wallpaper_dir"
 }
 
 # Main function
@@ -1076,20 +1185,13 @@ main() {
 
   clear
 
-  # Check for gum first
-  # check_gum
-
-  # Welcome banner
-  gum style \
-    --foreground 212 --border-foreground 212 --border double \
-    --align center --width 50 --margin "1 2" --padding "2 4" \
-    'HECATE DOTFILES' 'Hyprland Configuration Installer' ''
-
   # Confirm installation
-  if ! gum confirm "Do you want to proceed with Hecate installation?"; then
-    gum style --foreground 220 "Installation cancelled"
-    exit 0
-  fi
+    if ! gum confirm "Do you want to proceed with Hecate installation?"; then
+      gum style --foreground 220 "Installation cancelled"
+      echo "Exiting"
+      exit 0
+    fi
+
 
   gum style --foreground 220 "Starting installation process..."
   sleep 1
@@ -1097,12 +1199,6 @@ main() {
   # System checks
   # check_OS
   get_packageManager
-
-  # Clone repo early to check configs
-  clone_dotfiles
-
-  # Backup existing configs
-  backup_config
 
   # Ask all user preferences
   ask_preferences
@@ -1116,13 +1212,21 @@ main() {
 
   # Verify critical packages installed successfully
   verify_critical_packages
-  # Install configuration files
-  move_config
+
   # Enable SDDM if it was installed
   enable_sddm
 
   # Setup shell plugins
   setup_shell_plugins
+
+  # Clone repo early to check configs
+  clone_dotfiles
+
+  # Backup existing configs
+  backup_config
+
+  # Install configuration files
+  move_config
 
   # Setup Waybar symlinks
   setup_Waybar
@@ -1134,9 +1238,10 @@ main() {
   # Set default shell
   set_default_shell
   install_extra_tools
+  setup_wallpapers
   # Configure SDDM theme
   configure_sddm_theme
-  post_install
+
   # Completion message
   echo ""
   gum style \

@@ -140,6 +140,9 @@ check_network() {
   fi
 }
 
+change_lock(){
+    ~/.config/hypr/scripts/hyprlock.sh
+}
 # Check for updates
 check_updates() {
   local mode="${1:-normal}"
@@ -404,6 +407,7 @@ show_help() {
   gum style --foreground 220 "  theme       Toggle dynamic/static mode"
   gum style --foreground 220 "  info        Show installation info"
   gum style --foreground 220 "  term        Show configured terminal"
+  gum style --foreground 220 "  lock        change hyprlock layout"
   gum style --foreground 220 "  help        You're reading it right now"
 
   echo ""
@@ -463,6 +467,9 @@ theme)
   ;;
 info)
   show_info
+  ;;
+  lock)
+  change_lock
   ;;
 help | --help | -h)
   show_help
