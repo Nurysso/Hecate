@@ -215,7 +215,7 @@ clone_dotfiles() {
   fi
 
   gum style --foreground 220 "Cloning repository..."
-  if ! git clone "$REPO_URL" "$HECATEDIR"; then
+  if ! git clone --depth 1 "$REPO_URL" "$HECATEDIR"; then
     gum style --foreground 196 "✗ Error cloning repository!"
     gum style --foreground 196 "Check your internet connection and try again."
     exit 1
@@ -528,7 +528,7 @@ setup_wallpapers() {
 
     # Clone the repository
     mkdir -p "$HOME/Pictures"
-    if git clone "$FREYA_URL" "$HOME/Pictures/Freya-temp"; then
+    if git clone --depth 1 "$FREYA_URL" "$HOME/Pictures/Freya-temp"; then
       # Move only the walls directory and rename to wallpapers
       if [ -d "$HOME/Pictures/Freya-temp/walls" ]; then
         mv "$HOME/Pictures/Freya-temp/walls" "$wallpaper_dir"

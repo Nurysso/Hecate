@@ -67,7 +67,7 @@ clone_dotfiles() {
   fi
 
   gum style --foreground 220 "Cloning repository..."
-  if ! git clone "$REPO_URL" "$HECATEDIR"; then
+  if ! git clone --depth 1 "$REPO_URL" "$HECATEDIR"; then
     gum style --foreground 196 "✗ Error cloning repository!"
     exit 1
   fi
@@ -517,7 +517,7 @@ install_aur_helper() {
   local temp_dir="/tmp/paru-install-$$"
   mkdir -p "$temp_dir"
 
-  if ! git clone https://aur.archlinux.org/paru.git "$temp_dir/paru"; then
+  if ! git clone --depth 1 https://aur.archlinux.org/paru.git "$temp_dir/paru"; then
     gum style --foreground 196 "Failed to clone paru repository"
     rm -rf "$temp_dir"
     return 1
@@ -690,12 +690,12 @@ setup_zsh_plugins() {
 
   if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
     gum style --foreground 220 "Installing zsh-autosuggestions..."
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 2>/dev/null || true
+    git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 2>/dev/null || true
   fi
 
   if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
     gum style --foreground 220 "Installing zsh-syntax-highlighting..."
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 2>/dev/null || true
+    git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 2>/dev/null || true
   fi
 
   gum style --foreground 82 "✓ Zsh plugins installed!"
@@ -1149,7 +1149,7 @@ setup_wallpapers() {
 
     # Clone the repository
     mkdir -p "$HOME/Pictures"
-    if git clone "$FREYA_URL" "$HOME/Pictures/Freya-temp"; then
+    if git clone --depth 1 "$FREYA_URL" "$HOME/Pictures/Freya-temp"; then
       # Move only the walls directory and rename to wallpapers
       if [ -d "$HOME/Pictures/Freya-temp/walls" ]; then
         mv "$HOME/Pictures/Freya-temp/walls" "$wallpaper_dir"

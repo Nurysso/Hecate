@@ -376,7 +376,7 @@ clone_dotfiles() {
   fi
 
   gum style --foreground 220 "Cloning repository..."
-  if ! git clone "$REPO_URL" "$HECATEDIR"; then
+  if ! git clone --depth 1 "$REPO_URL" "$HECATEDIR"; then
     gum style --foreground 196 "✗ Error cloning repository!"
     gum style --foreground 196 "Check your internet connection and try again."
     exit 1
