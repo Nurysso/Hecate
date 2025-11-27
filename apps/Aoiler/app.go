@@ -83,7 +83,9 @@ type ServiceInfo struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
-func (a *App) PickFile(fileType string) (string, error) {
+
+// PickFile opens a file picker dialog using yad
+func (a *App) PickFile(fileType string) string {
     var cmd *exec.Cmd
 
     switch fileType {
@@ -98,8 +100,9 @@ func (a *App) PickFile(fileType string) (string, error) {
 
     output, err := cmd.Output()
     if err != nil {
-        return "", err
+        return "" // User cancelled or error occurred
     }
 
-    return strings.TrimSpace(string(output)), nil
+    // yad returns the path with a newline, so trim it
+    return strings.TrimSpace(string(output))
 }

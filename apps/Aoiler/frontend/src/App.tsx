@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, Search, FolderTree, Code, ScanText, Film, Sparkles, HelpCircle, FileText } from 'lucide-react';
-import { ProcessQuery, GetPathSuggestions } from '../wailsjs/go/main/App';
+import { ProcessQuery, GetPathSuggestions, PickFile } from '../wailsjs/go/main/App';
 
 interface Message {
   id: string;
@@ -188,26 +188,14 @@ function App() {
 
   const openFilePicker = async (fileType: 'file' | 'directory' | 'image'): Promise<string | null> => {
     try {
-      let yadCommand = '';
+      const filePath = await PickFile(fileType);
 
-      if (fileType === 'directory') {
-        yadCommand = 'yad --file --directory --title="Select Directory"';
-      } else if (fileType === 'image') {
-        yadCommand = 'yad --file --title="Select Image" --file-filter="Images | *.png *.jpg *.jpeg *.bmp *.gif *.tiff"';
-      } else {
-        yadCommand = 'yad --file --title="Select File"';
+      // PickFile returns empty string if user cancels or error occurs
+      if (!filePath || filePath.trim() === '') {
+        return null;
       }
 
-      // Execute yad through a backend function (you'll need to add this to your Go backend)
-      // For now, this is a placeholder - you need to implement this in your Wails app
-      const response = await fetch('http://localhost:9999/pick-file', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: fileType, command: yadCommand })
-      });
-
-      const data = await response.json();
-      return data.path || null;
+      return filePath;
     } catch (error) {
       console.error('File picker error:', error);
       return null;
