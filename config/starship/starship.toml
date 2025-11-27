@@ -1,8 +1,8 @@
 # ────────────────────────────────────────────────────────────────
-# 🌟 Starship Prompt Configuration
-# Generated: 2025-11-11 19:17:24
-# Modern, clean prompt — Hecate Theme Edition
-# colors added by ~/.config/hecate/scripts/update_hecate_colors.sh
+# 🌟 Starship Prompt Configuration - DUMMY TEMPLATE
+# Generated: 2025-11-27 17:31:57
+# This file contains placeholder colors that get replaced by the script
+# DO NOT EDIT THE GENERATED starship.toml - edit ~/.config/starship/starship-dummy.toml !
 # ────────────────────────────────────────────────────────────────
 
 "$schema" = 'https://starship.rs/config-schema.json'
@@ -15,26 +15,26 @@ command_timeout = 500
 
 # Main prompt layout
 format = """
-(bold #5D615F)$username $directory $git_branch $git_status $cmd_duration$fill
-(bold #5D615F)$character
+(bold #a1988a)$username $directory $git_branch $git_status $cmd_duration$fill
+(bold #a1988a)$character
 """
 
 # ─── PROMPT SYMBOLS ─────────────────────────────────────────────
 [character]
-success_symbol = "[ ](bold #738B8E)"
-error_symbol = "[  ](bold #35484F)"
+success_symbol = "[ ](bold #7A837D)"
+error_symbol = "[  ](bold #A1764B)"
 
 # ─── USER & HOST ────────────────────────────────────────────────
 
 [username]
-style_user = "bold #6E7D7F"
-style_root = "bold #35484F"
+style_user = "bold #B28C5E"
+style_root = "bold #A1764B"
 format = "[$user]($style)"
 show_always = true
 
 [hostname]
 ssh_only = false
-format = "[@$hostname](bold #BB5045) "
+format = "[@$hostname](bold #D09C66) "
 disabled = false
 
 # ─── DIRECTORY ──────────────────────────────────────────────────
@@ -42,21 +42,21 @@ disabled = false
 [directory]
 home_symbol = ""
 read_only = ""
-style = "bg:#738B8E fg:#000000"
+style = "bg:#C8BFAA fg:#000000"
 truncation_length = 3
 truncation_symbol = " ••/"
-format = '[](bold fg:#738B8E)[󰉋 $path]($style)[](bold fg:#738B8E)'
+format = '[](bold fg:#C8BFAA)[󰉋 $path]($style)[](bold fg:#C8BFAA)'
 
 # ─── GIT ────────────────────────────────────────────────────────
 
 [git_branch]
 symbol = "󰘬 "
 format = "on [$symbol$branch]($style) "
-style = "bold #C08E70"
+style = "bold #DDB88C"
 
 [git_status]
 format = '([\[$all_status$ahead_behind\]]($style) )'
-style = "bold #35484F"
+style = "bold #A1764B"
 conflicted = "🏳 "
 ahead = "⇡${count} "
 diverged = "⇕⇡${ahead_count}⇣${behind_count} "
@@ -66,53 +66,53 @@ stashed = "💾${count} "
 modified = "!${count} "
 staged = "+${count} "
 renamed = "»${count} "
-deleted = "✘${count} "
+deleted = "✘ ${count} "
 
 # ─── LANGUAGES ──────────────────────────────────────────────────
 
 [nodejs]
 symbol = " "
 format = "via [$symbol($version )]($style)"
-style = "bold #5D615F"
+style = "bold #a1988a"
 
 [python]
 symbol = " "
-style = "bold #6E7D7F"
+style = "bold #B28C5E"
 
 [rust]
 symbol = " "
 format = "via [$symbol($version )]($style)"
-style = "bold #35484F"
+style = "bold #A1764B"
 
 [java]
 symbol = " "
 format = "via [$symbol($version )]($style)"
-style = "bold #35484F"
+style = "bold #A1764B"
 
 [package]
 symbol = " "
 format = "[$symbol$version]($style)"
-style = "bold #BB5045"
+style = "bold #D09C66"
 
 [golang]
 symbol = " "
 format = "via [$symbol($version )]($style)"
-style = "bold #738B8E"
+style = "bold #7A837D"
 
 [lua]
 symbol = " "
 format = "via [$symbol($version )]($style)"
-style = "bold #BB5045"
+style = "bold #D09C66"
 
 # ─── MISC MODULES ───────────────────────────────────────────────
 
 [cmd_duration]
 min_time = 500
-format = "[took $duration](bold #6E7D7F) "
+format = "[took $duration](bold #B28C5E) "
 
 [time]
 disabled = false
-format = "[$time](dim #8a8987)"
+format = "[$time](dim #a1988a)"
 time_format = "%R"  # 24h format
 
 [fill]
@@ -129,54 +129,54 @@ format = "[$symbol $percentage]($style) "
 
 [[battery.display]]
 threshold = 10
-style = "bold #35484F"
+style = "bold #A1764B"
 
 [[battery.display]]
 threshold = 30
-style = "bold #6E7D7F"
+style = "bold #B28C5E"
 
 [[battery.display]]
 threshold = 100
-style = "bold #5D615F"
+style = "bold #a1988a"
 
 [os]
 disabled = false
 format = "[$symbol]($style)"
-style = "dim #c6c5c2"
+style = "dim #e7dac6"
 
 [os.symbols]
-Arch = " "
-Ubuntu = " "
-Debian = " "
-Fedora = " "
-Manjaro = " "
-NixOS = " "
-Pop = " "
-Raspbian = " "
+Arch = " "
+Ubuntu = " "
+Debian = " "
+Fedora = " "
+Manjaro = " "
+NixOS = " "
+Pop = " "
+Raspbian = " "
 
 
 # ─── DOCKER / KUBERNETES ────────────────────────────────────────
 
 [docker_context]
 symbol = " "
-format = "via [$symbol$context](bold #BB5045) "
+format = "via [$symbol$context](bold #D09C66) "
 
 [kubernetes]
 symbol = "☸ "
-format = 'on [$symbol$context( \($namespace\))](bold #BB5045) '
+format = 'on [$symbol$context( \($namespace\))](bold #D09C66) '
 disabled = false
 
 # ─── CLOUD PROVIDERS ────────────────────────────────────────────
 
 [aws]
 symbol = " "
-format = 'on [$symbol($profile )($region )](bold #6E7D7F) '
+format = 'on [$symbol($profile )($region )](bold #B28C5E) '
 
 [gcloud]
-format = 'on [$symbol$account(@$domain)($region)](bold #BB5045) '
+format = 'on [$symbol$account(@$domain)($region)](bold #D09C66) '
 
 [azure]
 symbol = " "
-format = 'on [$symbol($subscription)](bold #BB5045) '
+format = 'on [$symbol($subscription)](bold #D09C66) '
 
 # ─── END OF FILE ────────────────────────────────────────────────
