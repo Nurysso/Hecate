@@ -18,6 +18,7 @@ HECATEDIR="$HOME/Hecate"
 HECATEAPPSDIR="$HOME/Hecate/apps"
 CONFIGDIR="$HOME/.config"
 REPO_URL="https://github.com/Aelune/Hecate.git"
+FREYA_URL="https://github.com/Aelune/freya.git"
 CONFIG_FILE="$HOME/.config/hecate/hecate.toml"
 VERSION_FILE="$HECATEDIR/version.txt"
 
@@ -27,7 +28,7 @@ fancy_echo() {
   local effect="${2:-slide}"
 
   if command -v tte &>/dev/null; then
-    echo "$text" | tte "$effect" --movement-speed 0.5 2>/dev/null || echo "$text"
+    echo "$text" | tte "$effect" --movement-speed 2 2>/dev/null || echo "$text"
   else
     echo "$text"
   fi
@@ -219,20 +220,33 @@ read_user_config() {
 # Get current and remote versions
 check_versions() {
   remote_version=$(curl -s "https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt" 2>/dev/null || echo "")
-
   if [ -z "$remote_version" ]; then
     gum style --foreground 196 "❌ Failed to fetch remote version"
     gum style --foreground 220 "Check your internet connection"
     exit 1
   fi
 
-  if [ "$current_version" = "$remote_version" ]; then
+  # Extract numeric versions (remove any suffix like "shy eagle")
+  local_numeric=$(echo "$current_version" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
+  remote_numeric=$(echo "$remote_version" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
+
+  gum style --foreground 62 "Current version: ${current_version}"
+  gum style --foreground 82 "Latest version:  $remote_version"
+
+  # Compare versions using sort -V (version sort)
+  if [ "$local_numeric" = "$remote_numeric" ]; then
     gum style --foreground 82 "✓ You're already on the latest version!"
     exit 0
   fi
 
-  gum style --foreground 62 "Current version: ${current_version}"
-  gum style --foreground 82 "Latest version:  $remote_version"
+  # Check if local is newer than remote (shouldn't happen, but handle it)
+  if printf '%s\n' "$remote_numeric" "$local_numeric" | sort -V -C; then
+    gum style --foreground 82 "✓ You're already on the latest version!"
+    exit 0
+  fi
+
+  # If we get here, update is available
+  gum style --foreground 220 "🔄 Update available!"
 }
 
 # Show update warning and get confirmation
@@ -317,6 +331,43 @@ clone_dotfiles() {
   fi
 
   fancy_echo "✓ Dotfiles cloned successfully!" "beams"
+}
+
+# Install shell scripts to ~/.local/bin
+install_shell_scripts() {
+  gum style --border double --padding "1 2" --border-foreground 212 "Installing Shell Scripts"
+
+  mkdir -p "$HOME/.local/bin"
+
+  local scripts_dir="$HECATEDIR/config/local-bin"
+
+  if [ ! -d "$scripts_dir" ]; then
+    gum style --foreground 220 "⚠ Scripts directory not found at $scripts_dir"
+    return
+  fi
+
+  # Install hecate.sh
+  if [ -f "$scripts_dir/hecate.sh" ]; then
+    echo "Installing hecate script..." "slide"
+    cp "$scripts_dir/hecate.sh" "$HOME/.local/bin/hecate"
+    chmod +x "$HOME/.local/bin/hecate"
+    echo "✓ hecate installed to ~/.local/bin/hecate" "slide"
+  else
+    gum style --foreground 220 "⚠ hecate.sh not found at $scripts_dir/hecate.sh"
+  fi
+
+  # Install freya.sh
+  if [ -f "$scripts_dir/file_convert.sh" ]; then
+    echo "Installing freya script..." "slide"
+    cp "$scripts_dir/file_convert.sh" "$HOME/.local/bin/file_convert"
+    chmod +x "$HOME/.local/bin/file_convert"
+    echo "✓ freya installed to ~/.local/bin/file_convert" "slide"
+  else
+    gum style --foreground 220 "⚠ freya.sh not found at $scripts_dir/file_convert.sh"
+  fi
+
+  echo ""
+  gum style --foreground 82 "✓ Shell scripts installed successfully!"
 }
 
 # Move configs from cloned repo to ~/.config
@@ -467,34 +518,6 @@ update_hecate_config() {
   gum style --foreground 82 "✓ Hecate config updated"
   gum style --foreground 82 "  Version: $remote_version"
   gum style --foreground 82 "  Date: $update_date"
-}
-
-# Setup Waybar and link system colors
-setup_Waybar() {
-  gum style --foreground 220 "Configuring waybar..."
-
-  # Define symlink paths
-  local WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
-  local WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
-  local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
-  local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
-  local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
-
-  # Remove old symlinks or files
-  [ -e "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
-  [ -e "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
-  [ -e "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
-  [ -e "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
-  [ -e "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
-
-  # Create new symlinks
-  ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
-  ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
-  ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
-  ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
-  ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
-
-  gum style --foreground 82 "✓ Waybar configured!"
 }
 
 install_extra_tools(){
@@ -666,6 +689,34 @@ setup_wallpapers() {
   echo ""
   gum style --foreground 82 "Wallpapers saved to: $wallpaper_dir"
 }
+setup_Waybar() {
+  gum style --foreground 220 "Configuring waybar..."
+
+  # Define symlink paths
+  local WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
+  local WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
+  local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
+  local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
+  local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
+  local HYPRLOCK_SYMLINK="$HOME/.config/hypr/hyprlock.conf"
+
+  # Remove old symlinks or files
+  [ -e "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
+  [ -e "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
+  [ -e "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
+  [ -e "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
+  [ -e "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
+  [ -e "$HYPRLOCK_SYMLINK" ] && rm -f "$HYPRLOCK_SYMLINK"
+
+  # Create new symlinks
+  ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
+  ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
+  ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
+  ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
+  ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
+  ln -s "$HOME/.config/hypr/hyprlock/hecate-lock.conf" "$HYPRLOCK_SYMLINK"
+  gum style --foreground 82 "✓ Waybar configured!"
+}
 # Main update flow
 main() {
   clear
@@ -690,9 +741,9 @@ main() {
   read_user_config
 
   echo ""
-
   # Check versions and get confirmation
   check_versions
+
   echo ""
 #   show_update_warning
   # Perform update
@@ -701,7 +752,7 @@ main() {
 #   verify_critical_packages_installed
   move_config
   update_hecate_config
-  setup_waybar
+  setup_Waybar
   install_extra_tools
   setup_wallpapers
 
