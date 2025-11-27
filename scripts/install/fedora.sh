@@ -192,12 +192,16 @@ ask_preferences() {
   gum style --foreground 220 "Choose profile based on your needs"
   sleep 2
 
-  while true; do
-    USER_PROFILE=$(gum choose --header "Select your profile:" \
-      "minimal")
-    gum style --foreground 82 "✓ Profile: $USER_PROFILE"
-    echo ""
-  done
+#   while true; do
+#     USER_PROFILE=$(gum choose --header "Select your profile:" \
+#       "minimal")
+#     gum style --foreground 82 "✓ Profile: $USER_PROFILE"
+#     echo ""
+#   done
+USER_PROFILE=$(gum choose --header "Select your profile:" \
+  "minimal")
+gum style --foreground 82 "✓ Profile: $USER_PROFILE"
+echo ""
 
   # Summary
   gum style --border double --padding "1 2" --border-foreground 212 "Installation Summary"
@@ -219,7 +223,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - Fedora equivalents
-  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard waybar SwayNotificationCenter rofi-wayland rofi dunst fastfetch thunar btop wl-clipboard jq hyprpaper jetbrains-mono-fonts-all tesseract google-noto-emoji-fonts swww hyprlock hypridle starship google-noto-sans-fonts grim slurp neovim nano webkit2gtk4.1)
+  INSTALL_PACKAGES+=(git wget curl unzip waybar SwayNotificationCenter rofi dunst fastfetch thunar btop wl-clipboard jq hyprpaper jetbrains-mono-fonts-all tesseract google-noto-emoji-fonts swww hyprlock hypridle starship google-noto-sans-fonts grim slurp neovim nano webkit2gtk4.1)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -236,13 +240,13 @@ build_package_list() {
   # Shell packages
   case "$USER_SHELL" in
   zsh)
-    INSTALL_PACKAGES+=(zsh fzf bat exa fd-find)
+    INSTALL_PACKAGES+=(zsh fzf bat eza fd-find starship-zsh)
     ;;
   bash)
-    INSTALL_PACKAGES+=(bash fzf bat exa fd-find bash-completion)
+    INSTALL_PACKAGES+=(bash fzf bat eza fd-find bash-completion starship-bash)
     ;;
   fish)
-    INSTALL_PACKAGES+=(fish fzf bat exa)
+    INSTALL_PACKAGES+=(fish fzf bat eza starship-fish)
     ;;
   esac
 
@@ -309,7 +313,7 @@ EOF
     sudo dnf copr enable -y "$repo"
   done
 
-    sudo dnf copr enable materka/swww
+    sudo dnf copr enable materka/swww fedora-41-x86_64
     sudo dnf copr enable erikreider/SwayNotificationCenter
 
   echo ""
@@ -333,7 +337,7 @@ install_packages() {
 
   # Try to install all packages at once
   set +e
-  sudo dnf install -y "${INSTALL_PACKAGES[@]}" 2>&1 | tee /tmp/hecate_install.log
+  sudo dnf install -y --skip-broken --skip-unavailable --allowerasing "${INSTALL_PACKAGES[@]}" 2>&1 | tee /tmp/hecate_install.log
   local install_exit_code=$?
   set -e
 
@@ -341,132 +345,132 @@ install_packages() {
   local success_count=0
   FAILED_PACKAGES=()
 
-  gum style --foreground 220 "Verifying package installation..."
-  for pkg in "${INSTALL_PACKAGES[@]}"; do
-    if rpm -q "$pkg" &>/dev/null || command -v "$pkg" &>/dev/null; then
-      ((success_count++))
-    else
-      FAILED_PACKAGES+=("$pkg")
-    fi
-  done
+  # gum style --foreground 220 "Verifying package installation..."
+  # for pkg in "${INSTALL_PACKAGES[@]}"; do
+  #   if rpm -q "$pkg" &>/dev/null || command -v "$pkg" &>/dev/null; then
+  #     ((success_count++))
+  #   else
+  #     FAILED_PACKAGES+=("$pkg")
+  #   fi
+  # done
 
   echo ""
   gum style --border double --padding "1 2" --border-foreground 212 "Installation Results"
   gum style --foreground 82 "✓ Verified installed: $success_count/${#INSTALL_PACKAGES[@]} packages"
 
   # Handle failed packages gracefully
-  if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
-    gum style --foreground 196 "✗ Not installed: ${#FAILED_PACKAGES[@]} packages"
-    for pkg in "${FAILED_PACKAGES[@]}"; do
-      gum style --foreground 196 "  • $pkg"
-    done
-    echo ""
+  # if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
+  #   gum style --foreground 196 "✗ Not installed: ${#FAILED_PACKAGES[@]} packages"
+  #   for pkg in "${FAILED_PACKAGES[@]}"; do
+  #     gum style --foreground 196 "  • $pkg"
+  #   done
+  #   echo ""
 
-    # Save failed packages for later
-    local failed_log="$HOME/hecate_failed_packages.txt"
-    printf '%s\n' "${FAILED_PACKAGES[@]}" >"$failed_log"
-    gum style --foreground 220 "Failed packages saved to: $failed_log"
-    gum style --foreground 220 "Install them later with: sudo dnf install \$(cat $failed_log)"
-    echo ""
+  #   # Save failed packages for later
+  #   local failed_log="$HOME/hecate_failed_packages.txt"
+  #   printf '%s\n' "${FAILED_PACKAGES[@]}" >"$failed_log"
+  #   gum style --foreground 220 "Failed packages saved to: $failed_log"
+  #   gum style --foreground 220 "Install them later with: sudo dnf install \$(cat $failed_log)"
+  #   echo ""
 
     # Only check if CRITICAL packages failed
-    if ! verify_critical_packages_installed; then
-      gum style --foreground 196 "✗ Critical packages are missing!"
+   # if ! verify_critical_packages_installed; then
+   #   gum style --foreground 196 "✗ Critical packages are missing!"
 
-      if gum confirm "Some critical packages failed. Continue anyway? (May cause issues)"; then
-        gum style --foreground 220 "⚠ Continuing with missing critical packages..."
-        return 0
-      else
-        gum style --foreground 196 "Installation aborted by user"
-        exit 1
-      fi
-    else
-      gum style --foreground 82 "✓ All critical packages are installed"
-      gum style --foreground 220 "Non-critical packages can be installed later"
-    fi
-  else
-    gum style --foreground 82 "✓ All packages installed successfully!"
-  fi
+    #  if gum confirm "Some critical packages failed. Continue anyway? (May cause issues)"; then
+    #    gum style --foreground 220 "⚠ Continuing with missing critical packages..."
+    #    return 0
+    #  else
+    #    gum style --foreground 196 "Installation aborted by user"
+    #    exit 1
+    #  fi
+    #else
+    #  gum style --foreground 82 "✓ All critical packages are installed"
+    #  gum style --foreground 220 "Non-critical packages can be installed later"
+    #fi
+  #else
+  #  gum style --foreground 82 "✓ All packages installed successfully!"
+  # fi
 
   # Install ProtonUp-Qt via Flatpak if needed
-  if [ "$NEED_PROTONUP" = true ]; then
-    gum style --foreground 220 "Installing ProtonUp-Qt via Flatpak..."
-    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    flatpak install -y flathub net.davidotek.pupgui2
-  fi
+  # if [ "$NEED_PROTONUP" = true ]; then
+  #   gum style --foreground 220 "Installing ProtonUp-Qt via Flatpak..."
+  #   sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  #   flatpak install -y flathub net.davidotek.pupgui2
+  # fi
 
   return 0
 }
 
 # Verify critical packages are installed
-verify_critical_packages_installed() {
-  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "starship" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk4.1")
-  local missing_critical=()
+# verify_critical_packages_installed() {
+#   local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "starship" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk4.1")
+#   local missing_critical=()
 
-  for pkg in "${critical_packages[@]}"; do
-    if ! command -v "$pkg" &>/dev/null && ! rpm -q "$pkg" &>/dev/null 2>&1; then
-      missing_critical+=("$pkg")
-    fi
-  done
+#   for pkg in "${critical_packages[@]}"; do
+#     if ! command -v "$pkg" &>/dev/null && ! rpm -q "$pkg" &>/dev/null 2>&1; then
+#       missing_critical+=("$pkg")
+#     fi
+#   done
 
-  if [ ${#missing_critical[@]} -gt 0 ]; then
-    gum style --foreground 196 "Missing critical packages:"
-    for pkg in "${missing_critical[@]}"; do
-      gum style --foreground 196 "  • $pkg"
-    done
-    return 1
-  fi
+#   if [ ${#missing_critical[@]} -gt 0 ]; then
+#     gum style --foreground 196 "Missing critical packages:"
+#     for pkg in "${missing_critical[@]}"; do
+#       gum style --foreground 196 "  • $pkg"
+#     done
+#     return 1
+#   fi
 
-  return 0
-}
+#   return 0
+# }
 
 # Verify critical packages after installation
-verify_critical_packages() {
-  clear
-  gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
+# verify_critical_packages() {
+#   clear
+#   gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
 
-  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "starship" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk4.1")
-  local missing_packages=()
+#   local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "starship" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk4.1")
+#   local missing_packages=()
 
-  for pkg in "${critical_packages[@]}"; do
-    if ! command -v "$pkg" &>/dev/null && ! rpm -q "$pkg" &>/dev/null 2>&1; then
-      missing_packages+=("$pkg")
-      gum style --foreground 196 "✗ Missing: $pkg"
-    else
-      gum style --foreground 82 "✓ Found: $pkg"
-    fi
-  done
+#   for pkg in "${critical_packages[@]}"; do
+#     if ! command -v "$pkg" &>/dev/null && ! rpm -q "$pkg" &>/dev/null 2>&1; then
+#       missing_packages+=("$pkg")
+#       gum style --foreground 196 "✗ Missing: $pkg"
+#     else
+#       gum style --foreground 82 "✓ Found: $pkg"
+#     fi
+#   done
 
-  echo ""
+#   echo ""
 
-  if [ ${#missing_packages[@]} -gt 0 ]; then
-    gum style --foreground 196 "⚠ Critical packages are missing!"
-    gum style --foreground 220 "The system may not function correctly."
+#   if [ ${#missing_packages[@]} -gt 0 ]; then
+#     gum style --foreground 196 "⚠ Critical packages are missing!"
+#     gum style --foreground 220 "The system may not function correctly."
 
-    if gum confirm "Try to install missing critical packages now?"; then
-      INSTALL_PACKAGES=("${missing_packages[@]}")
-      install_packages
+#     if gum confirm "Try to install missing critical packages now?"; then
+#       INSTALL_PACKAGES=("${missing_packages[@]}")
+#       install_packages
 
-      # Re-verify
-      if ! verify_critical_packages_installed; then
-        gum style --foreground 196 "⚠ Critical packages still missing after retry"
-        if ! gum confirm "Continue anyway? (Not recommended)"; then
-          gum style --foreground 196 "Installation aborted"
-          exit 1
-        fi
-      fi
-    else
-      if ! gum confirm "Continue without critical packages? (Not recommended)"; then
-        gum style --foreground 196 "Installation aborted"
-        exit 1
-      fi
-    fi
-  else
-    gum style --foreground 82 "✓ All critical packages verified!"
-  fi
+#       # Re-verify
+#       if ! verify_critical_packages_installed; then
+#         gum style --foreground 196 "⚠ Critical packages still missing after retry"
+#         if ! gum confirm "Continue anyway? (Not recommended)"; then
+#           gum style --foreground 196 "Installation aborted"
+#           exit 1
+#         fi
+#       fi
+#     else
+#       if ! gum confirm "Continue without critical packages? (Not recommended)"; then
+#         gum style --foreground 196 "Installation aborted"
+#         exit 1
+#       fi
+#     fi
+#   else
+#     gum style --foreground 82 "✓ All critical packages verified!"
+#   fi
 
-  echo ""
-}
+#   echo ""
+# }
 
 
 
@@ -952,12 +956,6 @@ main() {
   #check_OS
   #get_packageManager
 
-  # Clone repo early to check configs
-  clone_dotfiles
-
-  # Backup existing configs
-  backup_config
-
   # Ask all user preferences
   ask_preferences
 
@@ -968,14 +966,21 @@ main() {
   install_packages
 
   # Verify critical packages installed successfully
-  verify_critical_packages
+  # verify_critical_packages
+
+  # Setup shell plugins
+  setup_shell_plugins
+  
+    # Clone repo early to check configs
+  clone_dotfiles
+
+  # Backup existing configs
+  backup_config
   # Install configuration files
   move_config
   # Enable SDDM if it was installed
   enable_sddm
 
-  # Setup shell plugins
-  setup_shell_plugins
 
   # Setup Waybar symlinks
   setup_Waybar
