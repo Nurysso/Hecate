@@ -76,120 +76,63 @@ func (fs *FileSearchService) Search(query string) (FileSearchResult, error) {
 	searchTerms := extractSearchTerms(query)
 
 	homeDir, _ := os.UserHomeDir()
-	searchPaths := []string{
-		filepath.Join(homeDir, ".config"),
-		homeDir, // Search home as fallback
-	}
+	configDir := filepath.Join(homeDir, ".config")
 
-	type candidate struct {
-		path  string
-		score int
-		info  os.FileInfo
-	}
+	var foundPath string
+	var bestScore int
 
-	candidates := []candidate{}
-
-	for _, searchPath := range searchPaths {
-		// depth := 0
-		filepath.Walk(searchPath, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return nil
-			}
-
-			// Control recursion depth
-			relPath, _ := filepath.Rel(searchPath, path)
-			currentDepth := strings.Count(relPath, string(os.PathSeparator))
-			if currentDepth > fs.maxDepth {
-				if info.IsDir() {
-					return filepath.SkipDir
-				}
-				return nil
-			}
-			// depth := currentDepth
-
-			// Skip hidden directories except .config
-			if info.IsDir() && strings.HasPrefix(info.Name(), ".") &&
-			   info.Name() != ".config" {
-				return filepath.SkipDir
-			}
-
-			fileName := strings.ToLower(filepath.Base(path))
-			lowerPath := strings.ToLower(path)
-
-			// Calculate match score
-			score := 0
-			matchedTerms := 0
-
-			for _, term := range searchTerms {
-				if fileName == term || fileName == term+".conf" ||
-				   fileName == term+".config" || fileName == term+".json" {
-					score += 100
-				} else if strings.HasPrefix(fileName, term) {
-					score += 50
-				} else if strings.Contains(fileName, term) {
-					score += 25
-				} else if strings.Contains(lowerPath, term) {
-					score += 10
-				}
-
-				if strings.Contains(lowerPath, term) {
-					matchedTerms++
-				}
-			}
-
-			// Bonus for .config directory
-			if strings.Contains(path, ".config") {
-				score += 20
-			}
-
-			// Only consider if all terms are matched
-			if matchedTerms == len(searchTerms) && score > 0 {
-				candidates = append(candidates, candidate{
-					path:  path,
-					score: score,
-					info:  info,
-				})
-			}
-
+	filepath.Walk(configDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
 			return nil
-		})
-	}
+		}
 
-	if len(candidates) == 0 {
-		return FileSearchResult{Found: false}, fmt.Errorf("file not found")
-	}
+		fileName := strings.ToLower(filepath.Base(path))
+		lowerPath := strings.ToLower(path)
 
-	// Sort by score (simple bubble sort for small lists)
-	for i := 0; i < len(candidates)-1; i++ {
-		for j := 0; j < len(candidates)-i-1; j++ {
-			if candidates[j].score < candidates[j+1].score {
-				candidates[j], candidates[j+1] = candidates[j+1], candidates[j]
+		// Calculate match score
+		score := 0
+		matchedTerms := 0
+
+		for _, term := range searchTerms {
+			// Exact filename match gets highest score
+			if fileName == term || fileName == term+".conf" || fileName == term+".config" {
+				score += 100
+			} else if strings.HasPrefix(fileName, term) {
+				score += 50
+			} else if strings.Contains(fileName, term) {
+				score += 25
+			} else if strings.Contains(lowerPath, term) {
+				score += 10
+			}
+
+			if strings.Contains(lowerPath, term) {
+				matchedTerms++
 			}
 		}
+
+		// Only consider if all terms are matched
+		if matchedTerms == len(searchTerms) && score > bestScore {
+			bestScore = score
+			foundPath = path
+		}
+
+		return nil
+	})
+
+	if foundPath != "" {
+		fileType := "file"
+		if info, _ := os.Stat(foundPath); info != nil && info.IsDir() {
+			fileType = "directory"
+		}
+
+		return FileSearchResult{
+			Path:  foundPath,
+			Type:  fileType,
+			Found: true,
+		}, nil
 	}
 
-	// Return best match with alternatives
-	best := candidates[0]
-	fileType := "file"
-	if best.info.IsDir() {
-		fileType = "directory"
-	}
-
-	matches := []string{}
-	limit := min(fs.maxResults, len(candidates))
-	for i := 1; i < limit; i++ {
-		matches = append(matches, candidates[i].path)
-	}
-
-	return FileSearchResult{
-		Path:        best.path,
-		Type:        fileType,
-		Found:       true,
-		Size:        best.info.Size(),
-		ModTime:     best.info.ModTime(),
-		Matches:     matches,
-		SearchScore: best.score,
-	}, nil
+	return FileSearchResult{Found: false}, fmt.Errorf("file not found")
 }
 
 // Enhanced autocomplete with better context awareness
@@ -284,7 +227,6 @@ func NewOrganizerService() *OrganizerService {
 func (o *OrganizerService) Organize(query, mode string) (OrganizerResult, error) {
 	path := extractPath(query)
 	homeDir, _ := os.UserHomeDir()
-
 	if path == "" {
 		path = "."
 	}
@@ -293,33 +235,27 @@ func (o *OrganizerService) Organize(query, mode string) (OrganizerResult, error)
 		path = filepath.Join(homeDir, path[1:])
 	}
 
-	// Verify path exists
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return OrganizerResult{Success: false}, fmt.Errorf("path does not exist: %s", path)
-	}
-
 	var cmd *exec.Cmd
 	if mode == "filename" {
 		cmd = exec.Command("kondo", "-f", "-nui", path)
+		cmd.Env = append(os.Environ(), "PATH="+os.Getenv("PATH")+":"+filepath.Join(homeDir, ".local/bin"))
 	} else {
 		cmd = exec.Command("kondo", "-c", "-nui", path)
+		cmd.Env = append(os.Environ(), "PATH="+os.Getenv("PATH")+":"+filepath.Join(homeDir, ".local/bin"))
 	}
 
-	cmd.Env = append(os.Environ(),
-		"PATH="+os.Getenv("PATH")+":"+filepath.Join(homeDir, ".local/bin"))
-
 	output, err := cmd.CombinedOutput()
-
-	// Count files changed (rough estimate)
-	filesChanged := strings.Count(string(output), "→")
+	if err != nil {
+		return OrganizerResult{
+			Output:  string(output),
+			Success: false,
+		}, err
+	}
 
 	return OrganizerResult{
-		Output:       string(output),
-		Success:      err == nil,
-		FilesChanged: filesChanged,
-		Path:         path,
-		Mode:         mode,
-	}, err
+		Output:  string(output),
+		Success: true,
+	}, nil
 }
 
 func (o *OrganizerService) GetPathSuggestions(input string) (AutoCompleteResult, error) {
