@@ -47,6 +47,44 @@ check_tte() {
   fi
 }
 
+
+install_dependencies() {
+  local deps=("$@")
+
+  case "$OS" in
+    arch)
+      # Install official packages first
+      sudo pacman -S --noconfirm "${deps[@]}" 2>/dev/null || true
+
+      # Install tte via AUR helper if missing
+      if ! command -v tte &>/dev/null; then
+        local aur_helper=""
+        if command -v paru &>/dev/null; then
+          aur_helper="paru"
+        elif command -v yay &>/dev/null; then
+          aur_helper="yay"
+        else
+          echo -e "${RED}No AUR helper (paru/yay) found. Install paru/yay first.${NC}"
+          return 1
+        fi
+
+        echo "Installing terminaltexteffects via $aur_helper..."
+        $aur_helper -S --noconfirm terminaltexteffects || {
+          echo -e "${RED}Failed to install terminaltexteffects via AUR.${NC}"
+          echo -e "${YELLOW}Trying pip install as fallback...${NC}"
+          pip install terminaltexteffects || return 1
+        }
+      fi
+      ;;
+    *)
+      # Fallback for other distros (pip for tte)
+      pip install terminaltexteffects || return 1
+      ;;
+  esac
+
+  return 0
+}
+
 check_dependencies() {
   local missing=()
 
@@ -379,52 +417,39 @@ move_config() {
     exit 1
   fi
 
-  mkdir -p "$CONFIGDIR"
-  mkdir -p "$HOME/.local/bin"
+#   mkdir -p "$CONFIGDIR"
+#   mkdir -p "$HOME/.local/bin"
 
-  # Copy all config directories except shell rc files
-  for item in "$HECATEDIR/config"/*; do
-    if [ -d "$item" ]; then
-      local item_name=$(basename "$item")
+  # only moves specific files/directories
+run cp -T "$HECATEDIR/config/quickshell/widgets/SystemInfoWidget.qml" "$HOME/.config/quickshell/widgets/SystemInfoWidget.qml"
+run cp -T "$HECATEDIR/config/waybar/configs/left" "$HOME/.config/waybar/configs/left"
+run cp -T "$HECATEDIR/config/waybar/configs/right" "$HOME/.config/waybar/configs/right"
+run rm -f "$HOME/.config/waybar/configs/side"
+#   for item in "$HECATEDIR/config"/*; do
+#     if [ -d "$item" ]; then
+#       local item_name=$(basename "$item")
 
-      # Skip local-bin directory (handled separately)
-      if [ "$item_name" = "local-bin" ]; then
-        continue
-      fi
+#       # Skip local-bin directory (handled separately)
+#       if [ "$item_name" = "local-bin" ]; then
+#         continue
+#       fi
 
-      # Handle terminal configs - only install selected terminal
-      case "$item_name" in
-        alacritty|foot|ghostty|kitty)
-          if [ "$item_name" = "$USER_TERMINAL" ]; then
-            fancy_echo "Installing $item_name config..." "slide"
-            cp -rT "$item" "$CONFIGDIR/$item_name"
-          fi
-          ;;
-        *)
-          # Install all other configs
-          fancy_echo "Installing $item_name..." "slide"
-          cp -rT "$item" "$CONFIGDIR/$item_name"
-          ;;
-      esac
-    fi
-  done
-
-  # Handle shell rc files
-  if [ -f "$HECATEDIR/config/zshrc" ]; then
-    fancy_echo "Installing .zshrc..." "slide"
-    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
-    fancy_echo "✓ ZSH config installed" "slide"
-  else
-    gum style --foreground 220 "⚠ zshrc not found in config directory"
-  fi
-
-  if [ -f "$HECATEDIR/config/bashrc" ]; then
-    fancy_echo "Installing .bashrc..." "slide"
-    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
-    fancy_echo "✓ BASH config installed" "slide"
-  else
-    gum style --foreground 220 "⚠ bashrc not found in config directory"
-  fi
+#       # Handle terminal configs - only install selected terminal
+#       case "$item_name" in
+#         alacritty|foot|ghostty|kitty)
+#           if [ "$item_name" = "$USER_TERMINAL" ]; then
+#             fancy_echo "Installing $item_name config..." "slide"
+#             cp -rT "$item" "$CONFIGDIR/$item_name"
+#           fi
+#           ;;
+#         *)
+#           # Install all other configs
+#           fancy_echo "Installing $item_name..." "slide"
+#           cp -rT "$item" "$CONFIGDIR/$item_name"
+#           ;;
+#       esac
+#     fi
+#   done
 
   # Install shell scripts
   install_shell_scripts
@@ -484,16 +509,6 @@ backup_config() {
       fancy_echo "Backing up: $dir" "slide"
       cp -r "$HOME/.config/$dir" "$backup_dir/config/"
     fi
-  done
-
-  # Backup shell rc files
-  for file in "${shell_files[@]}"; do
-    if [ "$backed_up" = false ]; then
-      mkdir -p "$backup_dir"
-      backed_up=true
-    fi
-    fancy_echo "Backing up: $file" "slide"
-    cp "$HOME/$file" "$backup_dir/"
   done
 
   if [ "$backed_up" = true ]; then
