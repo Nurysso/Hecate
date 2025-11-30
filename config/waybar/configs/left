@@ -4,7 +4,7 @@
   "$HOME/.config/waybar/module"],
 "layer": "top",
 "width": 40,
-"position": "right",
+"position": "left",
 "exclusive": true,
 "passthrough": false,
 "gtk-layer-shell": true,
@@ -17,10 +17,10 @@
 ],
 "modules-center": [
     "wlr/taskbar",
-    "clock#right"
+    "clock#left"
 ],
 "modules-right": [
-    "custom/updates_Right",
+    "custom/updates_Left",
     "pulseaudio",
     "pulseaudio#microphone",
     "group/notify",

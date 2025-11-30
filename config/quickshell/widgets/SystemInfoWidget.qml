@@ -215,16 +215,14 @@ Grid {
                             anchors.fill: parent
 
                             property real value: root.cpuUsage
-
+                            property string dialColor: root.cpuUsage > 80 ? root.criticalColor :
+                                                       root.cpuUsage > 60 ? root.warningColor :
+                                                       root.accentColor
                             onValueChanged: requestPaint()
 
                             onPaint: {
                                 var ctx = getContext("2d")
                                 ctx.clearRect(0, 0, width, height)
-
-                                var color = root.cpuUsage > 80 ? root.criticalColor :
-                                           root.cpuUsage > 60 ? root.warningColor :
-                                           root.accentColor
 
                                 ctx.lineWidth = 8
                                 ctx.strokeStyle = color
@@ -322,18 +320,21 @@ Grid {
 
                             property real value: root.ramUsage
 
+                            // Add explicit color property that updates immediately
+                            property string dialColor: root.ramUsage > 85 ? root.criticalColor :
+                                                    root.ramUsage > 70 ? root.warningColor :
+                                                    root.accentColor
+
                             onValueChanged: requestPaint()
+                            onDialColorChanged: requestPaint()  // Add this trigger
 
                             onPaint: {
                                 var ctx = getContext("2d")
                                 ctx.clearRect(0, 0, width, height)
 
-                                var color = root.ramUsage > 85 ? root.criticalColor :
-                                           root.ramUsage > 70 ? root.warningColor :
-                                           root.accentColor
-
+                                // Use the property instead of calculating inline
                                 ctx.lineWidth = 8
-                                ctx.strokeStyle = color
+                                ctx.strokeStyle = dialColor
                                 ctx.lineCap = "round"
                                 ctx.beginPath()
                                 var startAngle = 0.75 * Math.PI
@@ -413,19 +414,16 @@ Grid {
                             anchors.fill: parent
 
                             property real value: root.gpuUsage
-
+                             property string dialColor: root.gpuUsage > 80 ? root.criticalColor :
+                                                    root.gpuUsage > 60 ? root.warningColor :
+                                                    root.accentColor
                             onValueChanged: requestPaint()
 
                             onPaint: {
                                 var ctx = getContext("2d")
                                 ctx.clearRect(0, 0, width, height)
-
-                                var color = root.gpuUsage > 80 ? root.criticalColor :
-                                           root.gpuUsage > 60 ? root.warningColor :
-                                           root.accentColor
-
                                 ctx.lineWidth = 8
-                                ctx.strokeStyle = color
+                                ctx.strokeStyle = dialColor
                                 ctx.lineCap = "round"
                                 ctx.beginPath()
                                 var startAngle = 0.75 * Math.PI

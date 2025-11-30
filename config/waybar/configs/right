@@ -1,4 +1,6 @@
 {
+    "include": [
+  "$HOME/.config/waybar/module"],
   "layer": "top",
   "position": "right",
   "width": 45,
@@ -7,21 +9,19 @@
   "margin-bottom": 10,
   "margin-right": 5,
   "modules-left": [
-    "cpu",
-    "memory",
-    "temperature"
+ "custom/dMenu",
+ "hyprland/workspaces"
   ],
   "modules-center": [
-    "disk",
-    "disk#home",
-    "custom/gpu"
+    "wlr/taskbar",
+    "clock#right"
   ],
   "modules-right": [
+    "custom/updates_Right",
     "pulseaudio",
-    "backlight",
+    "pulseaudio#microphone",
+    "group/notify",
     "network",
-    "bluetooth",
-    "battery",
-    "group/notify"
+    "custom/power"
   ]
 }
