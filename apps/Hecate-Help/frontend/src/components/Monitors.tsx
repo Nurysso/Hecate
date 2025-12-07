@@ -397,11 +397,16 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
 
   return (
     <div className="flex flex-col h-full">
-      <Toaster position="top-center" toastOptions={{
-        style: {
-          background: '#F8F6F0',
-        },
-      }} />
+      <Toaster
+              position="top-center"
+              toastOptions={{
+                style: {
+                  background: '#1a2227',
+                  color: '#e5e7eb',
+                  border: '1px solid #2a3439',
+                },
+              }}
+            />
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Canvas Area */}
