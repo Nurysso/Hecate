@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Keyboard, Info, X, Home, Monitor, ArrowRight, AppWindow, Orbit, Search, Settings } from 'lucide-react';
+import { Keyboard, Info, X, Home, Monitor, ArrowRight, Flower2, AppWindow, Orbit, Search, Settings } from 'lucide-react';
 // import Hecate from '../public/hecate.svg';
 import KeybindsView from './components/KeybindsView';
 import MonitorsView from './components/Monitors';
 import SettingsView from './components/SettingView';
 import WindowRulesView from './components/windowRules';
 import AnimationsView from './components/AnimationView';
+import DecorationsView from './components/Decor';
 import { GetStartupArgs } from '../wailsjs/go/main/App';
 import { Popover, PopoverTrigger, PopoverContent } from './components/ui/popover';
 
@@ -18,6 +19,7 @@ const App = () => {
 
   const menuItems = [
     { id: 'home', label: 'Settings', icon: Home, color: '#60a5fa' },
+    { id: 'decoration', label: 'General', icon: Flower2, color: '#60a5fa'},
     { id: 'keybinds', label: 'Keybinds', icon: Keyboard, color: '#60a5fa' },
     { id: 'monitors', label: 'Monitors', icon: Monitor, color: '#60a5fa' },
     { id: 'windows', label: 'Window Rules', icon: AppWindow, color: '#60a5fa' },
@@ -30,6 +32,11 @@ const App = () => {
       title: 'General Settings',
       description: 'Configure core Hecate settings and general preferences.',
       tips: ['General and common changes', 'Save changes before switching pages', 'Use search to quickly find options', 'Hover over settings for more info']
+    },
+    general: {
+      title: 'Hyprland General Settings',
+      description: 'Configure decoration settings and general preferences.',
+      tips: ['General and Decorations', 'Save changes before switching pages', 'Use search to quickly find options']
     },
     keybinds: {
       title: 'Keyboard Shortcuts',
@@ -72,6 +79,7 @@ const App = () => {
   const searchIndex: Record<string, string[]> = {
     home: ['settings', 'general', 'config', 'configuration', 'main', 'home', 'start', 'waybar', 'status bar', 'bar', 'panel', 'taskbar', 'modules', 'clock', 'battery', 'preferences', 'advanced', 'options', 'terminal', 'shell', 'performance', 'theme', 'colors', 'appearance', 'style', 'borders', 'gaps', 'visual', 'palette', 'design'],
     keybinds: ['keyboard', 'shortcuts', 'hotkeys', 'bindings', 'keys', 'keybinds'],
+    general: ['decoration', 'decorations', 'blur', 'window'],
     // theme: [],
     monitors: ['monitors', 'displays', 'screens', 'resolution', 'refresh rate', 'layout', 'output'],
     windows: ['window rules', 'rules', 'window', 'floating', 'tiling', 'workspace', 'class', 'title'],
@@ -157,8 +165,8 @@ const App = () => {
     switch (activePage) {
       case 'keybinds':
         return <KeybindsView />;
-    //   case 'prefrences':
-    //     return <PreferencesView />;
+      case 'decoration':
+        return <DecorationsView />;
       case 'settings':
         return <SettingsView />;
       case 'monitors':

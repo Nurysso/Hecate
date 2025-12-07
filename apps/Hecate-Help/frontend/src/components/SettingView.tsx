@@ -280,14 +280,6 @@ const SettingsView: React.FC = () => {
     }
   };
 
-//   const handleBackup = async () => {
-//     try {
-//       const backupName = await CreateWaybarBackup();
-//       toast.success(`Backup created: ${backupName}`);
-//     } catch (error) {
-//       toast.error('Failed to create backup', { description: String(error) });
-//     }
-//   };
 
   const themeHasChanges = selectedMode !== originalMode || (selectedMode === 'static' && selectedTheme !== originalTheme);
   const waybarHasChanges = selectedConfig !== originalWaybar.config || selectedStyle !== originalWaybar.style;
@@ -318,11 +310,16 @@ const SettingsView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 overflow-y-auto">
-      <Toaster position="top-center" toastOptions={{
-        style: {
-          background: '#F8F6F0',
-        },
-      }} />
+      <Toaster
+              position="top-center"
+              toastOptions={{
+                style: {
+                  background: '#1a2227',
+                  color: '#e5e7eb',
+                  border: '1px solid #2a3439',
+                },
+              }}
+            />
 
       {/* Header */}
       <div className="max-w-7xl mx-auto flex items-center p-6 justify-between border-b border-gray-800/50">
@@ -688,9 +685,6 @@ const SettingsView: React.FC = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-gray-600 mt-2">
-                    Requires terminal command
-                  </p>
                 </div>
               </div>
 
