@@ -51,7 +51,7 @@ func (sm *ServiceManager) ClassifyIntent(query string) Intent {
 	}
 
 	// Organizer patterns
-	organizerKeywords := []string{"organize", "clean", "sort", "kondo"}
+	organizerKeywords := []string{"organize", "clean", "sort", "tyr"}
 	for _, keyword := range organizerKeywords {
 		if strings.Contains(lowerQuery, keyword) {
 			params := make(map[string]string)

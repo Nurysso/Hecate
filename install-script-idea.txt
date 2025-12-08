@@ -1,5 +1,3 @@
-build me the following shell script to install my hyprland dotfiles
-
 global variables
 HECATEDIR="$HOME/Hecate"
 CONFIGDIR="$HOME/.config"

@@ -846,8 +846,8 @@ install_extra_tools(){
   gum style \
     --foreground 212 --border-foreground 212 \
     --align center \
-    'Installing Aoiler helper kondo' 'used to organize dirs'
-    curl -fsSL https://raw.githubusercontent.com/aelune/kondo/main/install.sh | bash
+    'Installing Aoiler helper tyr' 'used to organize dirs'
+    curl -fsSL https://raw.githubusercontent.com/aelune/tyr/main/install.sh | bash
 }
 # Configure SDDM theme at the end
 configure_sddm_theme() {
