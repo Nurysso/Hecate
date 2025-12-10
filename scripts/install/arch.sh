@@ -17,8 +17,8 @@ NC='\033[0m'
 HECATEDIR="$HOME/Hecate"
 HECATEAPPSDIR="$HOME/Hecate/apps"
 CONFIGDIR="$HOME/.config"
-REPO_URL="https://github.com/nurysso/Hecate.git"
-FREYA_URL="https://github.com/nurysso/freya.git"
+REPO_URL="https://github.com/Nurysso/Hecate.git"
+FREYA_URL="https://github.com/Nurysso/freya.git"
 OS="arch"
 PACKAGE_MANAGER=""
 HYPRLAND_NEWLY_INSTALLED=false
@@ -903,7 +903,7 @@ create_hecate_config() {
 
   # Try to get version from remote
   if command -v curl &>/dev/null; then
-    local remote_version=$(curl -s "https://raw.githubusercontent.com/nurysso/Hecate/main/version.txt" 2>/dev/null || echo "")
+    local remote_version=$(curl -s "https://raw.githubusercontent.com/Nurysso/Hecate/main/version.txt" 2>/dev/null || echo "")
     [ -n "$remote_version" ] && version="$remote_version"
   fi
 
@@ -1026,7 +1026,7 @@ install_extra_tools(){
     --foreground 212 --border-foreground 212 \
     --align center \
     'Installing Aoiler helper tyr' 'used to organize dirs'
-    curl -fsSL https://raw.githubusercontent.com/nurysso/tyr/main/install.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/Nurysso/tyr/main/install.sh | bash
   gum style \
     --foreground 212 --border-foreground 212 \
     --align center \
@@ -1173,8 +1173,8 @@ setup_wallpapers() {
     # User wants only default wallpapers
     gum style --foreground 82 "Downloading default wallpapers..."
     mkdir -p "$wallpaper_dir"
-    local lock_screen_url="https://raw.githubusercontent.com/nurysso/Freya/main/walls/hecate-default/lock-screen.png"
-    local wallpaper_url="https://raw.githubusercontent.com/nurysso/Freya/main/walls/hecate-default/wallpaper.png"
+    local lock_screen_url="https://raw.githubusercontent.com/Nurysso/Freya/main/walls/hecate-default/lock-screen.png"
+    local wallpaper_url="https://raw.githubusercontent.com/Nurysso/Freya/main/walls/hecate-default/wallpaper.png"
     local success=0
     # Download lock screen
     echo "Downloading lock-screen.png..." "slide"

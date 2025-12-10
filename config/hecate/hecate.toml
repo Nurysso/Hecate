@@ -5,7 +5,7 @@
 version = "0.3.9 blind owl"
 install_date = "2025-10-15"
 last_update = "2025-10-15"
-repo_url = "https://github.com/nurysso/Hecate.git"
+repo_url = "https://github.com/Nurysso/Hecate.git"
 
 [theme]
 # Theme mode: "dynamic" or "static"

@@ -7,8 +7,8 @@ set -e
 
 CONFIG_FILE="$HOME/.config/hecate/hecate.toml"
 HECATE_DIR="$HOME/Hecate"
-REPO_URL="https://github.com/nurysso/Hecate.git"
-UPDATE_SCRIPT_URL="https://raw.githubusercontent.com/nurysso/Hecate/main/update.sh"
+REPO_URL="https://github.com/Nurysso/Hecate.git"
+UPDATE_SCRIPT_URL="https://raw.githubusercontent.com/Nurysso/Hecate/main/update.sh"
 
 # Ensure config directory exists
 mkdir -p "$HOME/.config/hecate"
@@ -94,7 +94,7 @@ get_current_version() {
 
 # Get remote version
 get_remote_version() {
-  local remote_version=$(curl -s "https://raw.githubusercontent.com/nurysso/Hecate/main/version.txt" 2>/dev/null || echo "")
+  local remote_version=$(curl -s "https://raw.githubusercontent.com/Nurysso/Hecate/main/version.txt" 2>/dev/null || echo "")
   echo "$remote_version"
 }
 
@@ -214,7 +214,7 @@ startup_check() {
     "Local Version: $local_version" \
     "Connecting to GitHub for remote info..."
 
-  remote_data=$(curl -fsSL --max-time 3 "https://raw.githubusercontent.com/nurysso/Hecate/main/version.txt" 2>/dev/null)
+  remote_data=$(curl -fsSL --max-time 3 "https://raw.githubusercontent.com/Nurysso/Hecate/main/version.txt" 2>/dev/null)
 
   if [ -n "$remote_data" ]; then
     # Extract version number and stage
