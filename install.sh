@@ -13,9 +13,9 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33m'
 NC='\033[0m'
 
-REPO_URL="https://github.com/Aelune/Hecate.git"
-# https://github.com/Aelune/Hecate/blob/main/scripts/install/arch.sh
-SCRIPT_BASE_URL="https://raw.githubusercontent.com/Aelune/Hecate/blod/main/scripts/install"
+REPO_URL="https://github.com/nurysso/Hecate.git"
+# https://github.com/nurysso/Hecate/blob/main/scripts/install/arch.sh
+SCRIPT_BASE_URL="https://raw.githubusercontent.com/nurysso/Hecate/blod/main/scripts/install"
 OS=""
 PACKAGE_MANAGER=""
 SKIP_DEPS=false
@@ -305,7 +305,7 @@ check_OS() {
   fedora)
     gum style --foreground 220 --bold "⚠️ Warning: Script has not been tested on Fedora!"
     gum style --foreground 220 "Proceed at your own risk or follow the Fedora guide if available at:"
-    gum style --foreground 220 "https://github.com/Aelune/Hecate/tree/main/documentation/install-fedora.md"
+    gum style --foreground 220 "https://github.com/nurysso/Hecate/tree/main/documentation/install-fedora.md"
     if ! gum confirm "Continue with Fedora installation?"; then
       exit 1
     fi
@@ -314,7 +314,7 @@ check_OS() {
     gum style --foreground 220 --bold "⚠️ Warning: Ubuntu/Debian-based OS detected!"
     gum style --foreground 220 "Hecate installer support for Ubuntu is experimental."
     gum style --foreground 220 "Manual installation instructions:"
-    gum style --foreground 220 "https://github.com/Aelune/Hecate/tree/main/documentation/install-ubuntu.md"
+    gum style --foreground 220 "https://github.com/nurysso/Hecate/tree/main/documentation/install-ubuntu.md"
     if ! gum confirm "Continue with Ubuntu installation?"; then
       exit 1
     fi

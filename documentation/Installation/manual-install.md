@@ -29,7 +29,7 @@ This guide provides distro-agnostic instructions for manually installing Hecate 
 
 ```bash
 # Clone to home directory
-git clone https://github.com/Aelune/Hecate.git ~/Hecate
+git clone https://github.com/nurysso/Hecate.git ~/Hecate
 
 # Verify
 ls ~/Hecate/config
@@ -352,14 +352,14 @@ echo "✓ All config directories copied"
 
 ```bash
 mkdir -p ~/.config/hecate
-remote_version=$(curl -s "https://raw.githubusercontent.com/Aelune/Hecate/main/version.txt" )
+remote_version=$(curl -s "https://raw.githubusercontent.com/nurysso/Hecate/main/version.txt" )
 cat > ~/.config/hecate/hecate.toml <<EOF
 # Hecate Dotfiles Configuration
 [metadata]
 version = "$remote_version"
 install_date = "$(date +%Y-%m-%d)"
 last_update = "$(date +%Y-%m-%d)"
-repo_url = "https://github.com/Aelune/Hecate.git"
+repo_url = "https://github.com/nurysso/Hecate.git"
 
 [theme]
 # Mode: "dynamic" = auto-update colors from wallpaper

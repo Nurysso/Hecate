@@ -1,7 +1,7 @@
 global variables
 HECATEDIR="$HOME/Hecate"
 CONFIGDIR="$HOME/.config"
-REPO_URL="https://github.com/Aelune/Hecate.git"
+REPO_URL="https://github.com/nurysso/Hecate.git"
 OS=""
 PACKAGE_MANAGER=""
 HYPRLAND_NEWLY_INSTALLED=false
