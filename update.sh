@@ -284,24 +284,31 @@ check_versions() {
   fi
 
   # If we get here, update is available
-  gum style --foreground 220 "🔄 Update available!"
+  gum style --foreground 220 "Update available!"
 }
 
 # Show update warning and get confirmation
 show_update_warning() {
-  gum style --border double --padding "1 2" --border-foreground 196 "⚠️  Update Warning"
+  gum style --border double --padding "1 2" --border-foreground 45 "What's New in This Version"
+  echo ""
+  gum style --foreground 45 --bold "New Features & Changes:"
+  gum style --foreground 255 "  • hecate-settings can now edit decorations for Hyprland"
+  gum style --foreground 255 "  • Fixed bugs while downloading wallpapers"
+  gum style --foreground 255 "  • Added experimental bar in Quickshell"
+  echo ""
+  gum style --foreground 226 --italic "To test the experimental bar, uncomment // Module.Bar{}"
+  gum style --foreground 226 --italic "in ~/.config/quickshell/shell.qml"
+  echo ""
 
-  gum style --foreground 220 --bold "IMPORTANT: Please read carefully before proceeding!"
+  gum style --border double --padding "1 2" --border-foreground 141 "Coming Soon"
   echo ""
-  gum style --foreground 220 "This update will:"
-  gum style --foreground 220 "  1. Backup your current configuration to:"
-  gum style --foreground 220 "     ~/.cache/hecate-backup/update-[timestamp]"
+  gum style --foreground 141 --bold "Next Major Version (Late Jan/Early Feb):"
+  gum style --foreground 255 "  • Switching to Quickshell for most components"
+  gum style --foreground 255 "  • No more rofi, swaync, and waybar"
   echo ""
-  gum style --foreground 220 "  2. Replace all Hecate configuration files with new versions"
-  echo ""
-  gum style --foreground 196 --bold "  3. ⚠️  ANY CUSTOM CHANGES YOU MADE WILL BE GONE BUT YOU CAN COPY THEM FROM BACKUP!"
-  echo ""
-  gum style --foreground 82 "Your backed up configs will be available at the backup location."
+  gum style --foreground 82 "Help Wanted: If you know how to build Quickshell widgets and apps,"
+  gum style --foreground 82 "   contributions are appreciated!"
+  gum style --foreground 82 "   See TODO: https://github.com/Nurysso/Hecate/issues/3"
   echo ""
 
   if ! gum confirm "Do you understand and want to proceed with the update?"; then
@@ -417,39 +424,52 @@ move_config() {
     exit 1
   fi
 
-#   mkdir -p "$CONFIGDIR"
-#   mkdir -p "$HOME/.local/bin"
+  mkdir -p "$CONFIGDIR"
+  mkdir -p "$HOME/.local/bin"
 
-  # only moves specific files/directories
-run cp -T "$HECATEDIR/config/quickshell/widgets/SystemInfoWidget.qml" "$HOME/.config/quickshell/widgets/SystemInfoWidget.qml"
-run cp -T "$HECATEDIR/config/waybar/configs/left" "$HOME/.config/waybar/configs/left"
-run cp -T "$HECATEDIR/config/waybar/configs/right" "$HOME/.config/waybar/configs/right"
-run rm -f "$HOME/.config/waybar/configs/side"
-#   for item in "$HECATEDIR/config"/*; do
-#     if [ -d "$item" ]; then
-#       local item_name=$(basename "$item")
+  # Copy all config directories except shell rc files
+  for item in "$HECATEDIR/config"/*; do
+    if [ -d "$item" ]; then
+      local item_name=$(basename "$item")
 
-#       # Skip local-bin directory (handled separately)
-#       if [ "$item_name" = "local-bin" ]; then
-#         continue
-#       fi
+      # Skip local-bin directory (handled separately)
+      if [ "$item_name" = "local-bin" ]; then
+        continue
+      fi
 
-#       # Handle terminal configs - only install selected terminal
-#       case "$item_name" in
-#         alacritty|foot|ghostty|kitty)
-#           if [ "$item_name" = "$USER_TERMINAL" ]; then
-#             fancy_echo "Installing $item_name config..." "slide"
-#             cp -rT "$item" "$CONFIGDIR/$item_name"
-#           fi
-#           ;;
-#         *)
-#           # Install all other configs
-#           fancy_echo "Installing $item_name..." "slide"
-#           cp -rT "$item" "$CONFIGDIR/$item_name"
-#           ;;
-#       esac
-#     fi
-#   done
+      # Handle terminal configs - only install selected terminal
+      case "$item_name" in
+        alacritty|foot|ghostty|kitty)
+          if [ "$item_name" = "$USER_TERMINAL" ]; then
+            fancy_echo "Installing $item_name config..." "slide"
+            cp -rT "$item" "$CONFIGDIR/$item_name"
+          fi
+          ;;
+        *)
+          # Install all other configs
+          fancy_echo "Installing $item_name..." "slide"
+          cp -rT "$item" "$CONFIGDIR/$item_name"
+          ;;
+      esac
+    fi
+  done
+
+  # Handle shell rc files
+  if [ -f "$HECATEDIR/config/zshrc" ]; then
+    fancy_echo "Installing .zshrc..." "slide"
+    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
+    fancy_echo "✓ ZSH config installed" "slide"
+  else
+    gum style --foreground 220 "⚠ zshrc not found in config directory"
+  fi
+
+  if [ -f "$HECATEDIR/config/bashrc" ]; then
+    fancy_echo "Installing .bashrc..." "slide"
+    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
+    fancy_echo "✓ BASH config installed" "slide"
+  else
+    gum style --foreground 220 "⚠ bashrc not found in config directory"
+  fi
 
   # Install shell scripts
   install_shell_scripts
@@ -760,7 +780,7 @@ main() {
   check_versions
 
   echo ""
-#   show_update_warning
+  show_update_warning
   # Perform update
   clone_dotfiles
   backup_config
