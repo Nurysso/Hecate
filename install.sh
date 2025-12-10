@@ -15,78 +15,10 @@ NC='\033[0m'
 
 REPO_URL="https://github.com/Nurysso/Hecate.git"
 # https://github.com/Nurysso/Hecate/blob/main/scripts/install/arch.sh
-SCRIPT_BASE_URL="https://raw.githubusercontent.com/Nurysso/Hecate/blod/main/scripts/install"
+# https://raw.githubusercontent.com/Nurysso/Hecate/refs/heads/main/scripts/install/arch.sh
+SCRIPT_BASE_URL="https://raw.githubusercontent.com/Nurysso/Hecate/main/scripts/install"
 OS=""
 PACKAGE_MANAGER=""
-SKIP_DEPS=false
-
-# Parse command line arguments
-parse_args() {
-  while [[ $# -gt 0 ]]; do
-    case $1 in
-      --no-deps)
-        SKIP_DEPS=true
-        shift
-        ;;
-      --help|-h)
-        show_help
-        exit 0
-        ;;
-      --dry-run)
-        dry_run
-        exit 0
-        ;;
-      -*)
-        echo -e "${RED}Unknown option: $1${NC}"
-        echo -e "${BLUE}Try: ./install.sh --help${NC}"
-        exit 1
-        ;;
-      *)
-        shift
-        ;;
-    esac
-  done
-}
-
-show_help() {
-  clear
-  echo -e "${YELLOW}Prerequisites:${NC}"
-  echo "  • gum - Interactive CLI tool"
-  echo "    (Will be installed automatically if missing)"
-  echo ""
-  echo "  • tte - Terminal text effects"
-  echo "    Install: pip install terminaltexteffects"
-  echo ""
-  echo "  • paru (recommended) - AUR helper (Arch only)"
-  echo "    Install: https://github.com/Morganamilo/paru#installation"
-  echo ""
-  echo -e "${YELLOW}Usage:${NC}"
-  echo "  ./install.sh              Run the full installer"
-  echo "  ./install.sh --no-deps    Skip dependency installation"
-  echo "  ./install.sh --help       Show this message"
-  echo "  ./install.sh --dry-run    Simulate installation"
-  echo ""
-  echo -e "${YELLOW}Options:${NC}"
-  echo "  --no-deps    Skip OS-specific dependency installation"
-  echo "               Only clones repo, backs up configs, and installs dotfiles"
-  echo ""
-  echo "Supported distributions: Arch, Fedora, Ubuntu/Debian(maybe in future for now run with --no-deps)"
-}
-
-dry_run() {
-  echo -e "${BLUE}The \"I want to feel productive without doing anything mode\"${NC}"
-  echo -e "${YELLOW}Simulating installation...${NC}"
-  sleep 1
-  echo ""
-  echo -e "${GREEN}✓ System check: Passed (probably)${NC}"
-  echo -e "${GREEN}✓ Packages: Would install ~47 packages${NC}"
-  echo -e "${GREEN}✓ Configs: Would copy lots of dotfiles${NC}"
-  echo ""
-  echo -e "${YELLOW}Congratulations! You've successfully done... nothing.${NC}"
-  echo -e "${ORANGE}Run without --dry-run when you're ready to actually install.${NC}"
-  echo ""
-  echo -e "${RED}Pro tip: Dry runs don't make your setup any cooler.${NC}"
-}
 
 detect_os() {
   if [ -f /etc/os-release ]; then
@@ -290,7 +222,7 @@ fancy_echo() {
   local effect="${2:-slide}"
 
   if command -v tte &>/dev/null; then
-    echo "$text" | tte "$effect" --movement-speed 0.5 2>/dev/null || echo "$text"
+    echo "$text" | tte "$effect" --movement-speed 5 2>/dev/null || echo "$text"
   else
     echo "$text"
   fi
@@ -334,22 +266,32 @@ run_os_script() {
   if curl -fsSL "$script_url" -o "$temp_script"; then
     fancy_echo "✓ Script downloaded successfully" "slide"
     chmod +x "$temp_script"
-
     echo ""
     gum style --foreground 220 "Executing ${OS} installation script..."
     echo ""
 
-    # Execute the script
+    # Execute the script and capture exit code
+    # Check if script succeeded before continuing
     if bash "$temp_script"; then
       fancy_echo "✓ Installation script completed successfully" "beams"
-    else
-      gum style --foreground 196 "✗ Installation script failed"
       rm -f "$temp_script"
-      exit 1
-    fi
+      return 0
+    else
+      local exit_code=$?
 
-    # Clean up
-    rm -f "$temp_script"
+      # Clean up temp script
+      rm -f "$temp_script"
+
+      # Check if it was a user cancellation (exit 1) or actual error
+      if [ $exit_code -eq 1 ]; then
+        gum style --foreground 220 "Installation cancelled by user"
+      else
+        gum style --foreground 196 "✗ Installation script failed with exit code: $exit_code"
+      fi
+
+      # Exit the main installer too
+      exit $exit_code
+    fi
   else
     gum style --foreground 196 "✗ Failed to download installation script from:"
     gum style --foreground 196 "  $script_url"
@@ -562,11 +504,67 @@ backup_config() {
     gum style --foreground 220 "No existing configs found to backup"
   fi
 }
-
 # Main function
 main() {
-  # Parse arguments first
-  parse_args "$@"
+  # Parse arguments inline
+  case "${1:-}" in
+    --help | -h)
+      clear
+      echo -e "${YELLOW}Prerequisites:${NC}"
+      echo "  • gum - Interactive CLI tool"
+      echo "    (Will be installed automatically if missing)"
+      echo ""
+      echo "  • tte - Terminal text effects"
+      echo "    Install: pip install terminaltexteffects"
+      echo ""
+      echo "  • paru (recommended) - AUR helper (Arch only)"
+      echo "    Install: https://github.com/Morganamilo/paru#installation"
+      echo ""
+      echo -e "${YELLOW}Usage:${NC}"
+      echo "  ./install.sh              Run the full installer"
+      echo "  ./install.sh --no-deps    Skip dependency installation"
+      echo "  ./install.sh --help       Show this message"
+      echo "  ./install.sh --dry-run    Simulate installation"
+      echo ""
+      echo -e "${YELLOW}Options:${NC}"
+      echo "  --no-deps    Skip OS-specific dependency installation"
+      echo "               Only clones repo, backs up configs, and installs dotfiles"
+      echo ""
+      echo "Supported distributions: Arch, Fedora, Ubuntu/Debian(maybe in future for now run with --no-deps)"
+      exit 0
+      ;;
+    --dry-run)
+      echo -e "${BLUE}The \"I want to feel productive without doing anything mode\"${NC}"
+      echo -e "${YELLOW}Simulating installation...${NC}"
+      sleep 1
+      echo ""
+      echo -e "${GREEN}✓ System check: Passed (probably)${NC}"
+      echo -e "${GREEN}✓ Packages: Would install ~47 packages${NC}"
+      echo -e "${GREEN}✓ Configs: Would copy lots of dotfiles${NC}"
+      echo ""
+      echo -e "${YELLOW}Congratulations! You've successfully done... nothing.${NC}"
+      echo -e "${ORANGE}Run without --dry-run when you're ready to actually install.${NC}"
+      echo ""
+      echo -e "${RED}Pro tip: Dry runs don't make your setup any cooler.${NC}"
+      exit 0
+      ;;
+    --no-deps)
+        # These steps run for both full install and --no-deps
+        backup_config
+        echo ""
+
+        clone_dotfiles
+        echo ""
+
+        move_config
+        echo ""
+      ;;
+    -*)
+      echo -e "${RED}Unknown option: $1${NC}"
+      echo -e "${BLUE}Try: ./install.sh --help${NC}"
+      exit 1
+      ;;
+  esac
 
   # Detect OS first (needed before gum check)
   detect_os
@@ -581,7 +579,7 @@ main() {
   clear
 
   if command -v tte &>/dev/null; then
-    figlet -f slant "Hecate Dotfiles Installer" | tte laseretch --etch-speed 4
+    figlet -f slant "Hecate Dotfiles Installer" | tte laseretch --etch-speed 10
     echo 'Preparing to install Hyprland configuration...' | tte slide --movement-speed 0.5
   else
     gum style \
@@ -600,64 +598,7 @@ main() {
   echo ""
   check_OS
   echo ""
-
-  # Run OS-specific installation script only if --no-deps not specified
-  if [ "$SKIP_DEPS" = false ]; then
-    gum style --foreground 82 "Running OS-specific dependency installation..."
-    echo ""
     run_os_script
-    echo ""
-  else
-    gum style --foreground 220 "⚠ Skipping dependency installation (--no-deps flag)"
-    echo ""
-  fi
-
-  # Always run these steps
-  backup_config
-  echo ""
-
-  clone_dotfiles
-  echo ""
-
-  move_config
-  echo ""
-
-  if command -v tte &>/dev/null; then
-    echo '✓ Installation Complete!' | tte beams --beam-delay 30
-  else
-    gum style \
-      --foreground 82 \
-      --border-foreground 82 \
-      --border double \
-      --align left \
-      --width 70 \
-      --margin "1 2" \
-      --padding "2 4" \
-      '✓ Installation Complete!'
-  fi
-
-  echo ""
-  gum style --foreground 85 '(surprisingly, nothing exploded)'
-  echo ""
-
-  gum style --foreground 82 \
-    'Post-Install TODO:' \
-    '1. Reboot (or live dangerously and just re-login)' \
-    '2. Log into Hyprland' \
-    '3. Take screenshot' \
-    '4. Post to r/unixporn'
-  echo ""
-  gum style --foreground 92 "May your wallpapers be dynamic and your RAM usage low."
-  echo ""
-  sleep 3
-
-  if gum confirm "Reboot now?"; then
-    fancy_echo "Rebooting..." "slide"
-    sleep 2
-    sudo reboot
-  else
-    gum style --foreground 220 "Remember to reboot to apply all changes!"
-  fi
 }
 
 # Run main function with arguments

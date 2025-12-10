@@ -243,7 +243,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - removed browser from here since we handle it separately
-  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp   neovim nano webkit2gtk)
+  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard matugen-bin yazi tyr-bin wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp   neovim nano webkit2gtk)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -1021,18 +1021,17 @@ set_default_shell() {
   fi
 }
 
-install_extra_tools(){
-  gum style \
-    --foreground 212 --border-foreground 212 \
-    --align center \
-    'Installing Aoiler helper tyr' 'used to organize dirs'
-    curl -fsSL https://raw.githubusercontent.com/Nurysso/tyr/main/install.sh | bash
-  gum style \
-    --foreground 212 --border-foreground 212 \
-    --align center \
-    'Installing Yazi plugins...'
-    ya pkg install >/dev/null 2>&1
-}
+# install_extra_tools(){
+#   gum style \
+#     --foreground 212 --border-foreground 212 \
+#     --align center \
+#     'Installing Aoiler helper tyr' 'used to organize dirs'
+#   gum style \
+#     --foreground 212 --border-foreground 212 \
+#     --align center \
+#     'Installing Yazi plugins...'
+#     # ya pkg install
+# }
 
 
 # Configure SDDM theme at the end
@@ -1066,103 +1065,33 @@ configure_sddm_theme() {
 # Setup wallpapers
 setup_wallpapers() {
   gum style --border double --padding "1 2" --border-foreground 212 "Wallpaper Setup"
+
   local wallpaper_dir="$HOME/Pictures/wallpapers"
+
   echo ""
   gum style --foreground 220 "Would you like to download the full wallpaper collection?"
   echo ""
+
   if gum confirm "Download full wallpaper repository?"; then
     # User wants full collection
     gum style --foreground 82 "Cloning wallpaper repository..."
 
+    # Backup existing wallpapers if directory exists
     if [ -d "$wallpaper_dir" ]; then
-      # Check if it's a git repository
-      if [ -d "$wallpaper_dir/.git" ]; then
-        # Get the remote URL
-        local remote_url=$(git -C "$wallpaper_dir" config --get remote.origin.url 2>/dev/null)
-
-        if [ -n "$remote_url" ]; then
-          # Normalize URLs for comparison (handle both HTTPS and SSH formats)
-          local normalized_remote=$(echo "$remote_url" | sed -e 's|\.git$||' -e 's|https://github.com/||' -e 's|git@github.com:||')
-          local normalized_freya=$(echo "$FREYA_URL" | sed -e 's|\.git$||' -e 's|https://github.com/||' -e 's|git@github.com:||')
-
-          if [ "$normalized_remote" = "$normalized_freya" ]; then
-            # Same repo - do a git pull preserving user changes
-            gum style --foreground 82 "Existing Freya wallpaper repository found. Updating..."
-
-            # Stash any local changes
-            git -C "$wallpaper_dir" stash push -m "Auto-stash before Freya update" 2>/dev/null
-
-            # Pull latest changes
-            if git -C "$wallpaper_dir" pull --rebase origin main 2>/dev/null || \
-               git -C "$wallpaper_dir" pull --rebase origin master 2>/dev/null; then
-
-              # Try to reapply stashed changes (don't fail if there's a conflict)
-              git -C "$wallpaper_dir" stash pop 2>/dev/null || {
-                gum style --foreground 220 "⚠ Some local changes were preserved in stash"
-                gum style --foreground 220 "  Run 'git -C $wallpaper_dir stash list' to see them"
-              }
-
-              echo "✓ Wallpaper repository updated!" "beams"
-            else
-              gum style --foreground 196 "✗ Failed to update repository"
-              return 1
-            fi
-            return 0
-          else
-            # Different repo - backup existing directory
-            local backup_dir="$HOME/Pictures/wallpapers-personal"
-            local counter=1
-
-            # Find a unique backup directory name
-            while [ -d "$backup_dir" ]; do
-              backup_dir="$HOME/Pictures/wallpapers-personal-$counter"
-              ((counter++))
-            done
-
-            gum style --foreground 220 "Found different wallpaper repository."
-            gum style --foreground 220 "Moving to: $backup_dir"
-
-            if mv "$wallpaper_dir" "$backup_dir"; then
-              gum style --foreground 82 "✓ Personal wallpapers backed up"
-            else
-              gum style --foreground 196 "✗ Failed to backup existing wallpapers"
-              return 1
-            fi
-          fi
-        fi
-      else
-        # Not a git repo - backup the directory
-        local backup_dir="$HOME/Pictures/wallpapers-personal"
-        local counter=1
-
-        while [ -d "$backup_dir" ]; do
-          backup_dir="$HOME/Pictures/wallpapers-personal-$counter"
-          ((counter++))
-        done
-
-        gum style --foreground 220 "Found existing non-git wallpaper directory."
-        gum style --foreground 220 "Moving to: $backup_dir"
-
-        if mv "$wallpaper_dir" "$backup_dir"; then
-          gum style --foreground 82 "✓ Personal wallpapers backed up"
-        else
-          gum style --foreground 196 "✗ Failed to backup existing wallpapers"
-          return 1
-        fi
-      fi
+      local backup_dir="$HOME/Pictures/wallpapers-backup-$(date +%Y%m%d_%H%M%S)"
+      gum style --foreground 220 "Backing up existing wallpapers to: $backup_dir"
+      mv "$wallpaper_dir" "$backup_dir"
     fi
 
-    # Clone the repository
+    # Clone and extract walls directory
     mkdir -p "$HOME/Pictures"
     if git clone --depth 1 "$FREYA_URL" "$HOME/Pictures/Freya-temp"; then
-      # Move only the walls directory and rename to wallpapers
       if [ -d "$HOME/Pictures/Freya-temp/walls" ]; then
         mv "$HOME/Pictures/Freya-temp/walls" "$wallpaper_dir"
         rm -rf "$HOME/Pictures/Freya-temp"
         echo "✓ Full wallpaper collection downloaded!" "beams"
       else
         gum style --foreground 196 "✗ Walls directory not found in repository"
-        rm -rf "$HOME/Pictures/Freya-temp"
         return 1
       fi
     else
@@ -1172,34 +1101,27 @@ setup_wallpapers() {
   else
     # User wants only default wallpapers
     gum style --foreground 82 "Downloading default wallpapers..."
-    mkdir -p "$wallpaper_dir"
+    local default_dir="$wallpaper_dir/hecate-default"
+    mkdir -p "$default_dir"
+
     local lock_screen_url="https://raw.githubusercontent.com/Nurysso/Freya/main/walls/hecate-default/lock-screen.png"
     local wallpaper_url="https://raw.githubusercontent.com/Nurysso/Freya/main/walls/hecate-default/wallpaper.png"
-    local success=0
+
     # Download lock screen
     echo "Downloading lock-screen.png..." "slide"
-    if curl -fsSL "$lock_screen_url" -o "$wallpaper_dir/lock-screen.png"; then
+    curl -fsSL "$lock_screen_url" -o "$default_dir/lock-screen.png" && \
       echo "✓ lock-screen.png downloaded" "slide"
-      ((success++))
-    else
-      gum style --foreground 196 "✗ Failed to download lock-screen.png"
-    fi
+
     # Download wallpaper
     echo "Downloading wallpaper.png..." "slide"
-    if curl -fsSL "$wallpaper_url" -o "$wallpaper_dir/wallpaper.png"; then
+    curl -fsSL "$wallpaper_url" -o "$default_dir/wallpaper.png" && \
       echo "✓ wallpaper.png downloaded" "slide"
-      ((success++))
-    else
-      gum style --foreground 196 "✗ Failed to download wallpaper.png"
-    fi
-    if [ $success -eq 2 ]; then
-      echo ""
-      echo "✓ Default wallpapers downloaded!" "beams"
-    else
-      echo ""
-      gum style --foreground 220 "⚠ Some wallpapers failed to download"
-    fi
+
+    echo ""
+    echo "✓ Default wallpapers downloaded!" "beams"
+    wallpaper_dir="$default_dir"
   fi
+
   echo ""
   gum style --foreground 82 "Wallpapers saved to: $wallpaper_dir"
 }
@@ -1249,13 +1171,19 @@ main() {
 
   clear
 
-  # Confirm installation
-    if ! gum confirm "Do you want to proceed with Hecate installation?"; then
-      gum style --foreground 220 "Installation cancelled"
-      echo "Exiting"
-      exit 0
-    fi
-
+    # Confirm installation
+  if ! gum confirm "Do you want to proceed with Hecate installation?"; then
+    clear
+    gum style \
+      --foreground 220 \
+      --border normal \
+      --border-foreground 220 \
+      --padding "1 2" \
+      "Installation cancelled by user"
+    echo ""
+    # Force exit with explicit return code
+    exec false
+  fi
 
   gum style --foreground 220 "Starting installation process..."
   sleep 1
@@ -1301,7 +1229,7 @@ main() {
 
   # Set default shell
   set_default_shell
-  install_extra_tools
+#   install_extra_tools
   setup_wallpapers
   # Configure SDDM theme
   configure_sddm_theme
