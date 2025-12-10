@@ -61,7 +61,7 @@ func (a *App) ProcessQuery(req QueryRequest) QueryResponse {
 func (a *App) GetAvailableServices() []ServiceInfo {
 	return []ServiceInfo{
 		{Name: "filesearch", Description: "Find files and directories"},
-		{Name: "organizer", Description: "Organize files with kondo"},
+		{Name: "organizer", Description: "Organize files with Tyr"},
 		{Name: "linter", Description: "Lint and format code files"},
 		{Name: "ocr", Description: "Extract text from screen area"},
 		{Name: "converter", Description: "Convert media files with ffmpeg"},

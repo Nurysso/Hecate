@@ -49,14 +49,14 @@
 
 ### 💿 Installation
 
-<img src="https://raw.githubusercontent.com/Aelune/assets/refs/heads/main/hecate/gifs/hecate-install.gif" alt="Installation Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
+<img src="https://raw.githubusercontent.com/nurysso/assets/refs/heads/main/hecate/gifs/hecate-install.gif" alt="Installation Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
 
 </td>
 <td width="50%" align="center">
 
 ### ✨ Usage
 
-<img src="https://raw.githubusercontent.com/Aelune/assets/refs/heads/main/hecate/gifs/hecate-demo.gif" alt="Usage Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
+<img src="https://raw.githubusercontent.com/nurysso/assets/refs/heads/main/hecate/gifs/hecate-demo.gif" alt="Usage Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
 
 </td>
 </tr>
@@ -282,7 +282,7 @@ sudo pacman -S git gum
 ### **⚡ One-Line Install**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Aelune/Hecate/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/nurysso/Hecate/main/install.sh | bash
 ```
 
 <br>
@@ -291,7 +291,7 @@ curl -fsSL https://raw.githubusercontent.com/Aelune/Hecate/main/install.sh | bas
 
 ```bash
 # Clone the repository
-git clone https://github.com/Aelune/Hecate.git
+git clone https://github.com/nurysso/Hecate.git
 cd Hecate
 
 # Make the installer executable
@@ -327,7 +327,7 @@ chmod +x install.sh
 
 <br>
 
-<img src="https://raw.githubusercontent.com/Aelune/assets/refs/heads/main/hecate/gifs/settings.gif" alt="Hecate Helper GUI" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
+<img src="https://raw.githubusercontent.com/nurysso/assets/refs/heads/main/hecate/gifs/settings.gif" alt="Hecate Helper GUI" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
 
 <br><br>
 
@@ -423,7 +423,7 @@ SUPER + H
 
 <br>
 
-<img src="https://raw.githubusercontent.com/Aelune/assets/refs/heads/main/hecate/img/hecate-widget.png" alt="QuickShell Widgets" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
+<img src="https://raw.githubusercontent.com/nurysso/assets/refs/heads/main/hecate/img/hecate-widget.png" alt="QuickShell Widgets" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
 
 </div>
 
@@ -493,7 +493,7 @@ Hecate stores your preferences in `~/.config/hecate/hecate.toml`:
 version = "0.4.1 shy eagle"
 install_date = "2025-10-15"
 last_update = "2025-10-15"
-repo_url = "https://github.com/Aelune/Hecate.git"
+repo_url = "https://github.com/nurysso/Hecate.git"
 
 [theme]
 # Theme mode: "dynamic" or "static"
@@ -987,22 +987,22 @@ See the [LICENSE](LICENSE) file for details
 
 <br>
 
-<a href="https://github.com/Aelune/Hecate">
-  <img src="https://img.shields.io/github/stars/Aelune/Hecate?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41" alt="Stars"/>
+<a href="https://github.com/nurysso/Hecate">
+  <img src="https://img.shields.io/github/stars/nurysso/Hecate?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41" alt="Stars"/>
 </a>
-<a href="https://github.com/Aelune/Hecate/network/members">
-  <img src="https://img.shields.io/github/forks/Aelune/Hecate?style=for-the-badge&logo=git&color=F9E2AF&logoColor=D9E0EE&labelColor=302D41" alt="Forks"/>
+<a href="https://github.com/nurysso/Hecate/network/members">
+  <img src="https://img.shields.io/github/forks/nurysso/Hecate?style=for-the-badge&logo=git&color=F9E2AF&logoColor=D9E0EE&labelColor=302D41" alt="Forks"/>
 </a>
-<a href="https://github.com/Aelune/Hecate/issues">
-  <img src="https://img.shields.io/github/issues/Aelune/Hecate?style=for-the-badge&logo=gitbook&color=F38BA8&logoColor=D9E0EE&labelColor=302D41" alt="Issues"/>
+<a href="https://github.com/nurysso/Hecate/issues">
+  <img src="https://img.shields.io/github/issues/nurysso/Hecate?style=for-the-badge&logo=gitbook&color=F38BA8&logoColor=D9E0EE&labelColor=302D41" alt="Issues"/>
 </a>
-<a href="https://github.com/Aelune/Hecate/pulls">
-  <img src="https://img.shields.io/github/issues-pr/Aelune/Hecate?style=for-the-badge&logo=github&color=A6E3A1&logoColor=D9E0EE&labelColor=302D41" alt="Pull Requests"/>
+<a href="https://github.com/nurysso/Hecate/pulls">
+  <img src="https://img.shields.io/github/issues-pr/nurysso/Hecate?style=for-the-badge&logo=github&color=A6E3A1&logoColor=D9E0EE&labelColor=302D41" alt="Pull Requests"/>
 </a>
 
 <br><br>
 
-**Made with ♥ by [Aelune](https://github.com/Aelune)**
+**Made with ♥ by [nurysso](https://github.com/nurysso)**
 
 <br>
 
@@ -1010,7 +1010,7 @@ See the [LICENSE](LICENSE) file for details
 
 <br><br>
 
-### **[⭐ Star this repo](https://github.com/Aelune/Hecate)** if you find it useful!
+### **[⭐ Star this repo](https://github.com/nurysso/Hecate)** if you find it useful!
 
 <br>
 
