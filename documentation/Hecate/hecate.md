@@ -156,7 +156,7 @@ hecate help
 version = "0.3.9 blind owl"
 install_date = "2025-10-15"
 last_update = "2025-10-15"
-repo_url = "https://github.com/Aelune/Hecate.git"
+repo_url = "https://github.com/nurysso/Hecate.git"
 
 [theme]
 # Theme mode: "dynamic" or "static"
@@ -250,7 +250,7 @@ alias hinfo="hecate info"
 
 The update command downloads and executes a script from GitHub:
 ```bash
-https://raw.githubusercontent.com/Aelune/Hecate/main/update.sh
+https://raw.githubusercontent.com/nurysso/Hecate/main/update.sh
 ```
 
 **Always review update scripts before running in production environments.**
@@ -296,4 +296,4 @@ cat ~/.config/hecate/hecate.toml
 ---
 
 **Last Updated:** 2025-10-25
-**Repository:** https://github.com/Aelune/Hecate
+**Repository:** https://github.com/nurysso/Hecate

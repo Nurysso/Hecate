@@ -237,10 +237,10 @@ func (o *OrganizerService) Organize(query, mode string) (OrganizerResult, error)
 
 	var cmd *exec.Cmd
 	if mode == "filename" {
-		cmd = exec.Command("kondo", "-f", "-nui", path)
+		cmd = exec.Command("tyr", "-f", "-nui", path)
 		cmd.Env = append(os.Environ(), "PATH="+os.Getenv("PATH")+":"+filepath.Join(homeDir, ".local/bin"))
 	} else {
-		cmd = exec.Command("kondo", "-c", "-nui", path)
+		cmd = exec.Command("tyr", "-c", "-nui", path)
 		cmd.Env = append(os.Environ(), "PATH="+os.Getenv("PATH")+":"+filepath.Join(homeDir, ".local/bin"))
 	}
 

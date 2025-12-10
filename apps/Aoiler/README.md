@@ -30,7 +30,7 @@ export GEMINI_API_KEY="..."
 
 ### Dependencies
 
-- **kondo** - File organization
+- **Tyr** - File organization
 - **black/gofmt/shfmt/prettier** - Code formatting
 - **tesseract/grim/slurp** - OCR
 - **ffmpeg** - File conversion
@@ -53,6 +53,6 @@ Path autocomplete works with Tab/Arrow keys when typing file paths.
 
 - **Contribution:** LLM logic and path completion implemented by Claude
 - **Architecture:** Designed and built by me
-- **Tools:** grim + slurp + tesseract (OCR), kondo (file organization), ffmpeg (conversion), black, gofmt, prettier, shfmt (Lint), filepath-go module(search)
+- **Tools:** grim + slurp + tesseract (OCR), Tyr (file organization), ffmpeg (conversion), black, gofmt, prettier, shfmt (Lint), filepath-go module(search)
 
 ## Note right now only .config module is searched not the entire homeDir

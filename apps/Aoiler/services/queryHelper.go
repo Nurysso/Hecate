@@ -138,7 +138,7 @@ func (h *HelpService) getAllSuggestions() []QuerySuggestion {
 			Query:       "organize [path]",
 			Description: "Organize files by category (default)",
 			Category:    "Organization",
-			Examples:    []string{"organize ~/Downloads", "organize .", "kondo ~/Desktop"},
+			Examples:    []string{"organize ~/Downloads", "organize .", "tyr ~/Desktop"},
 		},
 		{
 			Query:       "organize [path] by name",
@@ -275,7 +275,7 @@ func (h *HelpService) GetExamplesByCategory() []ExampleQueries {
 				"organize ~/Downloads",
 				"organize . by name",
 				"clean up ~/Desktop",
-				"kondo ~/Documents",
+				"tyr ~/Documents",
 			},
 		},
 		{

@@ -1,0 +1,208 @@
+# ~/.config/yazi/yazi.toml
+# Epic Yazi configuration for developers
+
+[mgr]
+# Layout ratio [parent, current, preview] - Maximize current view
+ratio = [1, 4, 3]
+
+# Natural sorting (1.md < 2.md < 10.md)
+sort_by = "natural"
+sort_sensitive = false
+sort_reverse = false
+sort_dir_first = true
+
+# Show file sizes with timestamps
+linemode = "size_and_mtime"
+
+# Always show hidden files (essential for .git, .config, etc.)
+show_hidden = true
+show_symlink = true
+
+# Keep cursor centered
+scrolloff = 10
+
+# Enable mouse events for better navigation
+mouse_events = ["click", "scroll"]
+
+# Terminal title format
+title_format = "Yazi: {cwd}"
+
+[preview]
+# Code preview settings
+wrap = "no"
+tab_size = 4
+
+# High-quality image preview
+max_width = 1200
+max_height = 900
+image_filter = "lanczos3"
+image_quality = 80
+image_delay = 30
+
+[opener]
+# Code editors
+edit = [
+  { run = '$EDITOR "$@"', desc = "Edit with $EDITOR", block = true, for = "unix" },
+  { run = 'nvim "$@"', desc = "Edit with nvim", block = true, for = "unix" },
+]
+
+# Terminal-based viewers
+less = [
+  { run = 'less "$@"', desc = "View with less", block = true },
+]
+
+# Web browsers
+browse = [
+  { run = 'open "$@"', desc = "Open in browser", for = "macos" },
+  { run = 'xdg-open "$@"', desc = "Open in browser", for = "linux" },
+]
+
+# Media players
+play = [
+  { run = 'mpv "$@"', desc = "Play with mpv", orphan = true, for = "unix" },
+]
+
+# Archive handling
+extract = [
+  { run = 'ouch decompress "$@"', desc = "Extract with ouch" },
+]
+
+# Open generic files
+open = [
+  { run = 'open "$@"', desc = "Open", for = "macos" },
+  { run = 'xdg-open "$@"', desc = "Open", for = "linux" },
+]
+
+# IDE/Visual Studio Code
+vscode = [
+  { run = 'code "$@"', orphan = true, desc = "Open in VS Code" },
+]
+
+# Git operations
+lazygit = [
+  { run = 'lazygit', block = true, desc = "Open lazygit" },
+]
+
+[open]
+# Rules for opening specific file types
+rules = [
+  # Development files - edit directly
+  { mime = "text/*", use = "edit" },
+  { name = "*.{go,rs,c,cpp,h,py,rb,js,ts,jsx,tsx}", use = "edit" },
+  { name = "*.{json,yaml,yml,toml,ini,conf,cfg}", use = "edit" },
+  { name = "*.{md,txt,log}", use = ["edit", "less"] },
+  
+  # Web files
+  { name = "*.{html,css,scss,sass,vue}", use = "edit" },
+  
+  # Shell scripts
+  { name = "*.{sh,bash,zsh,fish}", use = "edit" },
+  
+  # Makefiles and Dockerfiles
+  { name = "{Makefile,Dockerfile,Containerfile,*.mk}", use = "edit" },
+  
+  # Git files
+  { name = ".git{ignore,attributes,modules}", use = "edit" },
+  
+  # Archives - extract
+  { mime = "application/{zip,gzip,x-tar,x-bzip*,x-7z-compressed,x-xz,x-rar}", use = "extract" },
+  
+  # Images - open
+  { mime = "image/*", use = "open" },
+  
+  # Videos - play
+  { mime = "video/*", use = "play" },
+  
+  # Audio - play
+  { mime = "audio/*", use = "play" },
+  
+  # PDFs
+  { mime = "application/pdf", use = "open" },
+  
+  # Default fallback
+  { name = "*", use = "open" },
+]
+
+[tasks]
+# Performance tuning
+micro_workers = 10
+macro_workers = 25
+bizarre_retry = 5
+suppress_preload = false
+image_alloc = 536870912  # 512MB
+image_bound = [0, 0]     # unlimited
+
+[plugin]
+# Add custom previewers for development files
+prepend_previewers = [
+  # Markdown with glow
+  { name = "*.md", run = "glow" },
+  
+  # CSV/TSV with duckdb
+  { name = "*.{csv,tsv}", run = "duckdb" },
+  
+  # Office documents
+  { mime = "application/vnd.openxmlformats-officedocument.*", run = "office" },
+]
+
+prepend_fetchers = [
+  # Git status fetcher
+  { id = "git", name = "*", run = "git" },
+]
+
+[input]
+# Cursor behavior
+cursor_blink = true
+
+# Input dialogs positioning and styling
+cd_title = "Change directory:"
+cd_origin = "top-center"
+cd_offset = [0, 2, 50, 3]
+
+create_title = ["Create:", "Create (dir):"]
+create_origin = "top-center"
+create_offset = [0, 2, 50, 3]
+
+rename_title = "Rename:"
+rename_origin = "hovered"
+rename_offset = [0, 1, 50, 3]
+
+filter_title = "Filter:"
+filter_origin = "top-center"
+filter_offset = [0, 2, 50, 3]
+
+find_title = ["Find next:", "Find previous:"]
+find_origin = "top-center"
+find_offset = [0, 2, 50, 3]
+
+search_title = "Search via {n}:"
+search_origin = "top-center"
+search_offset = [0, 2, 50, 3]
+
+shell_title = ["Shell:", "Shell (block):"]
+shell_origin = "top-center"
+shell_offset = [0, 2, 50, 3]
+
+[confirm]
+# Confirmation dialogs
+trash_title = "Move {n} selected file(s) to trash?"
+trash_origin = "top-center"
+trash_offset = [0, 2, 50, 3]
+
+delete_title = "Permanently delete {n} selected file(s)?"
+delete_origin = "top-center"
+delete_offset = [0, 2, 50, 3]
+
+overwrite_title = "Overwrite an existing file?"
+overwrite_origin = "top-center"
+overwrite_offset = [0, 2, 50, 3]
+
+quit_title = "{n} task(s) running, sure to quit?"
+quit_origin = "top-center"
+quit_offset = [0, 2, 50, 3]
+
+[which]
+# Command palette settings
+sort_by = "key"
+sort_sensitive = false
+sort_reverse = false

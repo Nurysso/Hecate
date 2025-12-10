@@ -1,0 +1,57 @@
+[[plugin.deps]]
+use = "yazi-rs/plugins:full-border"
+rev = "19dc890"
+hash = ""
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:git"
+rev = "19dc890"
+hash = ""
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:smart-enter"
+rev = "19dc890"
+hash = ""
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:max-preview"
+rev = "19dc890"
+hash = ""
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:chmod"
+rev = "19dc890"
+hash = ""
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:smart-filter"
+rev = "19dc890"
+hash = ""
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:smart-paste"
+rev = "19dc890"
+hash = ""
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:starship"
+rev = "19dc890"
+hash = ""
+
+[[plugin.deps]]
+use = "dedukun/easyjump-yazi"
+rev = "main"
+hash = ""
+
+[[plugin.deps]]
+use = "Reledia/glow-yazi"
+rev = "main"
+hash = ""
+
+[[plugin.deps]]
+use = "Rolv-Apneseth/starship-yazi"
+rev = "main"
+hash = ""
+
+[flavor]
+deps = []

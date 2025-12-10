@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Save, RefreshCw, Info, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Save, RefreshCw, Edit2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -255,7 +255,7 @@ const AnimationsView: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           {/* Action Bar */}
           <div
-            className="flex items-center justify-between p-4 border rounded-lg"
+            className="flex items-center justify-between p-3 m-2 rounded-lg"
             style={{ borderColor: '#1e272b', backgroundColor: '#141b1e' }}
           >
             {/* Tabs (left) */}
@@ -289,7 +289,7 @@ const AnimationsView: React.FC = () => {
             </div>
 
             {/* Action buttons (right) */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ">
               <button
                 onClick={activeTab === 'animations' ? addAnimation : addBezier}
                 className="flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors hover:opacity-80"
