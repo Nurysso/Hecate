@@ -1,0 +1,118 @@
+[mgr]
+prepend_keymap = [
+  # Quick navigation
+  { on = ["g", "h"], run = "cd ~", desc = "Go home" },
+  { on = ["g", "c"], run = "cd ~/.config", desc = "Go to config" },
+  { on = ["g", "d"], run = "cd ~/Downloads", desc = "Go to downloads" },
+  { on = ["g", "t"], run = "cd /tmp", desc = "Go to temp" },
+  { on = ["g", "r"], run = "cd /", desc = "Go to root" },
+
+  # Git integration
+  { on = ["g", "g"], run = "shell lazygit --block", desc = "Lazygit" },
+  { on = ["g", "s"], run = "plugin git --args=status", desc = "Git status" },
+  { on = ["g", "l"], run = "plugin git --args=log", desc = "Git log" },
+  { on = ["g", "d"], run = "plugin git --args=diff", desc = "Git diff" },
+
+  # Plugin actions
+  { on = ["T"], run = "plugin max-preview", desc = "Maximize preview" },
+  { on = ["c", "m"], run = "plugin chmod", desc = "Chmod" },
+
+  # Archive operations
+  { on = ["C"], run = "plugin ouch --args=zip", desc = "Compress (zip)" },
+  { on = ["X"], run = "shell ouch decompress '$@' --yes --block", desc = "Extract here" },
+
+  # FZF integration
+  { on = ["f", "f"], run = "plugin fzf", desc = "Find file with fzf" },
+  { on = ["f", "g"], run = "plugin fzf --args='rg'", desc = "Grep with fzf" },
+  { on = ["f", "z"], run = "plugin fzf --args='fd -t d'", desc = "Find directory" },
+
+  # Zoxide integration
+  { on = ["z"], run = "plugin zoxide", desc = "Jump with zoxide" },
+  { on = ["Z"], run = "plugin fzf --args='zoxide query -l'", desc = "Zoxide history" },
+
+  # Smart operations
+  { on = ["<C-s>"], run = "plugin smart-filter", desc = "Smart filter" },
+  { on = ["<Enter>"], run = "plugin smart-enter", desc = "Smart enter" },
+  { on = ["<C-p>"], run = "plugin smart-paste", desc = "Smart paste" },
+
+  # Copy operations
+  { on = ["y", "p"], run = "plugin copy-file-contents", desc = "Copy file contents" },
+  { on = ["y", "d"], run = "plugin yank-dir-content", desc = "Yank dir tree + content" },
+  { on = ["y", "t"], run = "plugin tree-to-clipboard", desc = "Yank tree structure" },
+
+  # Open with specific apps
+  { on = ["o", "v"], run = "shell code '$@'", desc = "Open in VS Code" },
+  { on = ["o", "c"], run = "shell code '$0'", desc = "Open current in VS Code" },
+  { on = ["o", "e"], run = "shell $EDITOR '$@' --block", desc = "Open in editor" },
+
+  # Toggle features
+  { on = ["t", "h"], run = "hidden toggle", desc = "Toggle hidden files" },
+  { on = ["t", "l"], run = "linemode none", desc = "Toggle linemode" },
+  { on = ["t", "p"], run = "plugin toggle-pane", desc = "Toggle pane" },
+
+  # Tab management
+  { on = ["t", "n"], run = "tab_create --current", desc = "New tab (current dir)" },
+  { on = ["t", "c"], run = "tab_close", desc = "Close tab" },
+  { on = ["<C-n>"], run = "tab_create --current", desc = "New tab" },
+  { on = ["<C-w>"], run = "tab_close", desc = "Close tab" },
+
+  # Bulk operations
+  { on = ["<C-a>"], run = "select_all --state=true", desc = "Select all" },
+  { on = ["<C-r>"], run = "select_all --state=false", desc = "Deselect all" },
+  { on = ["V"], run = "visual_mode", desc = "Visual mode" },
+
+  # Directory operations
+  { on = ["m", "d"], run = "create --dir", desc = "Make directory" },
+  { on = ["m", "f"], run = "create", desc = "Make file" },
+  { on = ["D"], run = "remove --permanently", desc = "Delete permanently" },
+
+  # Search and filter
+  { on = ["/"], run = "filter", desc = "Filter" },
+  { on = ["?"], run = "help", desc = "Help" },
+  { on = ["<C-f>"], run = "search fd", desc = "Search with fd" },
+  { on = ["<C-g>"], run = "search rg", desc = "Search with ripgrep" },
+
+  # Quick jumps with easyjump
+  { on = ["f"], run = "plugin easyjump --args=jump", desc = "Jump to char" },
+  { on = ["F"], run = "plugin easyjump --args=jump-backward", desc = "Jump backward" },
+
+  # Preview controls
+  { on = ["["], run = "seek -5", desc = "Seek preview up" },
+  { on = ["]"], run = "seek 5", desc = "Seek preview down" },
+  { on = ["{"], run = "arrow -5", desc = "Move up 5" },
+  { on = ["}"], run = "arrow 5", desc = "Move down 5" },
+]
+
+[tasks]
+prepend_keymap = [
+  { on = ["w"], run = "close", desc = "Close task manager" },
+  { on = ["<C-c>"], run = "cancel", desc = "Cancel current task" },
+]
+
+[select]
+prepend_keymap = [
+  { on = ["<Esc>"], run = "close", desc = "Cancel selection" },
+  { on = ["<Enter>"], run = "close --submit", desc = "Submit selection" },
+]
+
+[input]
+prepend_keymap = [
+  # Vim-like editing
+  { on = ["<C-a>"], run = "move -999", desc = "Move to start" },
+  { on = ["<C-e>"], run = "move 999", desc = "Move to end" },
+  { on = ["<C-w>"], run = ["delete --cut", "delete --cut", "delete --insert"], desc = "Delete word" },
+  { on = ["<C-u>"], run = "kill bol", desc = "Kill to start" },
+  { on = ["<C-k>"], run = "kill eol", desc = "Kill to end" },
+]
+
+[completion]
+prepend_keymap = [
+  { on = ["<Tab>"], run = "close --submit", desc = "Complete" },
+  { on = ["<S-Tab>"], run = "arrow -1", desc = "Previous item" },
+]
+
+[help]
+prepend_keymap = [
+  { on = ["<Esc>"], run = "escape", desc = "Close help" },
+  { on = ["q"], run = "escape", desc = "Close help" },
+]

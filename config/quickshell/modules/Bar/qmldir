@@ -1,0 +1,17 @@
+module Bar
+Bar 1.0 Bar.qml
+Clock 1.0 Clock.qml
+HyprlandInfo 1.0 HyprlandInfo.qml
+Notification 1.0 Notification.qml
+Network 1.0 Network.qml
+Bluetooth 1.0 Bluetooth.qml
+Power 1.0 Power.qml
+WindowDock 1.0 WindowDock.qml
+Launcher 1.0 Launcher.qml
+DetailsPanel 1.0 DetailsPanel.qml
+Separator 1.0 Separator.qml
+StatPill 1.0 StatPill.qml
+SystemStats 1.0 SystemStats.qml
+Theme 1.0 Theme.qml
+Workspaces 1.0 Workspaces.qml
+WindowTitle 1.0 WindowTitle.qml
