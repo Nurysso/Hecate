@@ -454,25 +454,8 @@ move_config() {
     fi
   done
 
-  # Handle shell rc files
-  if [ -f "$HECATEDIR/config/zshrc" ]; then
-    fancy_echo "Installing .zshrc..." "slide"
-    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
-    fancy_echo "✓ ZSH config installed" "slide"
-  else
-    gum style --foreground 220 "⚠ zshrc not found in config directory"
-  fi
 
-  if [ -f "$HECATEDIR/config/bashrc" ]; then
-    fancy_echo "Installing .bashrc..." "slide"
-    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
-    fancy_echo "✓ BASH config installed" "slide"
-  else
-    gum style --foreground 220 "⚠ bashrc not found in config directory"
-  fi
-
-  # Install shell scripts
-  install_shell_scripts
+  install_shell_scripts 
 
   # Install apps from apps directory
   install_app "Pulse" "$HECATEAPPSDIR/Pulse/build/bin/Pulse"
