@@ -455,7 +455,7 @@ move_config() {
   done
 
 
-  install_shell_scripts 
+  install_shell_scripts
 
   # Install apps from apps directory
   install_app "Pulse" "$HECATEAPPSDIR/Pulse/build/bin/Pulse"
@@ -538,13 +538,13 @@ update_hecate_config() {
   gum style --foreground 82 "  Date: $update_date"
 }
 
-install_extra_tools(){
-  gum style \
-    --foreground 212 --border-foreground 212 \
-    --align center \
-    'Installing Aoiler helper Tyr' 'used to organize dirs'
-    curl -fsSL https://raw.githubusercontent.com/Nurysso/tyr/main/install.sh | bash
-}
+# install_extra_tools(){
+#   gum style \
+#     --foreground 212 --border-foreground 212 \
+#     --align center \
+#     'Installing Aoiler helper Tyr' 'used to organize dirs'
+#     curl -fsSL https://raw.githubusercontent.com/Nurysso/tyr/main/install.sh | bash
+# }
 
 # Show update complete message
 show_completion_message() {
@@ -771,7 +771,7 @@ main() {
   move_config
   update_hecate_config
   setup_Waybar
-  install_extra_tools
+#   install_extra_tools
   setup_wallpapers
 
   # Show completion
