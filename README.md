@@ -49,14 +49,24 @@
 
 ### 💿 Installation
 
-<img src="https://raw.githubusercontent.com/nurysso/assets/refs/heads/main/hecate/gifs/hecate-install.gif" alt="Installation Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
+<video src="https://raw.githubusercontent.com/Nurysso/Hermes/main/hecate/gifs/hecate-demo.mp4"
+       controls
+       width="100%"
+       style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+</video>
+
+
 
 </td>
 <td width="50%" align="center">
 
 ### ✨ Usage
 
-<img src="https://raw.githubusercontent.com/nurysso/assets/refs/heads/main/hecate/gifs/hecate-demo.gif" alt="Usage Demo" width="100%" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
+<video src="https://raw.githubusercontent.com/Nurysso/Hermes/main/hecate/gifs/hecate-install.mp4"
+       controls
+       width="100%"
+       style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+</video>
 
 </td>
 </tr>
@@ -327,7 +337,7 @@ chmod +x install.sh
 
 <br>
 
-<img src="https://raw.githubusercontent.com/nurysso/assets/refs/heads/main/hecate/gifs/settings.gif" alt="Hecate Helper GUI" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
+<img src="https://raw.githubusercontent.com/nurysso/Hermes/refs/heads/main/hecate/gifs/settings.gif" alt="Hecate Helper GUI" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
 
 <br><br>
 
@@ -423,7 +433,7 @@ SUPER + H
 
 <br>
 
-<img src="https://raw.githubusercontent.com/nurysso/assets/refs/heads/main/hecate/img/hecate-widget.png" alt="QuickShell Widgets" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
+<img src="https://raw.githubusercontent.com/nurysso/Hermes/main/hecate/img/hecate-widget.png" alt="QuickShell Widgets" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
 
 </div>
 
@@ -1010,10 +1020,10 @@ See the [LICENSE](LICENSE) file for details
 
 <br><br>
 
-### **[⭐ Star this repo](https://github.com/nurysso/Hecate)** if you find it useful!
+### **[⭐ Star this repo](https://github.com/nurysso/Hecate)** if you like it!
 
 <br>
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=150&section=footer&animation=twinkling"/>
+<!-- <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=150&section=footer&animation=twinkling"/> -->
 
 </div>
