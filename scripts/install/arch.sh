@@ -243,7 +243,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - removed browser from here since we handle it separately
-  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard matugen-bin yazi tyr-bin wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp   neovim nano webkit2gtk)
+  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard matugen-bin pacman-contrib yazi tyr-bin wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract tesseract-data-eng noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp neovim nano webkit2gtk)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
