@@ -2,14 +2,14 @@
 
 # 🌙 Hecate
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=32&duration=2800&pause=2000&color=A277FF&center=true&vCenter=true&width=940&lines=The+Ultimate+Hyprland+Experience;Dynamic+Theming+%E2%80%A2+Powerful+Customization;Transform+Your+Desktop" alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=32&duration=2800&pause=2000&color=A277FF&center=true&vCenter=true&width=940&lines=Hyprland+Dotfiles;Auto+Theming+%E2%80%A2+GUI+Tools+%E2%80%A2+Widgets" alt="Typing SVG" />
 
 <!-- <img src="assets/img/header.webp" alt="Header"/> -->
 
 <p align="center">
-  <strong>✦ Dynamic theming that adapts to your wallpaper ✦</strong>
+  <strong>A Hyprland rice with auto-theming from wallpapers</strong>
   <br>
-  <em>with powerful GUI customization tools and beautiful widgets</em>
+  <em>Comes with GUI config tools and desktop widgets</em>
 </p>
 
 <p align="center">
@@ -49,24 +49,18 @@
 
 ### 💿 Installation
 
-<video src="https://raw.githubusercontent.com/Nurysso/Hermes/main/hecate/gifs/hecate-demo.mp4"
-       controls
-       width="100%"
-       style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-</video>
-
-
+<img src="https://raw.githubusercontent.com/Nurysso/Hermes/main/hecate/hecate-demo.gif"
+     width="100%"
+     style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" />
 
 </td>
 <td width="50%" align="center">
 
 ### ✨ Usage
 
-<video src="https://raw.githubusercontent.com/Nurysso/Hermes/main/hecate/gifs/hecate-install.mp4"
-       controls
-       width="100%"
-       style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-</video>
+<img src="https://raw.githubusercontent.com/Nurysso/Hermes/main/hecate/hecate-install.gif"
+     width="100%"
+     style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" />
 
 </td>
 </tr>
@@ -104,33 +98,35 @@
 
 ### **Dynamic Theming**
 
-> *Colors that dance with your wallpaper*
+> _Your wallpaper picks the colors_
 
-Hecate automatically extracts colors from your wallpaper and applies them across your entire system. Watch your interface transform with every wallpaper change.
+Colors get auto-extracted from your wallpaper and applied system-wide. Change your wallpaper, change your whole vibe.
 
-**✦ Powered by PyWall**
+**✦ Uses PyWall under the hood**
 
 <br>
 
 ### **Hecate Settings GUI** <sup>⭐ NEW</sup>
 
-> *Customization made visual*
+> _GUI for people who don't want to edit config files_
 
-A powerful graphical interface to customize your Hyprland experience:
+A graphical tool to tweak your setup:
 
-- **Keybind Editor** — Visual keybinding configuration
-- **Waybar Customizer** — Switch layouts and styles with ease
-- **Preferences Manager** — Control theme modes and settings
+- **Keybind Editor** — Edit keybinds visually
+- **Waybar Customizer** — Switch bar layouts and styles
+- **Preferences Manager** — Toggle theme modes and settings
 - **Theme Selector** — Browse and apply color schemes
-- **Monitor Configuration** — Arrange multi-monitor setups visually
+- **Monitor Configuration** — Arrange monitors with drag-and-drop
+
+**Alternative:** try [hyprsettings](https://github.com/acropolis914/hyprsettings) — another solid Hyprland GUI config tool.
 
 <br>
 
 ### **Smart Installation**
 
-> *Interactive setup that asks for your preferences upfront*
+> _Asks what you want before installing_
 
-Less manual config file editing, more customization!
+Pick your terminal, shell, browser, and profile during install. Less manual editing later.
 
 </td>
 <td width="50%" valign="top">
@@ -139,20 +135,20 @@ Less manual config file editing, more customization!
 
 ### **QuickShell Widgets** <sup>⭐ NEW</sup>
 
-> *Beautiful desktop widgets at your fingertips*
+> _Desktop widgets that actually look good_
 
-- **🕐 Clock Widget** — Elegant time display
-- **🚀 QuickApps** — Launch favorite apps instantly
-- **💻 System Info** — Real-time CPU, GPU, and RAM monitoring
-- **🎵 Audio Visualizer** — Integrated Cava audio visualization
+- **🕐 Clock Widget** — Shows time and date
+- **🚀 QuickApps** — Quick app launcher
+- **💻 System Info** — CPU, GPU, RAM stats
+- **🎵 Audio Visualizer** — Cava audio viz built-in
 
 <br>
 
 ### **Multi-Shell Support**
 
-> *Your shell, your choice*
+> _Pick your shell_
 
-Choose your preferred shell during installation:
+Supports Bash, Zsh, and Fish. Choose during install:
 
 ```bash
 Bash  •  Zsh  •  Fish
@@ -162,9 +158,9 @@ Bash  •  Zsh  •  Fish
 
 ### **Multiple Terminals**
 
-> *Terminal freedom*
+> _Use what you like_
 
-Support for your favorite terminal emulator:
+Pick your terminal during install:
 
 ```bash
 Alacritty  •  Kitty  •  Foot  •  Ghostty
@@ -174,9 +170,9 @@ Alacritty  •  Kitty  •  Foot  •  Ghostty
 
 ### **Safe Backups**
 
-> *Peace of mind included*
+> _Won't nuke your configs_
 
-Automatically backs up your existing configurations before making any changes.
+Backs up existing configs before installing.
 
 </td>
 </tr>
@@ -317,7 +313,7 @@ chmod +x install.sh
 
 **Installation complete! 🎉**
 
-*Continue reading to discover all the features...*
+_Continue reading to discover all the features..._
 
 </div>
 
@@ -333,7 +329,7 @@ chmod +x install.sh
 
 <div align="center">
 
-### *Powerful customization at your fingertips*
+### _GUI config tool (or use hyprsettings if this doesn't work)_
 
 <br>
 
@@ -341,66 +337,13 @@ chmod +x install.sh
 
 <br><br>
 
-**The Hecate Helper is a comprehensive GUI tool that puts customization at your fingertips**
+**Hecate-Settings is a GUI tool for configuring Hyprland without editing files**
+
+> **Alternative:** If Hecate-Settings doesn't work, try [hyprsettings](https://github.com/acropolis914/hyprsettings) instead. It's another great GUI tool for Hyprland configuration.
 
 </div>
-
 <br>
 
-### **Keybind Editor**
-
-```
-┌─────────────────────────────────────────────────────────┐
-• Visual keybinding configuration interface
-• Search and filter keybindings
-• Live conflict detection(Yet to add | stay tuned)
-└─────────────────────────────────────────────────────────┘
-```
-
-<br>
-
-### **Waybar Customizer**
-
-```
-┌─────────────────────────────────────────────────────────┐
-• Layout Switcher — Toggle between Waybar layouts
-• Style Gallery — Preview and apply pre-made themes
-└─────────────────────────────────────────────────────────┘
-```
-
-<br>
-
-### **Preferences Manager**
-```
-┌─────────────────────────────────────────────────────────┐
-• Toggle between **Dynamic** and **Static** theme modes
-• Configure auto-start applications
-• Set default terminal, browser and shell
-• Manage Hecate preferences
-└─────────────────────────────────────────────────────────┘
-```
-<br>
-
-### **Theme Selector**
-```
-┌─────────────────────────────────────────────────────────┐
-• Browse through curated color schemes
-• Quick apply with one click
-└─────────────────────────────────────────────────────────┘
-```
-
-<br>
-
-### **Monitor Configuration**
-```
-┌─────────────────────────────────────────────────────────┐
-• Visual Monitor Arrangement — Drag-and-drop monitor positioning
-• Resolution and refresh rate selection
-• Display scaling options
-• Multi-monitor setup made easy
-• Live configuration testing
-└─────────────────────────────────────────────────────────┘
-```
 <br>
 
 <div align="center">
@@ -429,7 +372,7 @@ SUPER + H
 
 <div align="center">
 
-### *Enhance your desktop with beautiful, functional widgets*
+### _Enhance your desktop with beautiful, functional widgets_
 
 <br>
 
@@ -485,7 +428,7 @@ Elegant time and date display with multiple format options, customizable appeara
 
 <div align="center">
 
-### *Fine-tune Hecate to match your workflow*
+### _Fine-tune Hecate to match your workflow_
 
 </div>
 
@@ -534,6 +477,7 @@ mode = "dynamic"
 ```
 
 **Features:**
+
 - Colors automatically extracted from wallpaper
 - Real-time updates across all applications
 - Seamless visual harmony
@@ -550,6 +494,7 @@ mode = "static"
 ```
 
 **Features:**
+
 - Fixed color scheme
 - Manual theme changes only
 - Predictable appearance
@@ -626,7 +571,7 @@ All configuration files are located in `~/.config/`:
 
 ### ✨ **Simply change your wallpaper with `SUPER+CTRL+W`**
 
-*and watch your entire desktop environment transform!*
+_and watch your entire desktop environment transform!_
 
 </div>
 
@@ -642,7 +587,7 @@ All configuration files are located in `~/.config/`:
 
 <div align="center">
 
-### *Get started with these essential steps*
+### _Get started with these essential steps_
 
 </div>
 
@@ -656,7 +601,7 @@ All configuration files are located in `~/.config/`:
 
 Press `SUPER+CTRL+W` to open the wallpaper selector
 
-*See the magic happen!*
+_See the magic happen!_
 
 </td>
 <td align="center" width="33%">
@@ -665,7 +610,7 @@ Press `SUPER+CTRL+W` to open the wallpaper selector
 
 Press `SUPER+H` or run `Hecate-Settings `
 
-*Access the configuration interface*
+_Access the configuration interface_
 
 </td>
 <td align="center" width="33%">
@@ -674,7 +619,7 @@ Press `SUPER+H` or run `Hecate-Settings `
 
 Press `SUPER+W` to toggle desktop widgets
 
-*Enhance your desktop experience*
+_Enhance your desktop experience_
 
 </td>
 </tr>
@@ -697,7 +642,7 @@ Press `SUPER+W` to toggle desktop widgets
 
 <div align="center">
 
-### *Hecate automatically generates keybindings based on your preferred applications*
+### _Hecate automatically generates keybindings based on your preferred applications_
 
 </div>
 
@@ -749,7 +694,7 @@ Press `SUPER+W` to toggle desktop widgets
 <br>
 
 > [!TIP]
-> Full keybinding list available in `~/.config/hypr/keybinds.conf` or in the **Hecate-Settings GUI**
+> Full keybinding list available in `~/.config/hypr/config/keybinds.conf` or in the **Hecate-Settings GUI**
 
 <br>
 
@@ -763,7 +708,7 @@ Press `SUPER+W` to toggle desktop widgets
 
 <div align="center">
 
-### *Contributions are welcome! Here's how you can help:*
+### _Contributions are welcome! Here's how you can help:_
 
 <br>
 
@@ -796,6 +741,7 @@ Press `SUPER+W` to toggle desktop widgets
 <td width="50%" valign="top">
 
 #### **Themes & Visuals**
+
 - Create and share color schemes
 - Design new widget styles
 - Improve GUI aesthetics
@@ -803,6 +749,7 @@ Press `SUPER+W` to toggle desktop widgets
 <br>
 
 #### **Widget Development**
+
 - Build new QuickShell widgets
 - Enhance existing widgets
 - Add widget customization options
@@ -810,6 +757,7 @@ Press `SUPER+W` to toggle desktop widgets
 <br>
 
 #### **GUI Enhancements**
+
 - Improve Hecate Helper features
 - Add new configuration panels
 - Enhance user experience
@@ -818,6 +766,7 @@ Press `SUPER+W` to toggle desktop widgets
 <td width="50%" valign="top">
 
 #### **Application Support**
+
 - Add support for more terminals
 - Integrate new status bars
 - Expand launcher options
@@ -825,6 +774,7 @@ Press `SUPER+W` to toggle desktop widgets
 <br>
 
 #### **Documentation**
+
 - Improve guides and tutorials
 - Create video walkthroughs
 - Translate documentation
@@ -832,6 +782,7 @@ Press `SUPER+W` to toggle desktop widgets
 <br>
 
 #### **Bug Fixes**
+
 - Help squash bugs
 - Improve stability
 - Optimize performance
@@ -861,12 +812,16 @@ Press `SUPER+W` to toggle desktop widgets
 <br>
 
 <details>
-<summary><b>Hecate Helper won't launch</b></summary>
+<summary><b>Hecate-Settings won't launch</b></summary>
 <br>
 
 ```bash
-# try running in terminal to see error
+# Run in terminal to see the error
 Hecate-Settings
+
+# If it doesn't work, try hyprsettings instead
+# Install: yay -S hyprsettings-git
+# Run: hyprsettings
 ```
 
 </details>
@@ -934,7 +889,7 @@ See the [LICENSE](LICENSE) file for details
 
 <div align="center">
 
-*Built on the shoulders of giants*
+_Built on the shoulders of giants_
 
 <br>
 
@@ -993,7 +948,7 @@ See the [LICENSE](LICENSE) file for details
 
 # 🌙 Hecate
 
-### *Transform Your Desktop*
+### _Hyprland rice with auto-theming_
 
 <br>
 
@@ -1016,13 +971,19 @@ See the [LICENSE](LICENSE) file for details
 
 <br>
 
-<sub>*Hecate — Greek goddess of magic, crossroads, and transformation*</sub>
+<sub>_Hecate — Greek goddess of magic, crossroads, and transformation_</sub>
 
 <br><br>
 
 ### **[⭐ Star this repo](https://github.com/nurysso/Hecate)** if you like it!
 
 <br>
+
+---
+
+### 🔍 Keywords for GitHub Search
+
+`hyprland` `hyprland-dotfiles` `hyprland-rice` `hyprland-config` `hyprland-theme` `wayland` `wayland-compositor` `linux-rice` `arch-linux` `dotfiles` `pywal` `dynamic-theming` `auto-theming` `wallpaper-theming` `waybar` `rofi` `quickshell` `desktop-widgets` `hyprland-gui` `hyprland-settings` `swaync` `wlogout` `kitty` `alacritty` `foot` `ghostty` `zsh` `bash` `fish` `linux-desktop` `unixporn` `r-unixporn` `wayland-rice` `hyprland-setup` `pywall-theme` `matugen` `wallust` `cava` `audio-visualizer` `system-monitor` `gui-configurator` `hyprland-installer` `arch-dotfiles`
 
 <!-- <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=150&section=footer&animation=twinkling"/> -->
 

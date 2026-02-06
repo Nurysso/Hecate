@@ -18,7 +18,7 @@ HECATEDIR="$HOME/Hecate"
 HECATEAPPSDIR="$HOME/Hecate/apps"
 CONFIGDIR="$HOME/.config"
 REPO_URL="https://github.com/Nurysso/Hecate.git"
-FREYA_URL="https://github.com/Nurysso/freya.git"
+FREYA_URL="https://github.com/Nurysso/Freya.git"
 OS="arch"
 PACKAGE_MANAGER=""
 HYPRLAND_NEWLY_INSTALLED=false
@@ -51,6 +51,64 @@ get_packageManager() {
   fi
 
   gum style --foreground 82 "✓ Package Manager: $PACKAGE_MANAGER"
+}
+
+# Defensive helper function to safely remove files, directories, or symlinks
+safe_remove() {
+  local path="$1"
+  
+  if [ ! -e "$path" ] && [ ! -L "$path" ]; then
+    # Path doesn't exist, nothing to do
+    return 0
+  fi
+  
+  if [ -L "$path" ]; then
+    # It's a symlink
+    rm -f "$path"
+  elif [ -d "$path" ]; then
+    # It's a directory
+    rm -rf "$path"
+  elif [ -f "$path" ]; then
+    # It's a regular file
+    rm -f "$path"
+  else
+    # Unknown type, try to remove anyway
+    rm -rf "$path"
+  fi
+}
+
+# Defensive helper function to safely copy a directory
+safe_copy_dir() {
+  local src="$1"
+  local dest="$2"
+  
+  if [ ! -d "$src" ]; then
+    gum style --foreground 196 "Error: Source directory does not exist: $src"
+    return 1
+  fi
+  
+  # Remove destination if it exists (could be file, dir, or symlink)
+  safe_remove "$dest"
+  
+  # Now safely copy
+  cp -r "$src" "$dest"
+}
+
+# Defensive helper function to safely copy a file
+safe_copy_file() {
+  local src="$1"
+  local dest="$2"
+  
+  if [ ! -f "$src" ]; then
+    gum style --foreground 196 "Error: Source file does not exist: $src"
+    return 1
+  fi
+  
+  # Remove destination if it exists (could be file, dir, or symlink)
+  safe_remove "$dest"
+  
+  # Now safely copy
+  cp "$src" "$dest"
 }
 
 # Clone dotfiles
@@ -805,13 +863,13 @@ move_config() {
         alacritty|foot|ghostty|kitty)
           if [ "$item_name" = "$USER_TERMINAL" ]; then
             echo "Installing $item_name config..." "slide"
-            cp -rT "$item" "$CONFIGDIR/$item_name"
+            safe_copy_dir "$item" "$CONFIGDIR/$item_name"
           fi
           ;;
         *)
           # Install all other configs
           echo "Installing $item_name..." "slide"
-          cp -rT "$item" "$CONFIGDIR/$item_name"
+          safe_copy_dir "$item" "$CONFIGDIR/$item_name"
           ;;
       esac
     fi
@@ -820,7 +878,7 @@ move_config() {
   # Handle shell rc files
   if [ -f "$HECATEDIR/config/zshrc" ]; then
     echo "Installing .zshrc..." "slide"
-    cp "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
+    safe_copy_file "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
     echo "✓ ZSH config installed" "slide"
   else
     gum style --foreground 220 "⚠ zshrc not found in config directory"
@@ -828,7 +886,7 @@ move_config() {
 
   if [ -f "$HECATEDIR/config/bashrc" ]; then
     echo "Installing .bashrc..." "slide"
-    cp "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
+    safe_copy_file "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
     echo "✓ BASH config installed" "slide"
   else
     gum style --foreground 220 "⚠ bashrc not found in config directory"
@@ -960,13 +1018,13 @@ setup_Waybar() {
   local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
   local HYPRLOCK_SYMLINK="$HOME/.config/hypr/hyprlock.conf"
 
-  # Remove old symlinks or files
-  [ -e "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
-  [ -e "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
-  [ -e "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
-  [ -e "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
-  [ -e "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
-  [ -e "$HYPRLOCK_SYMLINK" ] && rm -f "$HYPRLOCK_SYMLINK"
+  # Remove old symlinks, files, or directories safely
+  safe_remove "$WAYBAR_STYLE_SYMLINK"
+  safe_remove "$WAYBAR_CONFIG_SYMLINK"
+  safe_remove "$WAYBAR_COLOR_SYMLINK"
+  safe_remove "$SWAYNC_COLOR_SYMLINK"
+  safe_remove "$STARSHIP_SYMLINK"
+  safe_remove "$HYPRLOCK_SYMLINK"
 
   # Create new symlinks
   ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
@@ -1076,11 +1134,21 @@ setup_wallpapers() {
     # User wants full collection
     gum style --foreground 82 "Cloning wallpaper repository..."
 
-    # Backup existing wallpapers if directory exists
-    if [ -d "$wallpaper_dir" ]; then
+    # Backup existing wallpapers if path exists (could be file, dir, or symlink)
+    if [ -e "$wallpaper_dir" ] || [ -L "$wallpaper_dir" ]; then
       local backup_dir="$HOME/Pictures/wallpapers-backup-$(date +%Y%m%d_%H%M%S)"
       gum style --foreground 220 "Backing up existing wallpapers to: $backup_dir"
-      mv "$wallpaper_dir" "$backup_dir"
+      
+      if [ -L "$wallpaper_dir" ]; then
+        # It's a symlink, just remove it
+        rm -f "$wallpaper_dir"
+      elif [ -d "$wallpaper_dir" ]; then
+        # It's a directory, move it
+        mv "$wallpaper_dir" "$backup_dir"
+      elif [ -f "$wallpaper_dir" ]; then
+        # It's a file, move it
+        mv "$wallpaper_dir" "$backup_dir"
+      fi
     fi
 
     # Clone and extract walls directory

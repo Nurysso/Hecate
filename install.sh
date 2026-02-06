@@ -504,6 +504,21 @@ backup_config() {
     gum style --foreground 220 "No existing configs found to backup"
   fi
 }
+
+code_ext() {
+  # Core essentials
+code --install-extension golang.go
+code --install-extension rust-lang.rust-analyzer
+code --install-extension esbenp.prettier-vscode
+code --install-extension bradlc.vscode-tailwindcss
+code --install-extension dsznajder.es7-react-js-snippets
+code --install-extension usernamehm.errorlens
+code --install-extension eamodio.gitlens
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension formulahendry.auto-rename-tag
+code --install-extension catppuccin.catppuccin-vsc
+code --install-extension catppuccin.catppuccin-vsc-icons
+}
 # Main function
 main() {
   # Parse arguments inline
@@ -599,6 +614,7 @@ main() {
   check_OS
   echo ""
     run_os_script
+    code_ext
 }
 
 # Run main function with arguments
