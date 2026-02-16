@@ -2,42 +2,41 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-Rectangle {
-    Layout.preferredHeight: theme.barHeight - 12
-    Layout.preferredWidth: clockLayout.implicitWidth + theme.padding * 2
-    radius: theme.radiusSmall
-    color: theme.bg
+Item {
+    id: clockContainer
+    Layout.preferredHeight: theme.barHeight
+    Layout.preferredWidth: clockText.implicitWidth + theme.padding * 2
 
     property var currentTime: new Date()
 
     Timer {
-        interval: 1000 // Update every second
+        interval: 60000 // Update every minute
         running: true
         repeat: true
         onTriggered: currentTime = new Date()
     }
 
-    RowLayout {
-        id: clockLayout
+    Text {
+        id: clockText
         anchors.centerIn: parent
-        spacing: theme.spacingSmall
-
-        Text {
-            text: Qt.formatDateTime(currentTime, "hh:mmap") + "·" +
-                  Qt.formatDateTime(currentTime, "ddd ") +
-                  Qt.formatDateTime(currentTime, "M/dd")
-            color: theme.fg
-            font.pixelSize: theme.fontSize
-            font.family: theme.fontFamily
-            font.weight: Font.Medium
-        }
+        text: Qt.formatDateTime(currentTime, "h:mm ap")
+        color: theme.fg
+        font.pixelSize: theme.fontSize
+        font.family: theme.fontFamily
+        font.weight: Font.Normal
+        opacity: 0.9
     }
 
     MouseArea {
         anchors.fill: parent
-        hoverEnabled: false
+        hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onEntered: parent.color = Qt.lighter(theme.bgLight, 1.15)
-        onExited: parent.color = theme.bgLight
+
+        onEntered: clockText.opacity = 1.0
+        onExited: clockText.opacity = 0.9
+    }
+
+    Behavior on opacity {
+        NumberAnimation { duration: 150 }
     }
 }

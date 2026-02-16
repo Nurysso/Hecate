@@ -1,182 +1,292 @@
-# ────────────────────────────────────────────────────────────────
-# 🌟 Starship Prompt Configuration - DUMMY TEMPLATE
-# Generated: 2025-11-27 17:31:57
-# This file contains placeholder colors that get replaced by the script
-# DO NOT EDIT THE GENERATED starship.toml - edit ~/.config/starship/starship-dummy.toml !
-# ────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════
+# Starship config, this file will be replaced when wallpaper is
+# changed so your changes will be overwritten, if need any changes
+# edit this file ~/.config/starship/starship-dummt.toml
+# Generated: 2026-02-14 11:44:52
+# ═══════════════════════════════════════════════════════════════
 
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# Add a blank line between prompts for readability
+# Performance
+command_timeout = 500
+scan_timeout = 30
 add_newline = true
 
-# Reduce lag for modules
-command_timeout = 500
-
-# Main prompt layout
+# Prompt format - clean stylish layout (no boxes!)
 format = """
-(bold #a1988a)$username $directory $git_branch $git_status $cmd_duration$fill
-(bold #a1988a)$character
-"""
+$os\
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$python\
+$rust\
+$golang\
+$java\
+$lua\
+$package\
+$fill\
+$cmd_duration\
+$time
+$line_break\
+$character"""
 
-# ─── PROMPT SYMBOLS ─────────────────────────────────────────────
-[character]
-success_symbol = "[ ](bold #7A837D)"
-error_symbol = "[  ](bold #A1764B)"
-
-# ─── USER & HOST ────────────────────────────────────────────────
-
-[username]
-style_user = "bold #B28C5E"
-style_root = "bold #A1764B"
-format = "[$user]($style)"
-show_always = true
-
-[hostname]
-ssh_only = false
-format = "[@$hostname](bold #D09C66) "
-disabled = false
-
-# ─── DIRECTORY ──────────────────────────────────────────────────
-
-[directory]
-home_symbol = ""
-read_only = ""
-style = "bg:#C8BFAA fg:#000000"
-truncation_length = 3
-truncation_symbol = " ••/"
-format = '[](bold fg:#C8BFAA)[󰉋 $path]($style)[](bold fg:#C8BFAA)'
-
-# ─── GIT ────────────────────────────────────────────────────────
-
-[git_branch]
-symbol = "󰘬 "
-format = "on [$symbol$branch]($style) "
-style = "bold #DDB88C"
-
-[git_status]
-format = '([\[$all_status$ahead_behind\]]($style) )'
-style = "bold #A1764B"
-conflicted = "🏳 "
-ahead = "⇡${count} "
-diverged = "⇕⇡${ahead_count}⇣${behind_count} "
-behind = "⇣${count} "
-untracked = "?${count} "
-stashed = "💾${count} "
-modified = "!${count} "
-staged = "+${count} "
-renamed = "»${count} "
-deleted = "✘ ${count} "
-
-# ─── LANGUAGES ──────────────────────────────────────────────────
-
-[nodejs]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold #a1988a"
-
-[python]
-symbol = " "
-style = "bold #B28C5E"
-
-[rust]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold #A1764B"
-
-[java]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold #A1764B"
-
-[package]
-symbol = " "
-format = "[$symbol$version]($style)"
-style = "bold #D09C66"
-
-[golang]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold #7A837D"
-
-[lua]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold #D09C66"
-
-# ─── MISC MODULES ───────────────────────────────────────────────
-
-[cmd_duration]
-min_time = 500
-format = "[took $duration](bold #B28C5E) "
-
-[time]
-disabled = false
-format = "[$time](dim #a1988a)"
-time_format = "%R"  # 24h format
-
+# ─── RIGHT SIDE FILLER ──────────────────────────────────────────
 [fill]
 symbol = " "
 
-# ─── BATTERY / OS / EXTRAS ──────────────────────────────────────
+# ─── PROMPT CHARACTER ───────────────────────────────────────────
+[character]
+success_symbol = "[❯](bold #636B8D)"
+error_symbol = "[❯](bold #3D5B8A)"
+vimcmd_symbol = "[❮](bold #74879D)"
 
+# ─── OS ICON ────────────────────────────────────────────────────
+[os]
+disabled = false
+style = "bold #A194A0"
+format = "[$symbol]($style)"
+
+[os.symbols]
+Arch = ""
+Ubuntu = ""
+Debian = ""
+Fedora = ""
+Manjaro = ""
+NixOS = ""
+Pop = ""
+Raspbian = ""
+
+# ─── DIRECTORY ──────────────────────────────────────────────────
+[directory]
+home_symbol = "~"
+read_only = " 󰌾"
+style = "bold #74879D"
+truncation_length = 3
+truncation_symbol = "…/"
+truncate_to_repo = true
+format = '[󰉋 $path]($style)[](#74879D) '
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+"Videos" = " "
+"Projects" = "󰲋 "
+"Code" = " "
+
+# ─── GIT ────────────────────────────────────────────────────────
+[git_branch]
+symbol = " "
+style = "bold #887BC3"
+format = "[$symbol$branch(:$remote_branch)]($style) "
+truncation_length = 20
+
+[git_status]
+style = "bold #887BC3"
+format = '[$all_status$ahead_behind]($style) '
+conflicted = "󰞇"
+ahead = "⇡${count}"
+diverged = "⇕${ahead_count}${behind_count}"
+behind = "⇣${count}"
+untracked = "?${count}"
+stashed = "󰏖${count}"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+disabled = false
+
+# Only check status in repos < 4096 files (performance)
+ignore_submodules = true
+
+# ─── LANGUAGE MODULES ───────────────────────────────────────────
+[nodejs]
+symbol = ""
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+detect_files = ["package.json", ".node-version"]
+detect_folders = ["node_modules"]
+
+[python]
+symbol = ""
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+detect_extensions = ["py"]
+detect_files = [".python-version", "pyproject.toml", "requirements.txt"]
+
+[rust]
+symbol = ""
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+detect_extensions = ["rs"]
+detect_files = ["Cargo.toml"]
+
+[golang]
+symbol = ""
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+detect_extensions = ["go"]
+detect_files = ["go.mod", "go.sum"]
+
+[java]
+symbol = ""
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+detect_extensions = ["java", "class", "jar"]
+
+[lua]
+symbol = ""
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+detect_extensions = ["lua"]
+
+[package]
+symbol = "󰏗"
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+display_private = false
+
+# ─── COMMAND DURATION ───────────────────────────────────────────
+[cmd_duration]
+min_time = 1000
+style = "bold #9d8f89"
+format = "[$duration]($style) "
+show_milliseconds = false
+
+# ─── TIME ───────────────────────────────────────────────────────
+[time]
+disabled = false
+style = "bold #9d8f89"
+format = "[$time]($style)"
+time_format = "%R"
+use_12hr = false
+
+# ─── DOCKER / CONTAINERS ────────────────────────────────────────
+[docker_context]
+symbol = ""
+style = "bold #887BC3"
+format = "[$symbol $context]($style) "
+only_with_files = true
+detect_files = ["docker-compose.yml", "Dockerfile"]
+
+[kubernetes]
+symbol = "󱃾"
+style = "bold #887BC3"
+format = '[$symbol $context( \($namespace\))]($style) '
+disabled = true  # Enable only if you use k8s
+
+# ─── CLOUD PROVIDERS ────────────────────────────────────────────
+[aws]
+symbol = ""
+style = "bold #907392"
+format = '[$symbol ($profile)($region)]($style) '
+disabled = true  # Enable if you use AWS
+
+[gcloud]
+symbol = "󱇶"
+style = "bold #907392"
+format = '[$symbol $account(@$domain)($region)]($style) '
+disabled = true  # Enable if you use GCP
+
+[azure]
+symbol = "󰠅"
+style = "bold #907392"
+format = '[$symbol ($subscription)]($style) '
+disabled = true  # Enable if you use Azure
+
+# ─── BATTERY (for laptops) ──────────────────────────────────────
 [battery]
 disabled = false
-full_symbol = "🔋"
-charging_symbol = "⚡"
-discharging_symbol = "💀"
+full_symbol = "󰁹"
+charging_symbol = "󰂄"
+discharging_symbol = "󰂃"
 format = "[$symbol $percentage]($style) "
 
 [[battery.display]]
 threshold = 10
-style = "bold #A1764B"
+style = "bold #3D5B8A"
 
 [[battery.display]]
 threshold = 30
-style = "bold #B28C5E"
+style = "bold #907392"
 
 [[battery.display]]
 threshold = 100
-style = "bold #a1988a"
+style = "bold #636B8D"
 
-[os]
-disabled = false
-format = "[$symbol]($style)"
-style = "dim #e7dac6"
-
-[os.symbols]
-Arch = " "
-Ubuntu = " "
-Debian = " "
-Fedora = " "
-Manjaro = " "
-NixOS = " "
-Pop = " "
-Raspbian = " "
-
-
-# ─── DOCKER / KUBERNETES ────────────────────────────────────────
-
-[docker_context]
-symbol = " "
-format = "via [$symbol$context](bold #D09C66) "
-
-[kubernetes]
-symbol = "☸ "
-format = 'on [$symbol$context( \($namespace\))](bold #D09C66) '
+# ─── ADDITIONAL LANGUAGES ───────────────────────────────────────
+[c]
+symbol = ""
+style = "bold #907392"
+format = "[$symbol $version]($style) "
 disabled = false
 
-# ─── CLOUD PROVIDERS ────────────────────────────────────────────
+[cmake]
+symbol = "△"
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+disabled = false
 
-[aws]
-symbol = " "
-format = 'on [$symbol($profile )($region )](bold #B28C5E) '
+[php]
+symbol = ""
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+disabled = false
 
-[gcloud]
-format = 'on [$symbol$account(@$domain)($region)](bold #D09C66) '
+[ruby]
+symbol = ""
+style = "bold #907392"
+format = "[$symbol $version]($style) "
+disabled = false
 
-[azure]
-symbol = " "
-format = 'on [$symbol($subscription)](bold #D09C66) '
+# ─── MISC MODULES ───────────────────────────────────────────────
+[username]
+disabled = true  # Disabled for cleaner look
+style_user = "bold #907392"
+style_root = "bold #3D5B8A"
+format = "[$user]($style) "
+show_always = false
 
-# ─── END OF FILE ────────────────────────────────────────────────
+[hostname]
+disabled = true  # Disabled for cleaner look
+ssh_only = true
+style = "bold #887BC3"
+format = "[@$hostname]($style) "
+
+[memory_usage]
+disabled = true
+symbol = "󰍛"
+style = "bold #907392"
+format = "[$symbol $ram( | $swap)]($style) "
+threshold = 70
+
+[status]
+disabled = true
+symbol = "✖"
+format = '[$symbol $status]($style) '
+style = "bold #3D5B8A"
+
+# ─── PERFORMANCE TIPS ───────────────────────────────────────────
+# 1. scan_timeout = 30 (faster directory scanning)
+# 2. git status only checked in small repos
+# 3. Language modules only activate with specific files
+# 4. Disabled modules set to "disabled = true"
+# 5. truncate_to_repo keeps paths short in git repos
+
+# ─── P10K TRANSIENT PROMPT WORKAROUND ──────────────────────────
+# Unfortunately, Starship doesn't support transient prompts like P10k
+# However, you can achieve similar behavior with these alternatives:
+#
+# OPTION 1: Use a shell integration
+# For Zsh, add to your .zshrc:
+#   # Clear previous prompts on new command
+#   precmd() { print -P '\n' }
+#
+# OPTION 2: Use minimal prompt after execution
+# You could write a shell script that uses ANSI escape codes to
+# replace the prompt after command execution
+#
+# OPTION 3: Use 'atuin' or 'mcfly' for cleaner history
+# These tools provide better history management and cleaner output

@@ -8,6 +8,6 @@ ShellRoot {
     Widgets.ClockWidget {}
     Widgets.QuickAppsWidget {}
     Widgets.AudioWidget {}
-    Widgets.SystemInfoWidget {}
-    // Module.Bar{}
+    // Widgets.SystemInfoWidget {}
+    Module.Bar{}
 }

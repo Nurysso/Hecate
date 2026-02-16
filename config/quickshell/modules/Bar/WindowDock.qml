@@ -4,18 +4,15 @@ import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
 
-Rectangle {
-    Layout.preferredHeight: theme.barHeight - 12
-    Layout.preferredWidth: dockLayout.implicitWidth + theme.padding * 2
-
-
-    radius: theme.radiusLarge
-    color: theme.bg
+Item {
+    id: windowDock
+    Layout.preferredHeight: theme.barHeight
+    Layout.preferredWidth: dockLayout.implicitWidth
 
     property var windows: []
     property string activeAddress: ""
 
-    // Fetch all windows with their details
+    // Fetch all windows
     Process {
         id: clientsProc
         command: ["sh", "-c", "hyprctl clients -j"]
@@ -25,7 +22,6 @@ Rectangle {
                     const clients = JSON.parse(text)
                     const windowMap = new Map()
 
-                    // Group windows by class
                     clients.forEach(client => {
                         const className = client.class || "unknown"
                         const address = client.address || ""
@@ -46,7 +42,6 @@ Rectangle {
                         })
                     })
 
-                    // Convert map to array
                     windows = Array.from(windowMap.values())
                 } catch (e) {
                     console.log("Error parsing clients:", e)
@@ -59,7 +54,6 @@ Rectangle {
     Process {
         id: activeWindowProc
         command: ["sh", "-c", "hyprctl activewindow -j | jq -r '.address // empty'"]
-
         stdout: StdioCollector {
             onStreamFinished: {
                 activeAddress = text ? text.trim() : ""
@@ -67,71 +61,64 @@ Rectangle {
         }
     }
 
-    // Function to focus a window
+    // Focus window function
     function focusWindow(address, workspace) {
-        // First switch to the workspace
         focusWorkspaceProc.command = ["hyprctl", "dispatch", "workspace", workspace.toString()]
         focusWorkspaceProc.running = true
 
-        // Small delay then focus the window
         Qt.callLater(() => {
             focusWindowProc.command = ["hyprctl", "dispatch", "focuswindow", "address:" + address]
             focusWindowProc.running = true
         })
     }
 
-    Process {
-        id: focusWorkspaceProc
-    }
-
-    Process {
-        id: focusWindowProc
-    }
+    Process { id: focusWorkspaceProc }
+    Process { id: focusWindowProc }
 
     RowLayout {
         id: dockLayout
         anchors.centerIn: parent
-        spacing: theme.spacingSmall
+        spacing: theme.spacing
 
         Repeater {
             model: windows
 
-            Rectangle {
+            Item {
                 id: dockItem
-                Layout.preferredWidth: 36
-                Layout.preferredHeight: 36
-                radius: theme.radiusSmall
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 32
 
-                // Check if any instance of this app is active
                 property bool isActive: {
                     const instances = modelData.instances || []
                     return instances.some(inst => inst.address === activeAddress)
                 }
 
-                color: isActive ? theme.accent : theme.bgLight
+                property bool isHovered: false
+                scale: isHovered ? 1.15 : 1.0
 
-                ColumnLayout {
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: 150
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                // Icon container
+                Item {
+                    id: iconLoader
                     anchors.centerIn: parent
-                    spacing: 2
+                    width: 24
+                    height: 24
 
-                    // Icon loader
-                    Item {
-                        id: iconLoader
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: 24
-                        Layout.preferredHeight: 24
+                    property string iconPath: ""
+                    property bool iconFound: false
 
-                        property string iconPath: ""
-                        property bool iconFound: false
-
-                        // Improved icon search script
-                        Process {
-                            id: iconProc
-                            command: ["sh", "-c", `
+                    Process {
+                        id: iconProc
+                        command: ["sh", "-c", `
 class='${modelData.class}'
 class_lower=$(echo "$class" | tr '[:upper:]' '[:lower:]')
 
-# Search locations in order of priority
 search_paths=(
     "$HOME/.local/share/applications"
     "/usr/share/applications"
@@ -140,17 +127,13 @@ search_paths=(
     "$HOME/.local/share/flatpak/exports/share/applications"
 )
 
-# Function to extract icon from desktop file
 get_icon() {
     local file="$1"
     grep -m 1 '^Icon=' "$file" | cut -d= -f2- | tr -d '\\r\\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
 }
 
-# Try exact match first
 for dir in "\${search_paths[@]}"; do
     [ -d "$dir" ] || continue
-
-    # Try exact matches
     for pattern in "$class_lower.desktop" "$class.desktop"; do
         file="$dir/$pattern"
         if [ -f "$file" ]; then
@@ -163,11 +146,8 @@ for dir in "\${search_paths[@]}"; do
     done
 done
 
-# Try fuzzy match if exact match fails
 for dir in "\${search_paths[@]}"; do
     [ -d "$dir" ] || continue
-
-    # Case-insensitive fuzzy match
     while IFS= read -r file; do
         icon=$(get_icon "$file")
         if [ -n "$icon" ]; then
@@ -177,72 +157,97 @@ for dir in "\${search_paths[@]}"; do
     done < <(find "$dir" -maxdepth 1 -iname "*$class_lower*.desktop" 2>/dev/null)
 done
 
-# No icon found
 exit 1
 `]
-
-                            stdout: StdioCollector {
-                                onStreamFinished: {
-                                    const icon = text.trim()
-                                    if (icon && icon.length > 0) {
-                                        iconLoader.iconPath = icon
-                                        iconLoader.iconFound = true
-                                    } else {
-                                        console.log("No icon found for:", modelData.class)
-                                        iconLoader.iconFound = false
-                                    }
-                                }
-                            }
-                        }
-
-                        Component.onCompleted: {
-                            iconProc.running = true
-                        }
-
-                        // Show icon if found
-                        Image {
-                            anchors.fill: parent
-                            visible: iconLoader.iconFound
-                            source: iconLoader.iconFound ? "image://icon/" + iconLoader.iconPath : ""
-                            sourceSize: Qt.size(24, 24)
-                            fillMode: Image.PreserveAspectFit
-                            smooth: true
-
-                            onStatusChanged: {
-                                if (status === Image.Error) {
-                                    console.log("Failed to load icon:", iconLoader.iconPath, "for", modelData.class)
+                        stdout: StdioCollector {
+                            onStreamFinished: {
+                                const icon = text.trim()
+                                if (icon && icon.length > 0) {
+                                    iconLoader.iconPath = icon
+                                    iconLoader.iconFound = true
+                                } else {
                                     iconLoader.iconFound = false
                                 }
                             }
                         }
+                    }
 
-                        // Fallback icon
-                        Text {
-                            anchors.centerIn: parent
-                            visible: !iconLoader.iconFound
-                            text: "󰂭"
-                            color: theme.fg
-                            font.pixelSize: 20
-                            font.family: "Symbols Nerd Font"
+                    Component.onCompleted: {
+                        iconProc.running = true
+                    }
+
+                    // Icon image
+                    Image {
+                        anchors.fill: parent
+                        visible: iconLoader.iconFound
+                        source: iconLoader.iconFound ? "image://icon/" + iconLoader.iconPath : ""
+                        sourceSize: Qt.size(24, 24)
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        opacity: dockItem.isActive ? 1.0 : 0.6
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 150 }
+                        }
+
+                        onStatusChanged: {
+                            if (status === Image.Error) {
+                                iconLoader.iconFound = false
+                            }
                         }
                     }
 
-                    // Indicator dots for multiple instances
-                    RowLayout {
-                        Layout.alignment: Qt.AlignHCenter
-                        spacing: 2
-                        visible: modelData.instances.length > 1
+                    // Fallback
+                    Text {
+                        anchors.centerIn: parent
+                        visible: !iconLoader.iconFound
+                        text: "●"
+                        color: theme.fg
+                        font.pixelSize: 18
+                        opacity: dockItem.isActive ? 1.0 : 0.6
 
-                        // Indicator dots for multiple instances
-                        Repeater {
-                            model: Math.min(modelData.instances.length, 4)
+                        Behavior on opacity {
+                            NumberAnimation { duration: 150 }
+                        }
+                    }
+                }
 
-                            Rectangle {
-                                Layout.preferredWidth: 3
-                                Layout.preferredHeight: 3
-                                radius: 1.5
-                                color: dockItem.isActive ? theme.fg : (theme.fgDim || theme.fg)
-                            }
+                // Active indicator - simple line below
+                Rectangle {
+                    visible: dockItem.isActive
+                    width: 16
+                    height: 2
+                    radius: 1
+                    color: theme.accent
+                    anchors.bottom: parent.bottom
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottomMargin: -6
+
+                    opacity: visible ? 1.0 : 0.0
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 150 }
+                    }
+                }
+
+                // Multiple instances indicator
+                Row {
+                    visible: modelData.instances.length > 1
+                    spacing: 2
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.topMargin: -4
+                    anchors.rightMargin: -4
+
+                    Repeater {
+                        model: Math.min(modelData.instances.length - 1, 3)
+
+                        Rectangle {
+                            width: 3
+                            height: 3
+                            radius: 1.5
+                            color: theme.fg
+                            opacity: 0.5
                         }
                     }
                 }
@@ -253,21 +258,14 @@ exit 1
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
 
-                    onEntered: {
-                        dockItem.color = Qt.lighter(dockItem.isActive ? theme.accent : theme.bgLight, 1.2)
-                    }
-
-                    onExited: {
-                        dockItem.color = dockItem.isActive ? theme.accent : theme.bgLight
-                    }
+                    onEntered: dockItem.isHovered = true
+                    onExited: dockItem.isHovered = false
 
                     onClicked: {
                         const instances = modelData.instances || []
                         if (instances.length > 0) {
-                            // Find currently active instance index
                             let currentIndex = instances.findIndex(inst => inst.address === activeAddress)
 
-                            // If this app is active, cycle to next instance, otherwise focus first
                             if (currentIndex !== -1 && instances.length > 1) {
                                 currentIndex = (currentIndex + 1) % instances.length
                             } else {
@@ -279,36 +277,6 @@ exit 1
                         }
                     }
                 }
-
-                // Tooltip showing all instances
-                Rectangle {
-                    id: tooltip
-                    visible: mouseArea.containsMouse && modelData.instances.length > 1
-                    color: theme.bg
-                    border.color: theme.bgLight
-                    border.width: 1
-                    radius: theme.radiusSmall
-
-                    width: tooltipText.width + 16
-                    height: tooltipText.height + 12
-
-                    anchors.bottom: parent.top
-                    anchors.bottomMargin: 8
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    Text {
-                        id: tooltipText
-                        anchors.centerIn: parent
-                        color: theme.fg
-                        font.pixelSize: 11
-                        text: {
-                            const instances = modelData.instances || []
-                            return instances.map((inst, i) =>
-                                `${i + 1}. WS${inst.workspace}: ${inst.title.substring(0, 30)}`
-                            ).join('\n')
-                        }
-                    }
-                }
             }
         }
     }
@@ -317,7 +285,6 @@ exit 1
     Connections {
         target: Hyprland
         function onRawEvent(event) {
-            // Only update on relevant events
             const eventName = event.name || ""
             if (eventName === "openwindow" ||
                 eventName === "closewindow" ||
@@ -329,7 +296,6 @@ exit 1
         }
     }
 
-    // Reduced timer interval for better responsiveness
     Timer {
         interval: 2000
         running: true
@@ -340,7 +306,6 @@ exit 1
         }
     }
 
-    // Initial load
     Component.onCompleted: {
         clientsProc.running = true
         activeWindowProc.running = true

@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 RowLayout {
     id: workspaces
-    spacing: 8
+    spacing: theme.spacing / 2
 
     Theme { id: theme }
 
@@ -12,7 +12,8 @@ RowLayout {
         model: 9
 
         Item {
-            Layout.preferredWidth: 24
+            id: workspaceItem
+            Layout.preferredWidth: 28
             Layout.preferredHeight: 28
 
             required property int index
@@ -35,60 +36,71 @@ RowLayout {
                 return false
             }
 
-            // Dot indicator
-            Rectangle {
+            property bool isHovered: false
+
+            // Workspace number text - always visible
+            Text {
                 anchors.centerIn: parent
-                width: isActive ? 12 : (hasWindows ? 6 : 6)
-                height: width
-                radius: width / 2
-
-                color: isActive ? theme.accent :
-                       (hasWindows ? theme.fg : theme.fgDark)
-
-                opacity: isActive ? 1.0 : (hasWindows ? 0.8 : 0.4)
-
-                // Smooth animations
-                Behavior on width {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.OutCubic
-                    }
+                text: workspaceId
+                color: {
+                    if (isActive) return theme.accent
+                    if (hasWindows) return theme.fg
+                    return Qt.rgba(theme.fg.r, theme.fg.g, theme.fg.b, 0.3)
                 }
-
-                Behavior on height {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.OutCubic
-                    }
-                }
+                font.pixelSize: theme.fontSize - 1
+                font.family: theme.fontFamily
+                font.weight: isActive ? Font.DemiBold : Font.Normal
+                opacity: isActive ? 1.0 : (hasWindows ? 0.8 : 0.5)
 
                 Behavior on color {
-                    ColorAnimation {
-                        duration: 200
-                        easing.type: Easing.OutCubic
-                    }
+                    ColorAnimation { duration: 150 }
                 }
 
                 Behavior on opacity {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.OutCubic
-                    }
+                    NumberAnimation { duration: 150 }
                 }
-
-                // Subtle glow for active workspace
-
             }
 
-            // Hover/click area
-            MouseArea {
+            // Active indicator - clean underline
+            Rectangle {
+                visible: isActive
+                width: 12
+                height: 2
+                radius: 1
+                color: theme.accent
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottomMargin: 2
+
+                opacity: visible ? 1.0 : 0.0
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 150 }
+                }
+            }
+
+            // Subtle background on hover
+            Rectangle {
                 anchors.fill: parent
-                anchors.margins: -4
+                radius: 4
+                color: Qt.rgba(theme.fg.r, theme.fg.g, theme.fg.b, 0.05)
+                visible: isHovered
+                opacity: visible ? 1.0 : 0.0
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 150 }
+                }
+            }
+
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                anchors.margins: -2
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
 
-                onEntered: parent.scale = 1.2
-                onExited: parent.scale = 1.0
+                onEntered: workspaceItem.isHovered = true
+                onExited: workspaceItem.isHovered = false
 
                 onClicked: {
                     if (Hyprland.dispatch) {
@@ -97,43 +109,13 @@ RowLayout {
                 }
             }
 
-            // Scale animation for hover
+            // Subtle scale on hover
+            scale: isHovered ? 1.1 : 1.0
+
             Behavior on scale {
                 NumberAnimation {
                     duration: 150
-                    easing.type: Easing.OutBack
-                    easing.overshoot: 1.5
-                }
-            }
-
-            // Tooltip on hover
-            Rectangle {
-                id: tooltip
-                visible: parent.children[1].containsMouse
-                anchors.bottom: parent.top
-                anchors.bottomMargin: 4
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                width: tooltipText.width + 12
-                height: tooltipText.height + 6
-                radius: 4
-                color: theme.bgLight
-                border.width: 1
-                border.color: theme.accentDim
-
-                opacity: visible ? 1.0 : 0.0
-
-                Behavior on opacity {
-                    NumberAnimation { duration: 150 }
-                }
-
-                Text {
-                    id: tooltipText
-                    text: workspaceId
-                    color: theme.fg
-                    font.pixelSize: theme.fontSize - 2
-                    font.family: theme.fontFamily
-                    anchors.centerIn: parent
+                    easing.type: Easing.OutCubic
                 }
             }
         }

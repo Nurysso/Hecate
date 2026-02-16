@@ -1,129 +1,204 @@
-# ────────────────────────────────────────────────────────────────
-# 🌟 Starship Prompt Configuration - DUMMY TEMPLATE
-# This file contains placeholder colors that get replaced by the script
-# DO NOT EDIT THE GENERATED starship.toml - edit ~/.config/starship/starship-dummy.toml !
-# ────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════
+# Starship Prompt
+# ═══════════════════════════════════════════════════════════════
 
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# Add a blank line between prompts for readability
+# Performance
+command_timeout = 500
+scan_timeout = 30
 add_newline = true
 
-# Reduce lag for modules
-command_timeout = 500
-
-# Main prompt layout
+# Prompt format - clean stylish layout (no boxes!)
 format = """
-(bold color8)$username $directory $git_branch $git_status $cmd_duration$fill
-(bold color8)$character
-"""
+$os\
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$python\
+$rust\
+$golang\
+$java\
+$lua\
+$package\
+$fill\
+$cmd_duration\
+$time
+$line_break\
+$character"""
 
-# ─── PROMPT SYMBOLS ─────────────────────────────────────────────
-[character]
-success_symbol = "[ ](bold color2)"
-error_symbol = "[  ](bold color1)"
-
-# ─── USER & HOST ────────────────────────────────────────────────
-
-[username]
-style_user = "bold color3"
-style_root = "bold color1"
-format = "[$user]($style)"
-show_always = true
-
-[hostname]
-ssh_only = false
-format = "[@$hostname](bold color4) "
-disabled = false
-
-# ─── DIRECTORY ──────────────────────────────────────────────────
-
-[directory]
-home_symbol = ""
-read_only = ""
-style = "bg:color6 fg:#000000"
-truncation_length = 3
-truncation_symbol = " ••/"
-format = '[](bold fg:color6)[󰉋 $path]($style)[](bold fg:color6)'
-
-# ─── GIT ────────────────────────────────────────────────────────
-
-[git_branch]
-symbol = "󰘬 "
-format = "on [$symbol$branch]($style) "
-style = "bold color5"
-
-[git_status]
-format = '([\[$all_status$ahead_behind\]]($style) )'
-style = "bold color1"
-conflicted = "🏳 "
-ahead = "⇡${count} "
-diverged = "⇕⇡${ahead_count}⇣${behind_count} "
-behind = "⇣${count} "
-untracked = "?${count} "
-stashed = "💾${count} "
-modified = "!${count} "
-staged = "+${count} "
-renamed = "»${count} "
-deleted = "✘ ${count} "
-
-# ─── LANGUAGES ──────────────────────────────────────────────────
-
-[nodejs]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold color8"
-
-[python]
-symbol = " "
-style = "bold color3"
-
-[rust]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold color1"
-
-[java]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold color1"
-
-[package]
-symbol = " "
-format = "[$symbol$version]($style)"
-style = "bold color4"
-
-[golang]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold color2"
-
-[lua]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold color4"
-
-# ─── MISC MODULES ───────────────────────────────────────────────
-
-[cmd_duration]
-min_time = 500
-format = "[took $duration](bold color3) "
-
-[time]
-disabled = false
-format = "[$time](dim color8)"
-time_format = "%R"  # 24h format
-
+# ─── RIGHT SIDE FILLER ──────────────────────────────────────────
 [fill]
 symbol = " "
 
-# ─── BATTERY / OS / EXTRAS ──────────────────────────────────────
+# ─── PROMPT CHARACTER ───────────────────────────────────────────
+[character]
+success_symbol = "[❯](bold color2)"
+error_symbol = "[❯](bold color1)"
+vimcmd_symbol = "[❮](bold color5)"
 
+# ─── OS ICON ────────────────────────────────────────────────────
+[os]
+disabled = false
+style = "bold color6"
+format = "[$symbol]($style)"
+
+[os.symbols]
+Arch = ""
+Ubuntu = ""
+Debian = ""
+Fedora = ""
+Manjaro = ""
+NixOS = ""
+Pop = ""
+Raspbian = ""
+
+# ─── DIRECTORY ──────────────────────────────────────────────────
+[directory]
+home_symbol = "~"
+read_only = " 󰌾"
+style = "bold color5"
+truncation_length = 3
+truncation_symbol = "…/"
+truncate_to_repo = true
+format = '[󰉋 $path]($style)[](color5) '
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+"Videos" = " "
+"Projects" = "󰲋 "
+"Code" = " "
+
+# ─── GIT ────────────────────────────────────────────────────────
+[git_branch]
+symbol = " "
+style = "bold color4"
+format = "[$symbol$branch(:$remote_branch)]($style) "
+truncation_length = 20
+
+[git_status]
+style = "bold color4"
+format = '[$all_status$ahead_behind]($style) '
+conflicted = "󰞇"
+ahead = "⇡${count}"
+diverged = "⇕${ahead_count}${behind_count}"
+behind = "⇣${count}"
+untracked = "?${count}"
+stashed = "󰏖${count}"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+disabled = false
+
+# Only check status in repos < 4096 files (performance)
+ignore_submodules = true
+
+# ─── LANGUAGE MODULES ───────────────────────────────────────────
+[nodejs]
+symbol = ""
+style = "bold color3"
+format = "[$symbol $version]($style) "
+detect_files = ["package.json", ".node-version"]
+detect_folders = ["node_modules"]
+
+[python]
+symbol = ""
+style = "bold color3"
+format = "[$symbol $version]($style) "
+detect_extensions = ["py"]
+detect_files = [".python-version", "pyproject.toml", "requirements.txt"]
+
+[rust]
+symbol = ""
+style = "bold color3"
+format = "[$symbol $version]($style) "
+detect_extensions = ["rs"]
+detect_files = ["Cargo.toml"]
+
+[golang]
+symbol = ""
+style = "bold color3"
+format = "[$symbol $version]($style) "
+detect_extensions = ["go"]
+detect_files = ["go.mod", "go.sum"]
+
+[java]
+symbol = ""
+style = "bold color3"
+format = "[$symbol $version]($style) "
+detect_extensions = ["java", "class", "jar"]
+
+[lua]
+symbol = ""
+style = "bold color3"
+format = "[$symbol $version]($style) "
+detect_extensions = ["lua"]
+
+[package]
+symbol = "󰏗"
+style = "bold color3"
+format = "[$symbol $version]($style) "
+display_private = false
+
+# ─── COMMAND DURATION ───────────────────────────────────────────
+[cmd_duration]
+min_time = 1000
+style = "bold color8"
+format = "[$duration]($style) "
+show_milliseconds = false
+
+# ─── TIME ───────────────────────────────────────────────────────
+[time]
+disabled = false
+style = "bold color8"
+format = "[$time]($style)"
+time_format = "%R"
+use_12hr = false
+
+# ─── DOCKER / CONTAINERS ────────────────────────────────────────
+[docker_context]
+symbol = ""
+style = "bold color4"
+format = "[$symbol $context]($style) "
+only_with_files = true
+detect_files = ["docker-compose.yml", "Dockerfile"]
+
+[kubernetes]
+symbol = "󱃾"
+style = "bold color4"
+format = '[$symbol $context( \($namespace\))]($style) '
+disabled = true  # Enable only if you use k8s
+
+# ─── CLOUD PROVIDERS ────────────────────────────────────────────
+[aws]
+symbol = ""
+style = "bold color3"
+format = '[$symbol ($profile)($region)]($style) '
+disabled = true  # Enable if you use AWS
+
+[gcloud]
+symbol = "󱇶"
+style = "bold color3"
+format = '[$symbol $account(@$domain)($region)]($style) '
+disabled = true  # Enable if you use GCP
+
+[azure]
+symbol = "󰠅"
+style = "bold color3"
+format = '[$symbol ($subscription)]($style) '
+disabled = true  # Enable if you use Azure
+
+# ─── BATTERY (for laptops) ──────────────────────────────────────
 [battery]
 disabled = false
-full_symbol = "🔋"
-charging_symbol = "⚡"
-discharging_symbol = "💀"
+full_symbol = "󰁹"
+charging_symbol = "󰂄"
+discharging_symbol = "󰂃"
 format = "[$symbol $percentage]($style) "
 
 [[battery.display]]
@@ -136,46 +211,79 @@ style = "bold color3"
 
 [[battery.display]]
 threshold = 100
-style = "bold color8"
+style = "bold color2"
 
-[os]
-disabled = false
-format = "[$symbol]($style)"
-style = "dim color7"
-
-[os.symbols]
-Arch = " "
-Ubuntu = " "
-Debian = " "
-Fedora = " "
-Manjaro = " "
-NixOS = " "
-Pop = " "
-Raspbian = " "
-
-
-# ─── DOCKER / KUBERNETES ────────────────────────────────────────
-
-[docker_context]
-symbol = " "
-format = "via [$symbol$context](bold color4) "
-
-[kubernetes]
-symbol = "☸ "
-format = 'on [$symbol$context( \($namespace\))](bold color4) '
+# ─── ADDITIONAL LANGUAGES ───────────────────────────────────────
+[c]
+symbol = ""
+style = "bold color3"
+format = "[$symbol $version]($style) "
 disabled = false
 
-# ─── CLOUD PROVIDERS ────────────────────────────────────────────
+[cmake]
+symbol = "△"
+style = "bold color3"
+format = "[$symbol $version]($style) "
+disabled = false
 
-[aws]
-symbol = " "
-format = 'on [$symbol($profile )($region )](bold color3) '
+[php]
+symbol = ""
+style = "bold color3"
+format = "[$symbol $version]($style) "
+disabled = false
 
-[gcloud]
-format = 'on [$symbol$account(@$domain)($region)](bold color4) '
+[ruby]
+symbol = ""
+style = "bold color3"
+format = "[$symbol $version]($style) "
+disabled = false
 
-[azure]
-symbol = " "
-format = 'on [$symbol($subscription)](bold color4) '
+# ─── MISC MODULES ───────────────────────────────────────────────
+[username]
+disabled = true  # Disabled for cleaner look
+style_user = "bold color3"
+style_root = "bold color1"
+format = "[$user]($style) "
+show_always = false
 
-# ─── END OF FILE ────────────────────────────────────────────────
+[hostname]
+disabled = true  # Disabled for cleaner look
+ssh_only = true
+style = "bold color4"
+format = "[@$hostname]($style) "
+
+[memory_usage]
+disabled = true
+symbol = "󰍛"
+style = "bold color3"
+format = "[$symbol $ram( | $swap)]($style) "
+threshold = 70
+
+[status]
+disabled = true
+symbol = "✖"
+format = '[$symbol $status]($style) '
+style = "bold color1"
+
+# ─── PERFORMANCE TIPS ───────────────────────────────────────────
+# 1. scan_timeout = 30 (faster directory scanning)
+# 2. git status only checked in small repos
+# 3. Language modules only activate with specific files
+# 4. Disabled modules set to "disabled = true"
+# 5. truncate_to_repo keeps paths short in git repos
+
+# ─── P10K TRANSIENT PROMPT WORKAROUND ──────────────────────────
+# Unfortunately, Starship doesn't support transient prompts like P10k
+# However, you can achieve similar behavior with these alternatives:
+#
+# OPTION 1: Use a shell integration
+# For Zsh, add to your .zshrc:
+#   # Clear previous prompts on new command
+#   precmd() { print -P '\n' }
+#
+# OPTION 2: Use minimal prompt after execution
+# You could write a shell script that uses ANSI escape codes to
+# replace the prompt after command execution
+#
+# OPTION 3: Use 'atuin' or 'mcfly' for cleaner history
+# These tools provide better history management and cleaner output

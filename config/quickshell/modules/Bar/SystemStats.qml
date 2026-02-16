@@ -1,463 +1,290 @@
-import Quickshell
-import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
 
-Rectangle {
-    id: root
-    Layout.preferredHeight: theme.barHeight - 8
-    Layout.preferredWidth: statsLayout.implicitWidth + theme.padding * 2
+Item {
+    id: systemUsageContainer
 
-    radius: theme.radiusSmall
-    color: theme.bgLight
+    property bool isHorizontal: true
+    property bool cpuEnabled: true
+    property bool memoryEnabled: true
+    property bool tempEnabled: true
 
-    property string activePanel: "" // "cpu", "memory", "volume", or ""
+    // Actual system data
+    property real cpuPercent: 0
+    property real ramPercent: 0
+    // property real cpuTempPercent: 0
+
+    implicitWidth: bgRect.implicitWidth
+    implicitHeight: bgRect.implicitHeight
+
+    // CPU Usage Process Component
+    Component {
+        id: cpuProcessComponent
+        Process {
+            running: true
+            command: ["sh", "-c", "top -bn2 -d 0.5 | grep 'Cpu(s)' | tail -1 | awk '{print $2}' | cut -d'%' -f1"]
+
+            stdout: SplitParser {
+                onRead: function(data) {
+                    var usage = parseFloat(data.trim());
+                    if (!isNaN(usage)) {
+                        cpuPercent = usage / 100;
+                    }
+                }
+            }
+        }
+    }
+
+    // RAM Usage Process Component
+    Component {
+        id: ramProcessComponent
+        Process {
+            running: true
+            command: ["sh", "-c", "free | grep Mem | awk '{print ($3/$2) * 100.0}'"]
+
+            stdout: SplitParser {
+                onRead: function(data) {
+                    var usage = parseFloat(data.trim());
+                    if (!isNaN(usage)) {
+                        ramPercent = usage / 100;
+                    }
+                }
+            }
+        }
+    }
+
+    // Temperature Process Component
+    // Component {
+    //     id: tempProcessComponent
+    //     Process {
+    //         running: true
+    //         command: ["sh", "-c", "sensors 2>/dev/null | grep -E 'Package id 0|Tdie|Tctl' | head -1 | awk '{print $4}' | sed 's/+//;s/°C//' || echo '0'"]
+
+    //         stdout: SplitParser {
+    //             onRead: function(data) {
+    //                 var temp = parseFloat(data.trim());
+    //                 if (!isNaN(temp) && temp > 0) {
+    //                     cpuTempPercent = Math.min(temp / 100, 1.0);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    // Update timer
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (cpuEnabled) cpuProcessComponent.createObject(systemUsageContainer);
+            if (memoryEnabled) ramProcessComponent.createObject(systemUsageContainer);
+            if (tempEnabled) tempProcessComponent.createObject(systemUsageContainer);
+        }
+    }
+
+    Rectangle {
+        id: bgRect
+        color: "#2a2a2a"
+        radius: 8
+        implicitWidth: child.implicitWidth + 16
+        implicitHeight: 32
+    }
 
     RowLayout {
-        id: statsLayout
+        id: child
         anchors.centerIn: parent
-        spacing: theme.spacing
+        spacing: 4
 
-        // CPU
-        Rectangle {
+        // CPU Section
+        Item {
+            id: cpuIndicator
+            visible: cpuEnabled
+            Layout.preferredWidth: 24
             Layout.preferredHeight: 24
-            Layout.preferredWidth: cpuLayout.implicitWidth + 12
-            radius: theme.radiusSmall
-            color: activePanel === "cpu" ? theme.yellow : "transparent"
-            opacity: activePanel === "cpu" ? 0.2 : 1.0
+            rotation: !isHorizontal ? 270 : 0
 
-            RowLayout {
-                id: cpuLayout
-                anchors.centerIn: parent
-                spacing: 4
-                Text {
-                    text: theme.iconCpu
-                    color: theme.yellow
-                    font.pixelSize: theme.iconSize
-                    font.family: theme.fontFamily
-                }
-                Text {
-                    text: (SystemStats.cpuUsage || 0) + "%"
-                    color: theme.fg
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                }
-            }
-
-            MouseArea {
+            Canvas {
+                id: cpuCanvas
                 anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onEntered: parent.opacity = 0.8
-                onExited: parent.opacity = activePanel === "cpu" ? 0.2 : 1.0
-                onClicked: activePanel = activePanel === "cpu" ? "" : "cpu"
-            }
-        }
 
-        Rectangle { width: 1; height: 14; color: theme.muted; opacity: 0.5 }
+                onPaint: {
+                    const ctx = getContext("2d");
+                    ctx.clearRect(0, 0, width, height);
 
-        // Memory
-        Rectangle {
-            Layout.preferredHeight: 24
-            Layout.preferredWidth: memLayout.implicitWidth + 12
-            radius: theme.radiusSmall
-            color: activePanel === "memory" ? theme.cyan : "transparent"
-            opacity: activePanel === "memory" ? 0.2 : 1.0
+                    const cx = width / 2;
+                    const cy = height / 2;
+                    const r = (width - 2) / 2;
+                    const start = -Math.PI / 2;
+                    const end = start + 2 * Math.PI * cpuPercent;
 
-            RowLayout {
-                id: memLayout
-                anchors.centerIn: parent
-                spacing: 4
-                Text {
-                    text: theme.iconMemory
-                    color: theme.cyan
-                    font.pixelSize: theme.iconSize
-                    font.family: theme.fontFamily
-                }
-                Text {
-                    text: (SystemStats.memUsage || 0) + "%"
-                    color: theme.fg
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                }
-            }
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = "round";
 
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onEntered: parent.opacity = 0.8
-                onExited: parent.opacity = activePanel === "memory" ? 0.2 : 1.0
-                onClicked: activePanel = activePanel === "memory" ? "" : "memory"
-            }
-        }
+                    // Background ring
+                    ctx.strokeStyle = "#3a3a3a";
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+                    ctx.stroke();
 
-        Rectangle { width: 1; height: 14; color: theme.muted; opacity: 0.5 }
-
-        // Volume
-        Rectangle {
-            Layout.preferredHeight: 24
-            Layout.preferredWidth: volLayout.implicitWidth + 12
-            radius: theme.radiusSmall
-            color: activePanel === "volume" ? theme.green : "transparent"
-            opacity: activePanel === "volume" ? 0.2 : 1.0
-
-            RowLayout {
-                id: volLayout
-                anchors.centerIn: parent
-                spacing: 4
-                Text {
-                    text: (SystemStats.volumeMuted || false) ? theme.iconVolumeMute : theme.iconVolume
-                    color: (SystemStats.volumeMuted || false) ? theme.red : theme.green
-                    font.pixelSize: theme.iconSize
-                    font.family: theme.fontFamily
-                }
-                Text {
-                    text: (SystemStats.volumeLevel || 0) + "%"
-                    color: theme.fg
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onEntered: parent.opacity = 0.8
-                onExited: parent.opacity = activePanel === "volume" ? 0.2 : 1.0
-                onClicked: activePanel = activePanel === "volume" ? "" : "volume"
-            }
-        }
-    }
-
-    // CPU Details Panel
-    Rectangle {
-        visible: activePanel === "cpu"
-        width: 280
-        height: cpuDetails.implicitHeight + theme.padding * 2
-
-        anchors.top: parent.bottom
-        anchors.topMargin: 4
-        anchors.right: parent.right
-
-        radius: theme.radius
-        color: theme.bgDark
-        border.width: 1
-        border.color: theme.yellow
-
-        ColumnLayout {
-            id: cpuDetails
-            anchors.fill: parent
-            anchors.margins: theme.padding
-            spacing: theme.spacing
-
-            Text {
-                text: theme.iconCpu + " CPU Information"
-                color: theme.yellow
-                font.pixelSize: theme.fontSize
-                font.family: theme.fontFamily
-                font.bold: true
-            }
-
-            Rectangle { Layout.fillWidth: true; height: 1; color: theme.muted }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    text: "Usage:"
-                    color: theme.fgDark
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                    Layout.preferredWidth: 100
-                }
-                Text {
-                    text: (SystemStats.cpuUsage || 0) + "%"
-                    color: theme.fg
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                    font.bold: true
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    text: "Kernel:"
-                    color: theme.fgDark
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                    Layout.preferredWidth: 100
-                }
-                Text {
-                    text: SystemStats.kernelVersion || "Unknown"
-                    color: theme.fg
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: 20
-                radius: 3
-                color: theme.muted
-                Rectangle {
-                    width: parent.width * ((SystemStats.cpuUsage || 0) / 100)
-                    height: parent.height
-                    radius: parent.radius
-                    color: theme.yellow
-                }
-            }
-        }
-    }
-
-    // Memory Details Panel
-    Rectangle {
-        visible: activePanel === "memory"
-        width: 280
-        height: memDetails.implicitHeight + theme.padding * 2
-
-        anchors.top: parent.bottom
-        anchors.topMargin: 4
-        anchors.right: parent.right
-
-        radius: theme.radius
-        color: theme.bgDark
-        border.width: 1
-        border.color: theme.cyan
-
-        ColumnLayout {
-            id: memDetails
-            anchors.fill: parent
-            anchors.margins: theme.padding
-            spacing: theme.spacing
-
-            Text {
-                text: theme.iconMemory + " Memory Information"
-                color: theme.cyan
-                font.pixelSize: theme.fontSize
-                font.family: theme.fontFamily
-                font.bold: true
-            }
-
-            Rectangle { Layout.fillWidth: true; height: 1; color: theme.muted }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    text: "Usage:"
-                    color: theme.fgDark
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                    Layout.preferredWidth: 100
-                }
-                Text {
-                    text: (SystemStats.memUsage || 0) + "%"
-                    color: theme.fg
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                    font.bold: true
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    text: "Status:"
-                    color: theme.fgDark
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                    Layout.preferredWidth: 100
-                }
-                Text {
-                    text: (SystemStats.memUsage || 0) > 80 ? "High" : (SystemStats.memUsage || 0) > 50 ? "Normal" : "Low"
-                    color: (SystemStats.memUsage || 0) > 80 ? theme.red : theme.green
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                    font.bold: true
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: 20
-                radius: 3
-                color: theme.muted
-                Rectangle {
-                    width: parent.width * ((SystemStats.memUsage || 0) / 100)
-                    height: parent.height
-                    radius: parent.radius
-                    color: theme.cyan
-                }
-            }
-        }
-    }
-
-    // Volume Control Panel
-    Rectangle {
-        visible: activePanel === "volume"
-        width: 280
-        height: volDetails.implicitHeight + theme.padding * 2
-
-        anchors.top: parent.bottom
-        anchors.topMargin: 4
-        anchors.right: parent.right
-
-        radius: theme.radius
-        color: theme.bgDark
-        border.width: 1
-        border.color: theme.green
-
-        ColumnLayout {
-            id: volDetails
-            anchors.fill: parent
-            anchors.margins: theme.padding
-            spacing: theme.spacing
-
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    text: theme.iconVolume + " Volume Control"
-                    color: theme.green
-                    font.pixelSize: theme.fontSize
-                    font.family: theme.fontFamily
-                    font.bold: true
-                }
-                Item { Layout.fillWidth: true }
-                Text {
-                    text: (SystemStats.volumeLevel || 0) + "%"
-                    color: theme.fg
-                    font.pixelSize: theme.fontSize
-                    font.family: theme.fontFamily
-                    font.bold: true
-                }
-            }
-
-            Rectangle { Layout.fillWidth: true; height: 1; color: theme.muted }
-
-            // Volume slider
-            Rectangle {
-                Layout.fillWidth: true
-                height: 8
-                radius: 4
-                color: theme.muted
-
-                Rectangle {
-                    width: parent.width * ((SystemStats.volumeLevel || 0) / 100)
-                    height: parent.height
-                    radius: parent.radius
-                    color: theme.green
+                    // Progress ring
+                    ctx.strokeStyle = "#4a90e2";
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, start, end);
+                    ctx.stroke();
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: mouse => {
-                        var percent = Math.max(0, Math.min(100, Math.round(100 * mouse.x / width)))
-                        setVolume(percent)
+                Connections {
+                    target: systemUsageContainer
+                    function onCpuPercentChanged() {
+                        cpuCanvas.requestPaint();
                     }
                 }
             }
 
-            // Volume preset buttons
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: theme.spacingSmall
+            Text {
+                anchors.centerIn: parent
+                text: ""
+                font.pixelSize: 10
+                font.bold: true
+                color: "#ffffff"
+            }
+        }
 
-                Repeater {
-                    model: [
-                        { label: "Mute", value: -1 },
-                        { label: "25%", value: 25 },
-                        { label: "50%", value: 50 },
-                        { label: "75%", value: 75 },
-                        { label: "100%", value: 100 }
-                    ]
+        Text {
+            visible: cpuEnabled && isHorizontal
+            text: Math.round(cpuPercent * 100) + "%"
+            color: "white"
+            font.pixelSize: 12
+        }
 
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 28
-                        radius: theme.radiusSmall
-                        color: theme.bgLight
-                        border.width: 1
-                        border.color: theme.muted
+        // Memory Section
+        Item {
+            id: memoryIndicator
+            visible: memoryEnabled
+            Layout.preferredWidth: 24
+            Layout.preferredHeight: 24
+            Layout.leftMargin: 4
+            rotation: !isHorizontal ? 270 : 0
 
-                        Text {
-                            text: modelData.label
-                            color: theme.fg
-                            font.pixelSize: theme.fontSize - 2
-                            font.family: theme.fontFamily
-                            anchors.centerIn: parent
-                        }
+            Canvas {
+                id: memoryCanvas
+                anchors.fill: parent
 
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
+                onPaint: {
+                    const ctx = getContext("2d");
+                    ctx.clearRect(0, 0, width, height);
 
-                            onEntered: parent.color = Qt.lighter(theme.bgLight, 1.2)
-                            onExited: parent.color = theme.bgLight
-                            onClicked: {
-                                if (modelData.value === -1) {
-                                    toggleMute()
-                                } else {
-                                    setVolume(modelData.value)
-                                }
-                            }
-                        }
+                    const cx = width / 2;
+                    const cy = height / 2;
+                    const r = (width - 2) / 2;
+                    const start = -Math.PI / 2;
+                    const end = start + 2 * Math.PI * ramPercent;
+
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = "round";
+
+                    // Background ring
+                    ctx.strokeStyle = "#3a3a3a";
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+                    ctx.stroke();
+
+                    // Progress ring
+                    ctx.strokeStyle = "#50c878";
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, start, end);
+                    ctx.stroke();
+                }
+
+                Connections {
+                    target: systemUsageContainer
+                    function onRamPercentChanged() {
+                        memoryCanvas.requestPaint();
                     }
                 }
             }
 
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    text: "Status:"
-                    color: theme.fgDark
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                }
-                Text {
-                    text: (SystemStats.volumeMuted || false) ? "Muted" : "Active"
-                    color: (SystemStats.volumeMuted || false) ? theme.red : theme.green
-                    font.pixelSize: theme.fontSize - 1
-                    font.family: theme.fontFamily
-                    font.bold: true
-                }
+            Text {
+                anchors.centerIn: parent
+                text: ""
+                font.pixelSize: 10
+                font.bold: true
+                color: "#ffffff"
             }
         }
-    }
 
-    // Click outside to close panel
-    MouseArea {
-        enabled: activePanel !== ""
-        parent: root.parent
-        anchors.fill: parent
-        onClicked: activePanel = ""
-        z: -1
-    }
+        Text {
+            visible: memoryEnabled && isHorizontal
+            text: Math.round(ramPercent * 100) + "%"
+            color: "white"
+            font.pixelSize: 12
+        }
 
-    // Helper functions
-    function setVolume(percent) {
-        var decimal = (percent / 100).toFixed(2)
-        var proc = Qt.createQmlObject('
-            import Quickshell.Io;
-            import QtQuick;
-            Process {
-                command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "' + decimal + '"]
-                running: true
-            }
-        ', root)
-    }
+        // Temperature Section
+       // Item {
+       //     id: tempIndicator
+       //     visible: tempEnabled
+       //     Layout.preferredWidth: 24
+       //     Layout.preferredHeight: 24
+       //     Layout.leftMargin: 4
+       //     rotation: !isHorizontal ? 270 : 0
 
-    function toggleMute() {
-        var proc = Qt.createQmlObject('
-            import Quickshell.Io;
-            import QtQuick;
-            Process {
-                command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]
-                running: true
-            }
-        ', root)
+       //     Canvas {
+       //         id: tempCanvas
+       //         anchors.fill: parent
+
+       //         onPaint: {
+       //             const ctx = getContext("2d");
+       //             ctx.clearRect(0, 0, width, height);
+
+       //             const cx = width / 2;
+       //             const cy = height / 2;
+       //             const r = (width - 2) / 2;
+       //             const start = -Math.PI / 2;
+       //             const end = start + 2 * Math.PI * cpuTempPercent;
+
+       //             ctx.lineWidth = 2;
+       //             ctx.lineCap = "round";
+
+       //             // Background ring
+       //             ctx.strokeStyle = "#3a3a3a";
+       //             ctx.beginPath();
+       //             ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+       //             ctx.stroke();
+
+       //             // Progress ring
+       //             ctx.strokeStyle = "#ff6b6b";
+       //             ctx.beginPath();
+       //             ctx.arc(cx, cy, r, start, end);
+       //             ctx.stroke();
+       //         }
+
+       //         Connections {
+       //             target: systemUsageContainer
+       //             function onCpuTempPercentChanged() {
+       //                 tempCanvas.requestPaint();
+       //             }
+       //         }
+       //     }
+
+       //     Text {
+       //         anchors.centerIn: parent
+       //         text: "T"
+       //         font.pixelSize: 10
+       //         font.bold: true
+       //         color: "#ffffff"
+       //     }
+       // }
+
+        // Text {
+        //     visible: tempEnabled && isHorizontal
+        //     text: Math.round(cpuTempPercent * 100) + "%"
+        //     color: "white"
+        //     font.pixelSize: 12
+        // }
     }
 }
