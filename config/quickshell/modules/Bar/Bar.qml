@@ -2,17 +2,11 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
+import "../../utils"
 
 Scope {
-    // Load singletons first
-    Theme { id: theme }
-    SystemStats { id: systemStats }
-    HyprlandInfo { id: hyprlandInfo }
-
-    // Create panel for each screen
     Variants {
         model: Quickshell.screens
-
         PanelWindow {
             required property var modelData
             screen: modelData
@@ -21,86 +15,72 @@ Scope {
                 left: true
                 right: true
             }
-
-            implicitHeight: theme.barHeight
+            implicitHeight: 36
             color: "transparent"
 
-            // Main bar - clean and minimal
             Rectangle {
                 anchors.fill: parent
-                color: theme.bg
+                color: ColorManager.bgColor
 
-                // Subtle bottom border for definition
+                // Subtle bottom border
                 Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
                     height: 1
-                    color: Qt.rgba(theme.fg.r, theme.fg.g, theme.fg.b, 0.08);
+                    color: ColorManager.mutedColor
+                    opacity: 0.15
                 }
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: theme.padding * 2
-                    anchors.rightMargin: theme.padding * 2
-                    spacing: theme.spacing * 2
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
+                    spacing: 16
 
-                    // Left section: Workspaces only
+                    // Left: Launcher + Workspaces
                     RowLayout {
                         Layout.alignment: Qt.AlignLeft
-                        spacing: theme.spacing
+                        spacing: 8
                         Launcher {}
                         Workspaces {}
                     }
 
-                    // Spacer
-                    Item {
-                        Layout.fillWidth: true
-                    }
+                    Item { Layout.fillWidth: true }
 
-                    // Center section: Window dock
+                    // Center: Window dock
                     RowLayout {
                         Layout.alignment: Qt.AlignCenter
                         spacing: 0
-
                         WindowDock {}
                     }
 
-                    // Spacer
-                    Item {
-                        Layout.fillWidth: true
-                    }
+                    Item { Layout.fillWidth: true }
 
-                    // Right section: Clock + System tray
+                    // Right: System tray + Clock
                     RowLayout {
                         Layout.alignment: Qt.AlignRight
-                        spacing: theme.spacing * 1.5
+                        spacing: 12
 
-                        // System tray items
                         RowLayout {
-                            spacing: theme.spacing
+                            spacing: 8
                             SystemStats {}
                             Notification {}
-                            // Bluetooth {}
-                            // Network {}
+                            Bluetooth {}
                             Power {}
                         }
 
                         // Separator
                         Rectangle {
                             Layout.preferredWidth: 1
-                            Layout.preferredHeight: theme.barHeight * 0.4
-                            color: Qt.rgba(theme.fg.r, theme.fg.g, theme.fg.b, 0.1)
+                            Layout.preferredHeight: 36 * 0.4
+                            color: ColorManager.mutedColor
+                            opacity: 0.3
                         }
 
                         Clock {}
                     }
                 }
-            }
-
-            // Details panel
-            DetailsPanel {
-                id: detailsPanel
             }
         }
     }

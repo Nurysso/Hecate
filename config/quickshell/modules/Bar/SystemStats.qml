@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import "../../utils"
 
 Item {
     id: systemUsageContainer
@@ -82,14 +83,13 @@ Item {
         onTriggered: {
             if (cpuEnabled) cpuProcessComponent.createObject(systemUsageContainer);
             if (memoryEnabled) ramProcessComponent.createObject(systemUsageContainer);
-            if (tempEnabled) tempProcessComponent.createObject(systemUsageContainer);
+            // if (tempEnabled) tempProcessComponent.createObject(systemUsageContainer);
         }
     }
 
     Rectangle {
         id: bgRect
-        color: "#2a2a2a"
-        radius: 8
+        color: "transparent"
         implicitWidth: child.implicitWidth + 16
         implicitHeight: 32
     }
@@ -97,7 +97,7 @@ Item {
     RowLayout {
         id: child
         anchors.centerIn: parent
-        spacing: 4
+        spacing: 6
 
         // CPU Section
         Item {
@@ -131,7 +131,7 @@ Item {
                     ctx.stroke();
 
                     // Progress ring
-                    ctx.strokeStyle = "#4a90e2";
+                    ctx.strokeStyle = ColorManager.accentColor;
                     ctx.beginPath();
                     ctx.arc(cx, cy, r, start, end);
                     ctx.stroke();
@@ -194,7 +194,7 @@ Item {
                     ctx.stroke();
 
                     // Progress ring
-                    ctx.strokeStyle = "#50c878";
+                    ctx.strokeStyle = ColorManager.accentColor;
                     ctx.beginPath();
                     ctx.arc(cx, cy, r, start, end);
                     ctx.stroke();

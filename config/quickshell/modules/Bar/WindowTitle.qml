@@ -21,7 +21,7 @@ Rectangle {
         // Window title
         Text {
             text: hyprlandInfo.activeWindow || "Desktop"
-            color: hyprlandInfo.activeWindow ? theme.fg : theme.fgDark
+            color: hyprlandInfo.activeWindow ? theme.fgColor : theme.fgDark
             font.pixelSize: theme.fontSize
             font.family: theme.fontFamily
             font.italic: !hyprlandInfo.activeWindow

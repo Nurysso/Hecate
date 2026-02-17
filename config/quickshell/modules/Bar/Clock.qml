@@ -1,6 +1,7 @@
 import Quickshell
 import QtQuick
 import QtQuick.Layouts
+import "../../utils"
 
 Item {
     id: clockContainer
@@ -20,7 +21,7 @@ Item {
         id: clockText
         anchors.centerIn: parent
         text: Qt.formatDateTime(currentTime, "h:mm ap")
-        color: theme.fg
+        color: ColorManager.fgColor
         font.pixelSize: theme.fontSize
         font.family: theme.fontFamily
         font.weight: Font.Normal

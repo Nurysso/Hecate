@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import QtQuick
+import "../../utils"
 
 Singleton {
     id: hyprInfo
@@ -10,7 +11,7 @@ Singleton {
     property string activeWindowTitle: ""
     property string activeWindowIcon: ""
     property string currentLayout: "Tiled"
-    property string layoutIcon: theme.iconTiled
+    property string layoutIcon: ColorManager.iconTiled
     property var openWindows: []
 
     // Active window class and title
@@ -66,11 +67,11 @@ Singleton {
                 hyprInfo.currentLayout = layout
                 // Set appropriate icon
                 if (layout === "Floating") {
-                    hyprInfo.layoutIcon = theme.iconFloating
+                    hyprInfo.layoutIcon = ColorManager.iconFloating
                 } else if (layout === "Fullscreen") {
-                    hyprInfo.layoutIcon = theme.iconFullscreen
+                    hyprInfo.layoutIcon = ColorManager.iconFullscreen
                 } else {
-                    hyprInfo.layoutIcon = theme.iconTiled
+                    hyprInfo.layoutIcon = ColorManager.iconTiled
                 }
             }
         }

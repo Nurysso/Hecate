@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import "../../utils"
 
 Rectangle {
     Layout.preferredWidth: 32
@@ -15,7 +16,7 @@ Rectangle {
 
     Text {
         text: ""
-        color: mouseArea.containsMouse ? theme.accent : theme.fg
+        color: mouseArea.containsMouse ? theme.accentColor : theme.fgColor
         font.pixelSize: 20
         font.family: "Symbols Nerd Font"
         anchors.centerIn: parent

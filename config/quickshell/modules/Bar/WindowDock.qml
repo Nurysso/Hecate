@@ -6,7 +6,7 @@ import QtQuick.Layouts
 
 Item {
     id: windowDock
-    Layout.preferredHeight: theme.barHeight
+    Layout.preferredHeight: ColorManager.barHeight
     Layout.preferredWidth: dockLayout.implicitWidth
 
     property var windows: []
@@ -78,7 +78,7 @@ Item {
     RowLayout {
         id: dockLayout
         anchors.centerIn: parent
-        spacing: theme.spacing
+        spacing: ColorManager.spacing
 
         Repeater {
             model: windows
@@ -202,7 +202,7 @@ exit 1
                         anchors.centerIn: parent
                         visible: !iconLoader.iconFound
                         text: "●"
-                        color: theme.fg
+                        color: ColorManager.fgColor
                         font.pixelSize: 18
                         opacity: dockItem.isActive ? 1.0 : 0.6
 
@@ -218,7 +218,7 @@ exit 1
                     width: 16
                     height: 2
                     radius: 1
-                    color: theme.accent
+                    color: ColorManager.accentColor
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottomMargin: -6
@@ -246,7 +246,7 @@ exit 1
                             width: 3
                             height: 3
                             radius: 1.5
-                            color: theme.fg
+                            color: ColorManager.fgColor
                             opacity: 0.5
                         }
                     }

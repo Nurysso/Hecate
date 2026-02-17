@@ -1,1 +1,7 @@
-singleton ColorManager 1.0 ColorManager.qml
+module widgets
+ClockWidget 1.0 ClockWidget.qml
+AudioWidget 1.0 AudioWidget.qml
+QuickAppsWidget 1.0 QuickAppsWidget.qml
+WeatherWidget 1.0 WeatherWidget.qml
+SystemInfoWidget 1.0 SystemInfoWidget.qml
+GitHubContributionsWidget 1.0 GitHubContributionsWidget.qml

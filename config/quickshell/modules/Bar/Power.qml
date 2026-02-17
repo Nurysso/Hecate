@@ -2,11 +2,12 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import "../../utils"
 
 Rectangle {
     Layout.preferredWidth: 32
     Layout.preferredHeight: 32
-    radius: theme.radiusSmall
+    radius: ColorManager.radiusSmall
     color: "transparent"
 
     Behavior on color {
@@ -15,7 +16,7 @@ Rectangle {
 
     Text {
         text: "⏻"
-        color: mouseArea.containsMouse ? theme.accent : theme.fg
+        color: mouseArea.containsMouse ? ColorManager.accentColor : ColorManager.fgColor
         font.pixelSize: 20
         font.family: "Symbols Nerd Font"
         anchors.centerIn: parent

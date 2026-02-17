@@ -1,57 +1,75 @@
-// widgets/ClockWidget.qml - Enhanced clock widget (fixed)
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
-import "."
+import "../utils"
 
 PanelWindow {
     id: root
-
-    implicitWidth: 420
-    implicitHeight: 220
+    implicitWidth: 520
+    implicitHeight: 120
     visible: true
     color: "transparent"
     mask: Region { item: container }
-
     WlrLayershell.layer: WlrLayer.Bottom
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
     WlrLayershell.namespace: "quickshell-clock"
+    WlrLayershell.exclusiveZone: -1
+
+    property int visibilityCheckCount: 0
+    Timer {
+        id: persistenceTimer
+        interval: 3000
+        running: true
+        repeat: true
+        onTriggered: {
+            if (!root.visible) {
+                root.visibilityCheckCount++
+                root.visible = true
+                if (root.visibilityCheckCount > 3) root.visibilityCheckCount = 0
+            } else {
+                root.visibilityCheckCount = 0
+            }
+        }
+    }
+
+    Component.onCompleted: { visible = true }
 
     anchors {
-        top: true
+        bottom: true
         right: true
     }
     margins {
-        top: 20
-        right: 20
+        bottom: 10
+        right: 16
     }
 
-    property string currentDay: ""
-    property string currentTime: ""
-    property string currentDate: ""
-    property string primaryColor: ColorManager.primaryColor
-    property string accentColor: ColorManager.accentColor
-    property string mutedColor: ColorManager.mutedColor
+    // Time parts
+    property string hourStr: ""
+    property string minuteStr: ""
+    property string ampm: ""
+    property string monthStr: ""
+    property string dayNumStr: ""
+    property string dayNameStr: ""
 
-    // Clock update timer
     Timer {
         interval: 1000
         running: true
         repeat: true
         triggeredOnStart: true
-
         onTriggered: {
             const now = new Date()
-            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-            const months = ["January", "February", "March", "April", "May", "June",
-                          "July", "August", "September", "October", "November", "December"]
-
-            root.currentDay = days[now.getDay()]
-            root.currentTime = String(now.getHours()).padStart(2, '0') + ":" +
-                         String(now.getMinutes()).padStart(2, '0') + ":" +
-                         String(now.getSeconds()).padStart(2, '0')
-            root.currentDate = months[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear()
+            const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+            const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE",
+                            "JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"]
+            const h = now.getHours()
+            root.ampm = h >= 12 ? "PM" : "AM"
+            const h12 = h % 12 || 12
+            root.hourStr = String(h12).padStart(2, '0')
+            root.minuteStr = String(now.getMinutes()).padStart(2, '0')
+            root.monthStr = months[now.getMonth()]
+            root.dayNumStr = String(now.getDate())
+            root.dayNameStr = days[now.getDay()]
         }
     }
 
@@ -59,51 +77,116 @@ PanelWindow {
         id: container
         anchors.fill: parent
         color: "transparent"
-        opacity: 1
 
-        Column {
+        Row {
             anchors.centerIn: parent
-            spacing: 20
+            spacing: 0
 
-            // Day
-            Text {
-                text: root.currentDay
-                font.pixelSize: 32
-                font.weight: Font.Bold
-                font.letterSpacing: 2
-                color: root.mutedColor
-                anchors.horizontalCenter: parent.horizontalCenter
+            // ── Left: HH : MM ──
+            Row {
+                id: timeRow
+                spacing: 0
+                anchors.verticalCenter: parent.verticalCenter
 
-                Behavior on color {
-                    ColorAnimation { duration: 300 }
+                // Hours
+                Text {
+                    text: root.hourStr
+                    font.pixelSize: 80
+                    font.weight: Font.Bold
+                    color: ColorManager.fgColor
+                    anchors.verticalCenter: parent.verticalCenter
+                    style: Text.Raised
+                    styleColor: "#000000"
+                    Behavior on color { ColorAnimation { duration: 300 } }
+                }
+
+                // Colon separator in accent color
+                Text {
+                    text: ":"
+                    font.pixelSize: 80
+                    font.weight: Font.Bold
+                    color: ColorManager.accentColor
+                    anchors.verticalCenter: parent.verticalCenter
+                    style: Text.Raised
+                    styleColor: "#000000"
+                    Behavior on color { ColorAnimation { duration: 300 } }
+                }
+
+                // Minutes
+                Text {
+                    text: root.minuteStr
+                    font.pixelSize: 80
+                    font.weight: Font.Bold
+                    color: ColorManager.fgColor
+                    anchors.verticalCenter: parent.verticalCenter
+                    style: Text.Raised
+                    styleColor: "#000000"
+                    Behavior on color { ColorAnimation { duration: 300 } }
+                }
+
+                // AM/PM stacked to top-right of time
+                Text {
+                    text: root.ampm
+                    font.pixelSize: 18
+                    font.weight: Font.Medium
+                    color: ColorManager.fgDimColor
+                    anchors.top: parent.top
+                    anchors.topMargin: 10
+                    leftPadding: 6
+                    style: Text.Raised
+                    styleColor: "#000000"
+                    Behavior on color { ColorAnimation { duration: 300 } }
                 }
             }
 
-            // Time
-            Text {
-                text: root.currentTime
-                font.pixelSize: 68
-                font.weight: Font.Bold
-                font.family: "monospace"
-                color: root.primaryColor
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                Behavior on color {
-                    ColorAnimation { duration: 300 }
+            // ── Vertical divider ──
+            Rectangle {
+                width: 1
+                height: 70
+                color: ColorManager.mutedColor
+                anchors.verticalCenter: parent.verticalCenter
+                opacity: 0.6
+                anchors.margins: 0
+                Component.onCompleted: {
+                    // small horizontal margins via x offset
                 }
             }
 
-            // Date
-            Text {
-                text: root.currentDate
-                font.pixelSize: 24
-                font.weight: Font.Medium
-                font.letterSpacing: 1
-                color: root.accentColor
-                anchors.horizontalCenter: parent.horizontalCenter
+            // ── Right: MONTH / Day number / Day name ──
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 0
+                leftPadding: 14
 
-                Behavior on color {
-                    ColorAnimation { duration: 300 }
+                Text {
+                    text: root.monthStr
+                    font.pixelSize: 15
+                    font.weight: Font.Bold
+                    font.letterSpacing: 2
+                    color: ColorManager.fgColor
+                    style: Text.Raised
+                    styleColor: "#000000"
+                    Behavior on color { ColorAnimation { duration: 300 } }
+                }
+
+                Text {
+                    text: root.dayNumStr
+                    font.pixelSize: 32
+                    font.weight: Font.Bold
+                    color: ColorManager.fgColor
+                    style: Text.Raised
+                    styleColor: "#000000"
+                    Behavior on color { ColorAnimation { duration: 300 } }
+                }
+
+                Text {
+                    text: root.dayNameStr
+                    font.pixelSize: 15
+                    font.weight: Font.Normal
+                    color: ColorManager.fgDimColor
+                    style: Text.Raised
+                    styleColor: "#000000"
+                    Behavior on color { ColorAnimation { duration: 300 } }
                 }
             }
         }

@@ -1,8 +1,9 @@
-// widgets/SystemInfoWidget.qml - Dial-based system information widget
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
+import "../utils"
+
 
 PanelWindow {
     id: root

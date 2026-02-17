@@ -2,29 +2,26 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import "../../utils"
 
 Rectangle {
     Layout.preferredWidth: 32
     Layout.preferredHeight: 32
-    radius: theme.radiusSmall
+    radius: 4
     color: "transparent"
-
     Behavior on color {
         ColorAnimation { duration: 150 }
     }
-
     Text {
         text: "󰂯"
-        color: mouseArea.containsMouse ? theme.accent : theme.fg
+        color: mouseArea.containsMouse ? ColorManager.accentColor : ColorManager.fgColor
         font.pixelSize: 20
         font.family: "Symbols Nerd Font"
         anchors.centerIn: parent
-
         Behavior on color {
             ColorAnimation { duration: 150 }
         }
     }
-
     Component {
         id: processComponent
         Process {
@@ -32,22 +29,16 @@ Rectangle {
             command: ["blueman-manager"]
         }
     }
-
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-
         onClicked: {
-            // Create a new instance of the process
-            processComponent.createObject(parent);
+            processComponent.createObject(parent)
         }
     }
-
-    // Subtle scale animation on click
     scale: mouseArea.pressed ? 0.9 : 1.0
-
     Behavior on scale {
         NumberAnimation {
             duration: 100
