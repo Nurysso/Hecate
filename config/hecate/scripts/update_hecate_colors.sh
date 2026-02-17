@@ -8,7 +8,6 @@ HECATE_CSS="$HOME/.config/hecate/hecate.css"
 HECATE_DIR="$HOME/.config/hecate"
 
 # Component CSS files that will import hecate.css
-WAYBAR_CSS="$HOME/.config/waybar/color.css"
 SWAYNC_CSS="$HOME/.config/swaync/color.css"
 ROFI_RASI="$HOME/.config/rofi/theme/colors-rofi.rasi"
 
@@ -256,10 +255,6 @@ cat > "$HECATE_CSS" <<EOF
 /* Component-Specific Aliases                                      */
 /* ─────────────────────────────────────────────────────────────── */
 
-/* Waybar */
-@define-color BACKGROUND ${BACKGROUND};
-@define-color FOREGROUND ${SMART_FG};
-
 /* Wlogout */
 /* (uses same definitions as above) */
 
@@ -273,13 +268,6 @@ echo "✓ Generated master hecate.css"
 # Create symlinks from component directories to hecate.css
 # This makes dotfiles portable across systems
 echo "Creating symlinks to hecate.css..."
-
-mkdir -p "$(dirname "$WAYBAR_CSS")"
-if [ -L "$WAYBAR_CSS" ] || [ -f "$WAYBAR_CSS" ]; then
-    rm -f "$WAYBAR_CSS"
-fi
-ln -sf "$HECATE_CSS" "$WAYBAR_CSS"
-echo "  ✓ $WAYBAR_CSS -> $HECATE_CSS"
 
 mkdir -p "$(dirname "$SWAYNC_CSS")"
 if [ -L "$SWAYNC_CSS" ] || [ -f "$SWAYNC_CSS" ]; then
@@ -393,10 +381,6 @@ fi
 echo ""
 echo "Reloading components..."
 
-if pgrep -x waybar > /dev/null; then
-    pkill -SIGUSR2 waybar
-    echo "✓ Waybar reloaded"
-fi
 
 if pgrep -x swaync > /dev/null; then
     swaync-client -rs

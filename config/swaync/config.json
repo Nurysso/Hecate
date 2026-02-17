@@ -29,23 +29,17 @@
   "script-fail-notify": true,
   "notification-body-image-height": 120,
   "notification-body-image-width": 200,
-"notification-visibility": {
+  "notification-visibility": {
     "theme-update": {
-        "state": "enabled",
-        "app-name": ".*",
-        "summary": ".*SwayNC theme updated.*",
-        "body": ".*",
-        "urgency": "Normal",
-        "category": ".*"
+      "state": "enabled",
+      "app-name": ".*",
+      "summary": ".*SwayNC theme updated.*",
+      "body": ".*",
+      "urgency": "Normal",
+      "category": ".*"
     }
-},
-  "widgets": [
-    "title",
-    "dnd",
-    "buttons-grid",
-    "volume",
-    "notifications"
-  ],
+  },
+  "widgets": ["title", "dnd", "buttons-grid", "volume", "notifications"],
   "widget-config": {
     "title": {
       "text": "Notifications",

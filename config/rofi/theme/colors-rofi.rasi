@@ -1,48 +1,48 @@
-/* Rofi Colors - Generated from Pywal */
-/* Generated: 2025-10-07 21:39:32 */
+/* Rofi Colors - Generated from Hecate Theme */
+/* Generated: 2026-02-16 13:11:22 */
 
 * {
     /* Special colors */
-    background:     #15151c;
-    foreground:     #c4c4c6;
-    cursor:         #c4c4c6;
-    
+    background:     #101116;
+    foreground:     #9abdb8;
+    cursor:         #9abdb8;
+
     /* Base16 color palette */
-    color0:         #15151c;
-    color1:         #EB9D7E;
-    color2:         #2E639C;
-    color3:         #5B6697;
-    color4:         #4B7DC2;
-    color5:         #AE6E8D;
-    color6:         #6B85B5;
-    color7:         #c4c4c6;
-    color8:         #5e5e72;
-    color9:         #EB9D7E;
-    color10:        #2E639C;
-    color11:        #5B6697;
-    color12:        #4B7DC2;
-    color13:        #AE6E8D;
-    color14:        #6B85B5;
-    color15:        #c4c4c6;
-    
-    /* Semantic color aliases */
+    color0:         #101116;
+    color1:         #A03D3A;
+    color2:         #DC392F;
+    color3:         #E23C31;
+    color4:         #E14235;
+    color5:         #3E827C;
+    color6:         #4D877A;
+    color7:         #9abdb8;
+    color8:         #6b8480;
+    color9:         #A03D3A;
+    color10:        #DC392F;
+    color11:        #E23C31;
+    color12:        #E14235;
+    color13:        #3E827C;
+    color14:        #4D877A;
+    color15:        #9abdb8;
+
+    /* Semantic aliases */
     bg:             @background;
     fg:             @foreground;
-    bg-alt:         @color1;
+    bg-alt:         #A03D3A;
     bg-dim:         @color0;
-    fg-dim:         @color8;
-    fg-bright:      @color15;
-    
+    fg-dim:         #6b8480;
+    fg-bright:      #9abdb8;
+
     accent:         @color4;
     accent-alt:     @color12;
-    
+
     red:            @color1;
     green:          @color2;
     yellow:         @color3;
     blue:           @color4;
     magenta:        @color5;
     cyan:           @color6;
-    
+
     red-bright:     @color9;
     green-bright:   @color10;
     yellow-bright:  @color11;

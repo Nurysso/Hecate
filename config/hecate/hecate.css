@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    Hecate Theme - Centralized Color Definitions
-   Generated from Pywal on 2025-11-27 17:31:57
+   Generated from Pywal on 2026-02-16 13:11:22
 
    This file is the single source of truth for all theme colors.
    All component CSS files import from this file.
@@ -10,106 +10,106 @@
 /* Base Colors (Pywal)                                             */
 /* ─────────────────────────────────────────────────────────────── */
 
-@define-color background #101011;
-@define-color foreground #e7dac6;
-@define-color cursor #e7dac6;
+@define-color background #101116;
+@define-color foreground #9abdb8;
+@define-color cursor #9abdb8;
 
-@define-color color0  #101011;
-@define-color color1  #A1764B;
-@define-color color2  #7A837D;
-@define-color color3  #B28C5E;
-@define-color color4  #D09C66;
-@define-color color5  #DDB88C;
-@define-color color6  #C8BFAA;
-@define-color color7  #e7dac6;
-@define-color color8  #a1988a;
-@define-color color9  #A1764B;
-@define-color color10 #7A837D;
-@define-color color11 #B28C5E;
-@define-color color12 #D09C66;
-@define-color color13 #DDB88C;
-@define-color color14 #C8BFAA;
-@define-color color15 #e7dac6;
+@define-color color0 #101116;
+@define-color color1 #A03D3A;
+@define-color color2 #DC392F;
+@define-color color3 #E23C31;
+@define-color color4 #E14235;
+@define-color color5 #3E827C;
+@define-color color6 #4D877A;
+@define-color color7 #9abdb8;
+@define-color color8 #6b8480;
+@define-color color9 #A03D3A;
+@define-color color10 #DC392F;
+@define-color color11 #E23C31;
+@define-color color12 #E14235;
+@define-color color13 #3E827C;
+@define-color color14 #4D877A;
+@define-color color15 #9abdb8;
 
 /* ─────────────────────────────────────────────────────────────── */
 /* Smart Contrast Variants                                         */
 /* ─────────────────────────────────────────────────────────────── */
 
-@define-color bg #101011;
-@define-color fg #e7dac6;
-@define-color bg-alt #A1764B;
-@define-color bg-dim #101011;
-@define-color fg-dim #a1988a;
-@define-color fg-bright #e7dac6;
+@define-color bg #101116;
+@define-color fg #9abdb8;
+@define-color bg-alt #A03D3A;
+@define-color bg-dim #101116;
+@define-color fg-dim #6b8480;
+@define-color fg-bright #9abdb8;
 
 /* ─────────────────────────────────────────────────────────────── */
 /* Semantic Colors                                                 */
 /* ─────────────────────────────────────────────────────────────── */
 
-@define-color primary #D09C66;
-@define-color secondary #C8BFAA;
-@define-color accent #DDB88C;
-@define-color accent-alt #D09C66;
-@define-color success #7A837D;
-@define-color warning #B28C5E;
-@define-color error #A1764B;
-@define-color muted #a1988a;
+@define-color primary #E14235;
+@define-color secondary #4D877A;
+@define-color accent #3E827C;
+@define-color accent-alt #E14235;
+@define-color success #DC392F;
+@define-color warning #E23C31;
+@define-color error #A03D3A;
+@define-color muted #6b8480;
 
-@define-color red #A1764B;
-@define-color green #7A837D;
-@define-color yellow #B28C5E;
-@define-color blue #D09C66;
-@define-color magenta #DDB88C;
-@define-color cyan #C8BFAA;
+@define-color red #A03D3A;
+@define-color green #DC392F;
+@define-color yellow #E23C31;
+@define-color blue #E14235;
+@define-color magenta #3E827C;
+@define-color cyan #4D877A;
 
-@define-color red-bright #A1764B;
-@define-color green-bright #7A837D;
-@define-color yellow-bright #B28C5E;
-@define-color blue-bright #D09C66;
-@define-color magenta-bright #DDB88C;
-@define-color cyan-bright #C8BFAA;
+@define-color red-bright #A03D3A;
+@define-color green-bright #DC392F;
+@define-color yellow-bright #E23C31;
+@define-color blue-bright #E14235;
+@define-color magenta-bright #3E827C;
+@define-color cyan-bright #4D877A;
 
 /* ─────────────────────────────────────────────────────────────── */
 /* RGBA Variants (for transparency effects)                        */
 /* ─────────────────────────────────────────────────────────────── */
 
 /* Background variants */
-@define-color bg_rgba rgba(16, 16, 17, 0.85);
-@define-color bg_rgba_light rgba(16, 16, 17, 0.7);
-@define-color bg_rgba_lighter rgba(16, 16, 17, 0.5);
-@define-color bg_dark rgba(16, 16, 17, 0.5);
-@define-color bg_rgba_dim rgba(16, 16, 17, 0.2);
+@define-color bg_rgba rgba(16, 17, 22, 0.85);
+@define-color bg_rgba_light rgba(16, 17, 22, 0.7);
+@define-color bg_rgba_lighter rgba(16, 17, 22, 0.5);
+@define-color bg_dark rgba(16, 17, 22, 0.5);
+@define-color bg_rgba_dim rgba(16, 17, 22, 0.2);
 
 /* Primary/Accent variants */
-@define-color color4_rgba rgba(208, 156, 102, 0.15);
-@define-color color4_rgba_hover rgba(208, 156, 102, 0.4);
-@define-color color4_rgba_border rgba(208, 156, 102, 0.6);
+@define-color color4_rgba rgba(225, 66, 53, 0.15);
+@define-color color4_rgba_hover rgba(225, 66, 53, 0.4);
+@define-color color4_rgba_border rgba(225, 66, 53, 0.6);
 
 /* Error/Warning variants */
-@define-color color1_rgba rgba(161, 118, 75, 0.4);
-@define-color color1_rgba_border rgba(161, 118, 75, 0.6);
-@define-color color1_rgba_light rgba(161, 118, 75, 0.3);
-@define-color color1_rgba_dim rgba(161, 118, 75, 0.1);
+@define-color color1_rgba rgba(160, 61, 58, 0.4);
+@define-color color1_rgba_border rgba(160, 61, 58, 0.6);
+@define-color color1_rgba_light rgba(160, 61, 58, 0.3);
+@define-color color1_rgba_dim rgba(160, 61, 58, 0.1);
 
 /* SwayNC specific RGBA variants */
-@define-color BG_RGBA rgba(16, 16, 17, 0.85);
-@define-color BG_RGBA_LIGHT rgba(16, 16, 17, 0.7);
-@define-color BG_RGBA_LIGHTER rgba(16, 16, 17, 0.5);
-@define-color COLOR1_RGBA rgba(161, 118, 75, 0.4);
-@define-color COLOR1_RGBA_LIGHT rgba(161, 118, 75, 0.3);
-@define-color COLOR1_RGBA_DIM rgba(161, 118, 75, 0.1);
-@define-color COLOR4_RGBA rgba(208, 156, 102, 0.5);
-@define-color COLOR4_RGBA_LIGHT rgba(208, 156, 102, 0.4);
-@define-color COLOR4_RGBA_DIM rgba(208, 156, 102, 0.3);
-@define-color COLOR4_RGBA_BORDER rgba(208, 156, 102, 0.2);
+@define-color BG_RGBA rgba(16, 17, 22, 0.85);
+@define-color BG_RGBA_LIGHT rgba(16, 17, 22, 0.7);
+@define-color BG_RGBA_LIGHTER rgba(16, 17, 22, 0.5);
+@define-color COLOR1_RGBA rgba(160, 61, 58, 0.4);
+@define-color COLOR1_RGBA_LIGHT rgba(160, 61, 58, 0.3);
+@define-color COLOR1_RGBA_DIM rgba(160, 61, 58, 0.1);
+@define-color COLOR4_RGBA rgba(225, 66, 53, 0.5);
+@define-color COLOR4_RGBA_LIGHT rgba(225, 66, 53, 0.4);
+@define-color COLOR4_RGBA_DIM rgba(225, 66, 53, 0.3);
+@define-color COLOR4_RGBA_BORDER rgba(225, 66, 53, 0.2);
 
 /* ─────────────────────────────────────────────────────────────── */
 /* Component-Specific Aliases                                      */
 /* ─────────────────────────────────────────────────────────────── */
 
 /* Waybar */
-@define-color BACKGROUND #101011;
-@define-color FOREGROUND #e7dac6;
+@define-color BACKGROUND #101116;
+@define-color FOREGROUND #9abdb8;
 
 /* Wlogout */
 /* (uses same definitions as above) */
