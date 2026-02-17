@@ -5,8 +5,8 @@ import Quickshell.Io
 import "../../utils"
 
 Rectangle {
-    Layout.preferredWidth: 32
-    Layout.preferredHeight: 32
+    implicitWidth: 32
+    implicitHeight: 32
     radius: ColorManager.radiusSmall
     color: "transparent"
 
