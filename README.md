@@ -4,8 +4,6 @@
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=32&duration=2800&pause=2000&color=A277FF&center=true&vCenter=true&width=940&lines=Hyprland+Dotfiles;Auto+Theming+%E2%80%A2+GUI+Tools+%E2%80%A2+Widgets" alt="Typing SVG" />
 
-<!-- <img src="assets/img/header.webp" alt="Header"/> -->
-
 <p align="center">
   <strong>A Hyprland rice with auto-theming from wallpapers</strong>
   <br>
@@ -24,15 +22,6 @@
   </a>
 </p>
 
-<!-- <p align="center">
-  <a href="#-features"><kbd> <br> Features <br> </kbd></a>
-  <a href="#-installation"><kbd> <br> Installation <br> </kbd></a>
-  <a href="#-Hecate-Settingser-gui"><kbd> <br> GUI Helper <br> </kbd></a>
-  <a href="#-quickshell-widgets"><kbd> <br> Widgets <br> </kbd></a>
-  <a href="#-configuration"><kbd> <br> Configuration <br> </kbd></a>
-  <a href="#-contributing"><kbd> <br> Contributing <br> </kbd></a>
-</p> -->
-
 <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
 
 </div>
@@ -42,7 +31,6 @@
 ## 🎬 See It In Action
 
 <div align="center">
-
 <table>
 <tr>
 <td width="50%" align="center">
@@ -65,30 +53,17 @@
 </td>
 </tr>
 </table>
-
 </div>
 
 <br>
 
-<div align="center">
+<!-- <div align="center">
   <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
+</div> -->
 
 <br>
 
 ## 🌟 Features
-
-<div align="center">
-
-```
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                                                                              ║
-║     🎨 DYNAMIC THEMING  •  🖥️ GUI HELPER  •  📦 WIDGETS  •  🚀 SMART SETUP   ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-```
-
-</div>
 
 <table>
 <tr>
@@ -106,9 +81,10 @@ Colors get auto-extracted from your wallpaper and applied system-wide. Change yo
 
 <br>
 
-### **Hecate Settings GUI** <sup>⭐ NEW</sup>
+### **Hecate Settings GUI** <sup> No longer maintained</sup>
 
 > _GUI for people who don't want to edit config files_
+> _A new tool will be launched soon_
 
 A graphical tool to tweak your setup:
 
@@ -133,14 +109,15 @@ Pick your terminal, shell, browser, and profile during install. Less manual edit
 
 <br>
 
-### **QuickShell Widgets** <sup>⭐ NEW</sup>
+### **QuickShell Widgets** <sup>⭐ Updated</sup>
 
-> _Desktop widgets that actually look good_
+> _Desktop widgets that are 🤌_
 
 - **🕐 Clock Widget** — Shows time and date
 - **🚀 QuickApps** — Quick app launcher
 - **💻 System Info** — CPU, GPU, RAM stats
 - **🎵 Audio Visualizer** — Cava audio viz built-in
+- **Github Contribuition** — This one for the devs
 
 <br>
 
@@ -179,10 +156,6 @@ Backs up existing configs before installing.
 </table>
 
 <br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
 
 <br>
 
@@ -224,7 +197,7 @@ Backs up existing configs before installing.
 </tr>
 <tr>
 <td align="center"><strong>Bars</strong></td>
-<td><code>Waybar</code></td>
+<td><code>Quickshell</code></td>
 </tr>
 <tr>
 <td align="center"><strong>Notifications</strong></td>
@@ -253,14 +226,6 @@ Backs up existing configs before installing.
 
 </div>
 
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
-
-<br>
-
 ## 📦 Installation
 
 <div align="center">
@@ -270,17 +235,18 @@ Backs up existing configs before installing.
 </div>
 
 > [!IMPORTANT]
-> **Hecate will detect your package manager automatically** (pacman, yay, paru).
+> **Hecate will detect your Os and package manager automatically** (pacman, yay, paru, dnf).
 > If paru is installed on your system, the script selects paru to install packages.
+> For dnf well it works kinda but may need manualaly installing few packages
 
 <br>
 
 ### **Prerequisites**
 
-Ensure you have `git` and `gum` installed:
+Ensure you have `git`, `gum`, `TerminalTextEffects(tte)` installed:
 
 ```bash
-sudo pacman -S git gum
+paru -S terminaltexteffects git gum
 ```
 
 <br>
@@ -295,17 +261,7 @@ curl -fsSL https://raw.githubusercontent.com/nurysso/Hecate/main/install.sh | ba
 
 ### **🔧 Manual Installation**
 
-```bash
-# Clone the repository
-git clone https://github.com/nurysso/Hecate.git
-cd Hecate
-
-# Make the installer executable
-chmod +x install.sh
-
-# Run the installer
-./install.sh
-```
+Checkout [Documentaion](documentation/Installation/manual-install.md)
 
 <br>
 
@@ -317,58 +273,21 @@ _Continue reading to discover all the features..._
 
 </div>
 
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
-
-<br>
-
 ## 🎨 Hecate Settings GUI
 
 <div align="center">
 
 ### _GUI config tool (or use hyprsettings if this doesn't work)_
 
-<br>
+> This is no longer maintained a new project will be released soon. Try [hyprsettings](https://github.com/acropolis914/hyprsettings) instead. It's another great GUI tool for Hyprland configuration.
 
 <img src="https://raw.githubusercontent.com/nurysso/Hermes/refs/heads/main/hecate/gifs/settings.gif" alt="Hecate Helper GUI" width="800" style="border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);"/>
 
-<br><br>
-
 **Hecate-Settings is a GUI tool for configuring Hyprland without editing files**
 
-> **Alternative:** If Hecate-Settings doesn't work, try [hyprsettings](https://github.com/acropolis914/hyprsettings) instead. It's another great GUI tool for Hyprland configuration.
-
-</div>
-<br>
-
-<br>
-
-<div align="center">
-
-### 🚀 Launch Hecate Helper
-
-```bash
-# Run from anywhere
-Hecate-Settings
-
-# Or use the keybinding
-SUPER + H
-```
-
 </div>
 
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
-
-<br>
-
-## 📱 QuickShell Widgets
+## QuickShell Widgets
 
 <div align="center">
 
@@ -380,51 +299,7 @@ SUPER + H
 
 </div>
 
-<br>
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### **Clock Widget**
-
-Elegant time and date display with multiple format options, customizable appearance, and smooth animations.
-
-<br>
-
-### **QuickApps Launcher**
-
-- Pin your favorite applications with quick access grid layout.
-- config available at ~/.config/hecate/quickapps.conf
-
-</td>
-<td width="50%" valign="top">
-
-### **System Info Monitor**
-
-- **CPU Usage** — Real-time processor monitoring with temperature
-- **GPU Stats** — Graphics card utilization and memory
-- **RAM Usage** — Memory consumption with available/total display
-
-<br>
-
-### **Audio Visualizer**
-
-- Integrated **Cava** audio visualization synchronized with system audio, customizable colors matching your theme, and multiple visualization modes.
-- config available at ~/.config/cava/config_widget
-</td>
-</tr>
-</table>
-
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
-
-<br>
-
-## ⚙️ Configuration
+## Configuration
 
 <div align="center">
 
@@ -434,7 +309,7 @@ Elegant time and date display with multiple format options, customizable appeara
 
 <br>
 
-### 📝 **Hecate Configuration File**
+### **Hecate Configuration File**
 
 Hecate stores your preferences in `~/.config/hecate/hecate.toml`:
 
@@ -443,7 +318,7 @@ Hecate stores your preferences in `~/.config/hecate/hecate.toml`:
 # This file manages your Hecate installation settings
 
 [metadata]
-version = "0.4.1 shy eagle"
+version = "0.4.9 shy eagle"
 install_date = "2025-10-15"
 last_update = "2025-10-15"
 repo_url = "https://github.com/nurysso/Hecate.git"
@@ -461,62 +336,17 @@ shell = "fish"
 profile = "minimal"
 ```
 
-<br>
-
-### **Theme Modes**
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-#### Dynamic Mode
-
-```toml
-[theme]
-mode = "dynamic"
-```
-
-**Features:**
-
-- Colors automatically extracted from wallpaper
-- Real-time updates across all applications
-- Seamless visual harmony
-- Powered by Matugen and PyWall
-
-</td>
-<td width="50%" valign="top">
-
-#### Static Mode
-
-```toml
-[theme]
-mode = "static"
-```
-
-**Features:**
-
-- Fixed color scheme
-- Manual theme changes only
-- Predictable appearance
-
-</td>
-</tr>
-</table>
-
-<br>
-
-### 📂 **Configuration Structure**
+### **Configuration Structure**
 
 All configuration files are located in `~/.config/`:
 
 ```
 ~/.config/
 ├── hypr/              # Hyprland configuration
-├── waybar/            # Status bar layouts and styles
 ├── rofi/              # Application launcher themes
 ├── swaync/            # Notification center
 ├── wlogout/           # Logout menu
-├── quickshell/        # Widget configurations
+├── quickshell/        # Widget And Bar configurations
 ├── alacritty/         # Terminal configs
 ├── kitty/             # Terminal configs
 ├── foot/              # Terminal configs
@@ -524,15 +354,7 @@ All configuration files are located in `~/.config/`:
 └── hecate/            # Hecate main config
 ```
 
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
-
-<br>
-
-## 🎨 Dynamic Theming in Action
+## Dynamic Theming in Action
 
 <div align="center">
 
@@ -550,7 +372,7 @@ All configuration files are located in `~/.config/`:
 <tr>
 <td width="50%" valign="top">
 
-- **Waybar** — Status bar colors and modules
+- **Bar** — Status bar colors and modules
 - **Rofi** — Application launcher themes
 - **SwayNC** — Notification styling
 
@@ -573,67 +395,6 @@ All configuration files are located in `~/.config/`:
 
 _and watch your entire desktop environment transform!_
 
-</div>
-
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
-
-<br>
-
-## 🔨 Post-Installation
-
-<div align="center">
-
-### _Get started with these essential steps_
-
-</div>
-
-<br>
-
-<table>
-<tr>
-<td align="center" width="33%">
-
-### 🖼️ **Setup Wallpaper**
-
-Press `SUPER+CTRL+W` to open the wallpaper selector
-
-_See the magic happen!_
-
-</td>
-<td align="center" width="33%">
-
-### 🎨 **Launch GUI Helper**
-
-Press `SUPER+H` or run `Hecate-Settings `
-
-_Access the configuration interface_
-
-</td>
-<td align="center" width="33%">
-
-### 📱 **Enable Widgets**
-
-Press `SUPER+W` to toggle desktop widgets
-
-_Enhance your desktop experience_
-
-</td>
-</tr>
-</table>
-
-<br>
-
-> [!NOTE]
-> Hyprland plugins have been removed from the system as they can break when Hyprland is updated.
-
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
 </div>
 
 <br>
@@ -693,16 +454,8 @@ _Enhance your desktop experience_
 
 <br>
 
-> [!TIP]
+> [!NOTE]
 > Full keybinding list available in `~/.config/hypr/config/keybinds.conf` or in the **Hecate-Settings GUI**
-
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
-
-<br>
 
 ## 🤝 Contributing
 
@@ -731,79 +484,6 @@ _Enhance your desktop experience_
 3. **Add feature** your changes (`git commit -m 'Add some AmazingFeature'`)
 4. **Push** to the branch (`git push origin feature/AmazingFeature`)
 5. **Open** a Pull Request
-
-<br>
-
-### **Areas for Contribution**
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-#### **Themes & Visuals**
-
-- Create and share color schemes
-- Design new widget styles
-- Improve GUI aesthetics
-
-<br>
-
-#### **Widget Development**
-
-- Build new QuickShell widgets
-- Enhance existing widgets
-- Add widget customization options
-
-<br>
-
-#### **GUI Enhancements**
-
-- Improve Hecate Helper features
-- Add new configuration panels
-- Enhance user experience
-
-</td>
-<td width="50%" valign="top">
-
-#### **Application Support**
-
-- Add support for more terminals
-- Integrate new status bars
-- Expand launcher options
-
-<br>
-
-#### **Documentation**
-
-- Improve guides and tutorials
-- Create video walkthroughs
-- Translate documentation
-
-<br>
-
-#### **Bug Fixes**
-
-- Help squash bugs
-- Improve stability
-- Optimize performance
-
-</td>
-</tr>
-</table>
-
-<br>
-
-<div align="center">
-
-**Check out our [Contributing Guide](CONTRIBUTING.md) for detailed information**
-
-</div>
-
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
 
 <br>
 
@@ -867,8 +547,6 @@ post_command = ~/.config/hecate/scripts/hecate-system-colors.sh
 
 <br>
 
-## License
-
 <div align="center">
 
 This project is licensed under the **GNU-gpl3 License**
@@ -876,14 +554,6 @@ This project is licensed under the **GNU-gpl3 License**
 See the [LICENSE](LICENSE) file for details
 
 </div>
-
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
-
-<br>
 
 ## Acknowledgments
 
@@ -928,63 +598,10 @@ _Built on the shoulders of giants_
 </tr>
 </table>
 
-<br>
-
-<div align="center">
-
-<!-- *And all the amazing developers of the supported applications* ❤️ -->
-
-</div>
-
-<br>
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="900">
-</div>
-
-<br>
-
-<div align="center">
-
-# 🌙 Hecate
-
-### _Hyprland rice with auto-theming_
-
-<br>
-
-<a href="https://github.com/nurysso/Hecate">
-  <img src="https://img.shields.io/github/stars/nurysso/Hecate?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41" alt="Stars"/>
-</a>
-<a href="https://github.com/nurysso/Hecate/network/members">
-  <img src="https://img.shields.io/github/forks/nurysso/Hecate?style=for-the-badge&logo=git&color=F9E2AF&logoColor=D9E0EE&labelColor=302D41" alt="Forks"/>
-</a>
-<a href="https://github.com/nurysso/Hecate/issues">
-  <img src="https://img.shields.io/github/issues/nurysso/Hecate?style=for-the-badge&logo=gitbook&color=F38BA8&logoColor=D9E0EE&labelColor=302D41" alt="Issues"/>
-</a>
-<a href="https://github.com/nurysso/Hecate/pulls">
-  <img src="https://img.shields.io/github/issues-pr/nurysso/Hecate?style=for-the-badge&logo=github&color=A6E3A1&logoColor=D9E0EE&labelColor=302D41" alt="Pull Requests"/>
-</a>
-
-<br><br>
-
 **Made with ♥ by [nurysso](https://github.com/nurysso)**
 
 <br>
 
 <sub>_Hecate — Greek goddess of magic, crossroads, and transformation_</sub>
 
-<br><br>
-
-### **[⭐ Star this repo](https://github.com/nurysso/Hecate)** if you like it!
-
-<br>
-
----
-
-### 🔍 Keywords for GitHub Search
-
-`hyprland` `hyprland-dotfiles` `hyprland-rice` `hyprland-config` `hyprland-theme` `wayland` `wayland-compositor` `linux-rice` `arch-linux` `dotfiles` `pywal` `dynamic-theming` `auto-theming` `wallpaper-theming` `waybar` `rofi` `quickshell` `desktop-widgets` `hyprland-gui` `hyprland-settings` `swaync` `wlogout` `kitty` `alacritty` `foot` `ghostty` `zsh` `bash` `fish` `linux-desktop` `unixporn` `r-unixporn` `wayland-rice` `hyprland-setup` `pywall-theme` `matugen` `wallust` `cava` `audio-visualizer` `system-monitor` `gui-configurator` `hyprland-installer` `arch-dotfiles`
-
 <!-- <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=150&section=footer&animation=twinkling"/> -->
-
-</div>
