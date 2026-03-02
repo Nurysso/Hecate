@@ -56,12 +56,12 @@ get_packageManager() {
 # Defensive helper function to safely remove files, directories, or symlinks
 safe_remove() {
   local path="$1"
-  
+
   if [ ! -e "$path" ] && [ ! -L "$path" ]; then
     # Path doesn't exist, nothing to do
     return 0
   fi
-  
+
   if [ -L "$path" ]; then
     # It's a symlink
     rm -f "$path"
@@ -81,15 +81,15 @@ safe_remove() {
 safe_copy_dir() {
   local src="$1"
   local dest="$2"
-  
+
   if [ ! -d "$src" ]; then
     gum style --foreground 196 "Error: Source directory does not exist: $src"
     return 1
   fi
-  
+
   # Remove destination if it exists (could be file, dir, or symlink)
   safe_remove "$dest"
-  
+
   # Now safely copy
   cp -r "$src" "$dest"
 }
@@ -98,15 +98,15 @@ safe_copy_dir() {
 safe_copy_file() {
   local src="$1"
   local dest="$2"
-  
+
   if [ ! -f "$src" ]; then
     gum style --foreground 196 "Error: Source file does not exist: $src"
     return 1
   fi
-  
+
   # Remove destination if it exists (could be file, dir, or symlink)
   safe_remove "$dest"
-  
+
   # Now safely copy
   cp "$src" "$dest"
 }
@@ -148,7 +148,7 @@ backup_config() {
 
   # List of config directories to check (excluding shell rc files)
    local config_dirs=(
- "alacritty"  "cava" "fastfetch"  "foot"     "gtk-3.0"  "hecate"  "kitty"    "quickshell"  "starship" "wallust" "waypaper" "zsh" "bash"  "fish" "ghostty" "gtk-4.0" "hypr" "matugen" "rofi" "swaync" "waybar" "wlogout"
+ "alacritty"  "cava" "fastfetch"  "foot"     "gtk-3.0"  "hecate"  "kitty"    "quickshell"  "starship" "wallust" "waypaper" "zsh" "bash"  "fish" "ghostty" "gtk-4.0" "hypr" "matugen" "rofi" "swaync" "wlogout"
   )
 
   # Check for shell rc files separately
@@ -301,7 +301,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - removed browser from here since we handle it separately
-  INSTALL_PACKAGES+=(git wget curl unzip wl-clipboard matugen-bin pacman-contrib yazi tyr-bin wallust waybar swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract tesseract-data-eng noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp neovim nano webkit2gtk)
+  INSTALL_PACKAGES+=(git hyprsettings-git wget curl unzip wl-clipboard matugen-bin pacman-contrib yazi tyr-bin wallust swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract tesseract-data-eng noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp neovim nano webkit2gtk)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -607,7 +607,7 @@ install_aur_helper() {
 
 # Verify critical packages are installed (returns 0 if ok, 1 if critical failure)
 verify_critical_packages_installed() {
-  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk")
+  local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk")
   local missing_critical=()
 
   for pkg in "${critical_packages[@]}"; do
@@ -632,7 +632,7 @@ verify_critical_packages() {
   clear
   gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
 
-  local critical_packages=("$USER_TERMINAL" "hyprland" "waybar" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk")
+  local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk")
   local missing_packages=()
 
   for pkg in "${critical_packages[@]}"; do
@@ -896,29 +896,29 @@ move_config() {
   install_shell_scripts
 
   # Install apps from apps directory
-  install_app "Pulse" "$HECATEAPPSDIR/Pulse/build/bin/Pulse"
-  install_app "Hecate-Settings" "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings"
-  install_app "Aoiler" "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler"
+#   install_app "Pulse" "$HECATEAPPSDIR/Pulse/build/bin/Pulse"
+#   install_app "Hecate-Settings" "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings"
+#   install_app "Aoiler" "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler"
 
   echo ""
   echo "✓ Configuration files installed successfully!" "beams"
 }
 
 # Helper function to install apps
-install_app() {
-  local app_name="$1"
-  local app_path="$2"
-  local app_display="${3:-$app_name}"
+# install_app() {
+#   local app_name="$1"
+#   local app_path="$2"
+#   local app_display="${3:-$app_name}"
 
-  if [ -f "$app_path" ]; then
-    echo "Installing $app_display..." "slide"
-    cp "$app_path" "$HOME/.local/bin/$app_name"
-    chmod +x "$HOME/.local/bin/$app_name"
-    echo "✓ $app_display installed to ~/.local/bin/$app_name" "slide"
-  else
-    gum style --foreground 220 "⚠ $app_display binary not found at $app_path"
-  fi
-}
+#   if [ -f "$app_path" ]; then
+#     echo "Installing $app_display..." "slide"
+#     cp "$app_path" "$HOME/.local/bin/$app_name"
+#     chmod +x "$HOME/.local/bin/$app_name"
+#     echo "✓ $app_display installed to ~/.local/bin/$app_name" "slide"
+#   else
+#     gum style --foreground 220 "⚠ $app_display binary not found at $app_path"
+#   fi
+# }
 
 # Build preferred app keybind
 build_preferd_app_keybind() {
@@ -1007,33 +1007,33 @@ EOF
 }
 
 # Setup Waybar and link system colors
-setup_Waybar() {
-  gum style --foreground 220 "Configuring waybar..."
+setup_Symlinks() {
+  gum style --foreground 220 "Adding symlinks..."
 
   # Define symlink paths
-  local WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
-  local WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
-  local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
+#   local WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
+#   local WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
+#   local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
   local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
   local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
   local HYPRLOCK_SYMLINK="$HOME/.config/hypr/hyprlock.conf"
 
   # Remove old symlinks, files, or directories safely
-  safe_remove "$WAYBAR_STYLE_SYMLINK"
-  safe_remove "$WAYBAR_CONFIG_SYMLINK"
-  safe_remove "$WAYBAR_COLOR_SYMLINK"
+#   safe_remove "$WAYBAR_STYLE_SYMLINK"
+#   safe_remove "$WAYBAR_CONFIG_SYMLINK"
+#   safe_remove "$WAYBAR_COLOR_SYMLINK"
   safe_remove "$SWAYNC_COLOR_SYMLINK"
   safe_remove "$STARSHIP_SYMLINK"
   safe_remove "$HYPRLOCK_SYMLINK"
 
   # Create new symlinks
-  ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
-  ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
+#   ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
+#   ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
   ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
   ln -s "$HOME/.config/hypr/hyprlock/hecate-lock.conf" "$HYPRLOCK_SYMLINK"
-  gum style --foreground 82 "✓ Waybar configured!"
+  gum style --foreground 82 "✓ Symlinks configured!"
 }
 
 # Set default shell
@@ -1138,7 +1138,7 @@ setup_wallpapers() {
     if [ -e "$wallpaper_dir" ] || [ -L "$wallpaper_dir" ]; then
       local backup_dir="$HOME/Pictures/wallpapers-backup-$(date +%Y%m%d_%H%M%S)"
       gum style --foreground 220 "Backing up existing wallpapers to: $backup_dir"
-      
+
       if [ -L "$wallpaper_dir" ]; then
         # It's a symlink, just remove it
         rm -f "$wallpaper_dir"
@@ -1288,8 +1288,8 @@ main() {
   # Install configuration files
   move_config
 
-  # Setup Waybar symlinks
-  setup_Waybar
+  # Setup symlinks
+  setup_Symlinks
 
   build_preferd_app_keybind
   build_quickApps

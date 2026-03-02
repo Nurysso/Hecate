@@ -1064,6 +1064,9 @@ main() {
 
   clear
 
+  echo -e "${RED} THIS SCRIPT IS STILL IN TESTING PHASE SOME PARTS MAY NOT WORK"
+  sleep 5
+
   # Check for gum first
   #check_gum
 
