@@ -300,6 +300,11 @@ ask_preferences() {
 build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
+# Pre-install webkit2gtk-4.1 from official repos right now, before paru touches it
+  gum style --foreground 220 "Pre-installing webkit2gtk-4.1 from pacman..."
+  sudo pacman -S --needed --noconfirm webkit2gtk-4.1 || \
+  gum style --foreground 196 "⚠ webkit2gtk-4.1 pacman install failed,
+  paru will handle it this will take a long time"
   # Base packages - removed browser from here since we handle it separately
   INSTALL_PACKAGES+=(git hyprsettings-git wget curl unzip wl-clipboard matugen-bin pacman-contrib yazi tyr-bin wallust swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract tesseract-data-eng noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp neovim nano webkit2gtk)
 
@@ -607,7 +612,7 @@ install_aur_helper() {
 
 # Verify critical packages are installed (returns 0 if ok, 1 if critical failure)
 verify_critical_packages_installed() {
-  local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk")
+  local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk-4.1")
   local missing_critical=()
 
   for pkg in "${critical_packages[@]}"; do
@@ -632,7 +637,7 @@ verify_critical_packages() {
   clear
   gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
 
-  local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk")
+  local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk-4.1")
   local missing_packages=()
 
   for pkg in "${critical_packages[@]}"; do
@@ -1010,29 +1015,19 @@ EOF
 setup_Symlinks() {
   gum style --foreground 220 "Adding symlinks..."
 
-  # Define symlink paths
-#   local WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
-#   local WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
-#   local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
   local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
   local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
   local HYPRLOCK_SYMLINK="$HOME/.config/hypr/hyprlock.conf"
 
-  # Remove old symlinks, files, or directories safely
-#   safe_remove "$WAYBAR_STYLE_SYMLINK"
-#   safe_remove "$WAYBAR_CONFIG_SYMLINK"
-#   safe_remove "$WAYBAR_COLOR_SYMLINK"
   safe_remove "$SWAYNC_COLOR_SYMLINK"
   safe_remove "$STARSHIP_SYMLINK"
   safe_remove "$HYPRLOCK_SYMLINK"
 
-  # Create new symlinks
-#   ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
-#   ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
-  ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
+  # Waybar color symlink is intentionally omitted (waybar lines are commented out)
   ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
   ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
   ln -s "$HOME/.config/hypr/hyprlock/hecate-lock.conf" "$HYPRLOCK_SYMLINK"
+
   gum style --foreground 82 "✓ Symlinks configured!"
 }
 
