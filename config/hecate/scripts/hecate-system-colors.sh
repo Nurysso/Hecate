@@ -29,8 +29,9 @@ if [ "$THEME_MODE" = "static" ]; then
 fi
 
 # Extract wallpaper path
-WP_PATH=$(grep '^wallpaper' "$CONFIG" | cut -d '=' -f2 | tr -d ' ')
+WP_PATH=$(grep '^wallpaper' "$CONFIG" | head -n 1 | cut -d '=' -f2 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr -d '\r')
 WP_PATH="${WP_PATH/#\~/$HOME}"
+ls -l "$WP_PATH"
 
 if [ ! -f "$WP_PATH" ]; then
   echo "Error: Wallpaper not found at $WP_PATH"
