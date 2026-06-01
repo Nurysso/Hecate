@@ -53,28 +53,34 @@ get_packageManager() {
   gum style --foreground 82 "✓ Package Manager: $PACKAGE_MANAGER"
 }
 
-# Defensive helper function to safely remove files, directories, or symlinks
+
+
 safe_remove() {
   local path="$1"
 
-  if [ ! -e "$path" ] && [ ! -L "$path" ]; then
-    # Path doesn't exist, nothing to do
+  # 1. Input Validation & Strict Guardrails
+  if [[ -z "$path" ]]; then
+    gum style --foreground 196 "Error: safe_remove requires a target path."
+    return 1
+  fi
+
+  if [[ "$path" == "/" || "$path" == "." || "$path" == ".." ]]; then
+    gum style --foreground 196 "Error: Refusing to delete critical directory path: $path"
+    return 1
+  fi
+
+  # 2. Check existence
+  if [[ ! -e "$path" && ! -L "$path" ]]; then
     return 0
   fi
 
-  if [ -L "$path" ]; then
-    # It's a symlink
-    rm -f "$path"
-  elif [ -d "$path" ]; then
-    # It's a directory
-    rm -rf "$path"
-  elif [ -f "$path" ]; then
-    # It's a regular file
-    rm -f "$path"
-  else
-    # Unknown type, try to remove anyway
-    rm -rf "$path"
-  fi
+  # 3. Remove cleanly and catch errors
+  # --preserve-root protects against accidental system wipeouts
+  # -- stops flags from being read if a file starts with a dash (-)
+  rm -rf --preserve-root -- "$path" || {
+    gum style --foreground 196 "Error: Failed to force remove $path"
+    return 1
+  }
 }
 
 # Defensive helper function to safely copy a directory
@@ -82,17 +88,59 @@ safe_copy_dir() {
   local src="$1"
   local dest="$2"
 
-  if [ ! -d "$src" ]; then
+  # 1. Input Validation
+  if [[ -z "$src" || -z "$dest" ]]; then
+    gum style --foreground 196 "Error: Source and destination paths are required."
+    return 1
+  fi
+
+  if [[ ! -d "$src" ]]; then
     gum style --foreground 196 "Error: Source directory does not exist: $src"
     return 1
   fi
 
-  # Remove destination if it exists (could be file, dir, or symlink)
-  safe_remove "$dest"
+  # Prevent destructive operations on root or matching paths
+  if [[ "$dest" == "/" || "$src" == "$dest" ]]; then
+    gum style --foreground 196 "Error: Invalid or identical source/destination paths."
+    return 1
+  fi
 
-  # Now safely copy
-  cp -r "$src" "$dest"
+  # 2. Stage the copy in a temporary directory
+  local dest_parent
+  dest_parent=$(dirname -- "$dest")
+
+  local tmp_dest
+  tmp_dest=$(mktemp -d "${dest_parent}/.copy_tmp_XXXXXX") || {
+    gum style --foreground 196 "Error: Could not create temporary directory."
+    return 1
+  }
+
+  # Ensure cleanup of temp dir if script aborts mid-copy
+  trap 'rm -rf "$tmp_dest"' RETURN
+
+  # Copy contents *into* the temp directory instead of replacing it
+  cp -a "$src/." "$tmp_dest/" || {
+    gum style --foreground 196 "Error: Copy failed from $src to $tmp_dest"
+    return 1
+  }
+
+  # 3. Swap destination atomically
+  if [[ -e "$dest" || -L "$dest" ]]; then
+    rm -rf --preserve-root "$dest" || {
+      gum style --foreground 196 "Error: Could not remove old $dest"
+      return 1
+    }
+  fi
+
+  mv "$tmp_dest" "$dest" || {
+    gum style --foreground 196 "Error: Could not move temporary directory to final destination."
+    return 1
+  }
+
+  # Clear the trap explicitly on success
+  trap - RETURN
 }
+
 
 # Defensive helper function to safely copy a file
 safe_copy_file() {
@@ -296,17 +344,26 @@ ask_preferences() {
   fi
 }
 
+install_pacman_only_packages() {
+  gum style --border double --padding "1 2" --border-foreground 212 "Installing Official Repo Packages"
+  gum style --foreground 220 "Pre-installing webkit2gtk-4.1 from pacman (avoids AUR source build)..."
+
+  if ! sudo pacman -S --needed --noconfirm webkit2gtk-4.1; then
+    gum style --foreground 196 "✗ Failed to install webkit2gtk-4.1 from pacman"
+    if ! gum confirm "Continue anyway?"; then
+      exit 1
+    fi
+  else
+    gum style --foreground 82 "✓ webkit2gtk-4.1 installed from official repos"
+  fi
+}
+
 # Build package list based on preferences
 build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
-# Pre-install webkit2gtk-4.1 from official repos right now, before paru touches it
-  gum style --foreground 220 "Pre-installing webkit2gtk-4.1 from pacman..."
-  sudo pacman -S --needed --noconfirm webkit2gtk-4.1 || \
-  gum style --foreground 196 "⚠ webkit2gtk-4.1 pacman install failed,
-  paru will handle it this will take a long time"
   # Base packages - removed browser from here since we handle it separately
-  INSTALL_PACKAGES+=(git hyprsettings-git wget curl unzip wl-clipboard matugen-bin pacman-contrib yazi tyr-bin wallust swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract tesseract-data-eng noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp neovim nano webkit2gtk)
+  INSTALL_PACKAGES+=(git hyprsettings-git wget curl unzip wl-clipboard matugen-bin pacman-contrib yazi tyr-bin wallust swaync rofi-wayland rofi rofi-emoji waypaper wlogout dunst fastfetch thunar quickshell-git python-pywal btop base-devel cliphist jq hyprpaper inter-font ttf-jetbrains-mono-nerd tesseract tesseract-data-eng noto-fonts-emoji swww hyprlock hypridle starship noto-fonts grim slurp neovim nano)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -612,8 +669,10 @@ install_aur_helper() {
 
 # Verify critical packages are installed (returns 0 if ok, 1 if critical failure)
 verify_critical_packages_installed() {
-  local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk-4.1")
-  local missing_critical=()
+    local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" \
+    "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" \
+    "tesseract" "webkit2gtk-4.1")
+     local missing_critical=()
 
   for pkg in "${critical_packages[@]}"; do
     if ! command -v "$pkg" &>/dev/null && ! pacman -Q "$pkg" &>/dev/null 2>&1; then
@@ -637,8 +696,10 @@ verify_critical_packages() {
   clear
   gum style --border double --padding "1 2" --border-foreground 212 "Verifying Critical Packages"
 
-  local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" "tesseract" "webkit2gtk-4.1")
-  local missing_packages=()
+    local critical_packages=("$USER_TERMINAL" "hyprland" "rofi" "swaync" "hyprlock" \
+    "hypridle" "wallust" "starship" "wlogout" "grim" "wl-clipboard" "slurp" \
+    "tesseract" "webkit2gtk-4.1")
+    local missing_packages=()
 
   for pkg in "${critical_packages[@]}"; do
     if ! command -v "$pkg" &>/dev/null && ! pacman -Q "$pkg" &>/dev/null 2>&1; then
@@ -853,60 +914,51 @@ move_config() {
   mkdir -p "$CONFIGDIR"
   mkdir -p "$HOME/.local/bin"
 
-  # Copy all config directories except shell rc files
   for item in "$HECATEDIR/config"/*; do
     if [ -d "$item" ]; then
-      local item_name=$(basename "$item")
+      local item_name
+      item_name=$(basename "$item")
 
-      # Skip local-bin directory (handled separately)
-      if [ "$item_name" = "local-bin" ]; then
-        continue
-      fi
+      [ "$item_name" = "local-bin" ] && continue
 
-      # Handle terminal configs - only install selected terminal
       case "$item_name" in
         alacritty|foot|ghostty|kitty)
           if [ "$item_name" = "$USER_TERMINAL" ]; then
-            echo "Installing $item_name config..." "slide"
+            gum style --foreground 220 "Installing $item_name config..."
             safe_copy_dir "$item" "$CONFIGDIR/$item_name"
           fi
           ;;
+        hypr)
+          # Explicit loud handling — this one must succeed
+          gum style --foreground 220 "Installing hypr config..."
+          if ! safe_copy_dir "$item" "$CONFIGDIR/hypr"; then
+            gum style --foreground 196 "✗ CRITICAL: Failed to install hypr config!"
+            exit 1
+          fi
+          gum style --foreground 82 "✓ hypr config installed ($(ls "$CONFIGDIR/hypr" | wc -l) items)"
+          ;;
         *)
-          # Install all other configs
-          echo "Installing $item_name..." "slide"
+          gum style --foreground 220 "Installing $item_name..."
           safe_copy_dir "$item" "$CONFIGDIR/$item_name"
           ;;
       esac
     fi
   done
 
-  # Handle shell rc files
+  # Shell rc files
   if [ -f "$HECATEDIR/config/zshrc" ]; then
-    echo "Installing .zshrc..." "slide"
     safe_copy_file "$HECATEDIR/config/zshrc" "$HOME/.zshrc"
-    echo "✓ ZSH config installed" "slide"
-  else
-    gum style --foreground 220 "⚠ zshrc not found in config directory"
+    gum style --foreground 82 "✓ .zshrc installed"
   fi
 
   if [ -f "$HECATEDIR/config/bashrc" ]; then
-    echo "Installing .bashrc..." "slide"
     safe_copy_file "$HECATEDIR/config/bashrc" "$HOME/.bashrc"
-    echo "✓ BASH config installed" "slide"
-  else
-    gum style --foreground 220 "⚠ bashrc not found in config directory"
+    gum style --foreground 82 "✓ .bashrc installed"
   fi
 
-  # Install shell scripts
   install_shell_scripts
 
-  # Install apps from apps directory
-#   install_app "Pulse" "$HECATEAPPSDIR/Pulse/build/bin/Pulse"
-#   install_app "Hecate-Settings" "$HECATEAPPSDIR/Hecate-Help/build/bin/Hecate-Settings"
-#   install_app "Aoiler" "$HECATEAPPSDIR/Aoiler/build/bin/Aoiler"
-
-  echo ""
-  echo "✓ Configuration files installed successfully!" "beams"
+  gum style --foreground 82 "✓ Configuration files installed successfully!"
 }
 
 # Helper function to install apps
@@ -1257,8 +1309,7 @@ main() {
 
   # Ask all user preferences
   ask_preferences
-
-
+  install_pacman_only_packages
   # Build complete package list
   build_package_list
 
