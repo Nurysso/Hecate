@@ -356,16 +356,6 @@ install_shell_scripts() {
     gum style --foreground 220 "⚠ hecate.sh not found at $scripts_dir/hecate.sh"
   fi
 
-  # Install freya.sh
-  if [ -f "$scripts_dir/file_convert.sh" ]; then
-    fancy_echo "Installing freya script..." "slide"
-    cp "$scripts_dir/file_convert.sh" "$HOME/.local/bin/file_convert"
-    chmod +x "$HOME/.local/bin/file_convert"
-    fancy_echo "✓ freya installed to ~/.local/bin/file_convert" "slide"
-  else
-    gum style --foreground 220 "⚠ freya.sh not found at $scripts_dir/file_convert.sh"
-  fi
-
   echo ""
   gum style --foreground 82 "✓ Shell scripts installed successfully!"
 }

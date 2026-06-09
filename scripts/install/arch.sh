@@ -18,7 +18,6 @@ HECATEDIR="$HOME/Hecate"
 HECATEAPPSDIR="$HOME/Hecate/apps"
 CONFIGDIR="$HOME/.config"
 REPO_URL="https://github.com/Nurysso/Hecate.git"
-FREYA_URL="https://github.com/Nurysso/Freya.git"
 OS="arch"
 PACKAGE_MANAGER=""
 HYPRLAND_NEWLY_INSTALLED=false
@@ -887,17 +886,6 @@ install_shell_scripts() {
   else
     gum style --foreground 220 "⚠ hecate.sh not found at $scripts_dir/hecate.sh"
   fi
-
-  # Install freya.sh
-  if [ -f "$scripts_dir/file_convert.sh" ]; then
-    echo "Installing freya script..." "slide"
-    cp "$scripts_dir/file_convert.sh" "$HOME/.local/bin/file_convert"
-    chmod +x "$HOME/.local/bin/file_convert"
-    echo "✓ freya installed to ~/.local/bin/file_convert" "slide"
-  else
-    gum style --foreground 220 "⚠ freya.sh not found at $scripts_dir/file_convert.sh"
-  fi
-
   echo ""
   gum style --foreground 82 "✓ Shell scripts installed successfully!"
 }
@@ -1171,7 +1159,7 @@ configure_sddm_theme() {
 setup_wallpapers() {
   gum style --border double --padding "1 2" --border-foreground 212 "Wallpaper Setup"
 
-  local wallpaper_dir="$HOME/Pictures/wallpapers"
+  local wallpaper_dir="$HOME/Pictures/Wallpapers"
 
   echo ""
   gum style --foreground 220 "Would you like to download the full wallpaper collection?"
@@ -1179,7 +1167,7 @@ setup_wallpapers() {
 
   if gum confirm "Download full wallpaper repository?"; then
     # User wants full collection
-    gum style --foreground 82 "Cloning wallpaper repository..."
+    gum style --foreground 82 "Downloading wallpaper collection (sparse checkout of images folder)..."
 
     # Backup existing wallpapers if path exists (could be file, dir, or symlink)
     if [ -e "$wallpaper_dir" ] || [ -L "$wallpaper_dir" ]; then
@@ -1198,29 +1186,38 @@ setup_wallpapers() {
       fi
     fi
 
-    # Clone and extract walls directory
-    mkdir -p "$HOME/Pictures"
-    if git clone --depth 1 "$FREYA_URL" "$HOME/Pictures/Freya-temp"; then
-      if [ -d "$HOME/Pictures/Freya-temp/walls" ]; then
-        mv "$HOME/Pictures/Freya-temp/walls" "$wallpaper_dir"
-        rm -rf "$HOME/Pictures/Freya-temp"
-        echo "✓ Full wallpaper collection downloaded!" "beams"
-      else
-        gum style --foreground 196 "✗ Walls directory not found in repository"
-        return 1
-      fi
+    # Create temporary directory for sparse checkout
+    local temp_dir="$HOME/Pictures/aesthetic-wallpapers-temp"
+    mkdir -p "$temp_dir"
+
+    # Perform sparse checkout
+    (
+      cd "$temp_dir" || exit 1
+      git init
+      git remote add origin "https://github.com/D3Ext/aesthetic-wallpapers.git"
+      git sparse-checkout init --cone
+      git sparse-checkout set --no-cone images
+      git pull origin main
+    )
+
+    if [ -d "$temp_dir/images" ]; then
+      # Move the images folder to wallpaper_dir
+      mv "$temp_dir/images" "$wallpaper_dir"
+      rm -rf "$temp_dir"
+      echo "✓ Full wallpaper collection downloaded!" "beams"
     else
-      gum style --foreground 196 "✗ Failed to clone wallpaper repository"
+      gum style --foreground 196 "✗ Images folder not found in repository"
+      rm -rf "$temp_dir"
       return 1
     fi
   else
     # User wants only default wallpapers
     gum style --foreground 82 "Downloading default wallpapers..."
-    local default_dir="$wallpaper_dir/hecate-default"
+    local default_dir="$wallpaper_dir"
     mkdir -p "$default_dir"
 
-    local lock_screen_url="https://raw.githubusercontent.com/Nurysso/Freya/main/walls/hecate-default/lock-screen.png"
-    local wallpaper_url="https://raw.githubusercontent.com/Nurysso/Freya/main/walls/hecate-default/wallpaper.png"
+    local lock_screen_url="https://raw.githubusercontent.com/D3Ext/aesthetic-wallpapers/refs/heads/main/images/3squares.png"
+    local wallpaper_url="https://raw.githubusercontent.com/D3Ext/aesthetic-wallpapers/refs/heads/main/images/falltree.jpg"
 
     # Download lock screen
     echo "Downloading lock-screen.png..." "slide"
@@ -1234,7 +1231,6 @@ setup_wallpapers() {
 
     echo ""
     echo "✓ Default wallpapers downloaded!" "beams"
-    wallpaper_dir="$default_dir"
   fi
 
   echo ""

@@ -18,7 +18,6 @@ HECATEDIR="$HOME/Hecate"
 HECATEAPPSDIR="$HOME/Hecate/apps"
 CONFIGDIR="$HOME/.config"
 REPO_URL="https://github.com/Nurysso/Hecate.git"
-FREYA_URL="https://github.com/Nurysso/freya.git"
 CONFIG_FILE="$HOME/.config/hecate/hecate.toml"
 VERSION_FILE="$HECATEDIR/version.txt"
 
@@ -570,140 +569,81 @@ show_completion_message() {
 # Setup wallpapers
 setup_wallpapers() {
   gum style --border double --padding "1 2" --border-foreground 212 "Wallpaper Setup"
-  local wallpaper_dir="$HOME/Pictures/wallpapers"
+
+  local wallpaper_dir="$HOME/Pictures/Wallpapers"
+
   echo ""
   gum style --foreground 220 "Would you like to download the full wallpaper collection?"
   echo ""
+
   if gum confirm "Download full wallpaper repository?"; then
     # User wants full collection
-    gum style --foreground 82 "Cloning wallpaper repository..."
+    gum style --foreground 82 "Downloading wallpaper collection (sparse checkout of images folder)..."
 
-    if [ -d "$wallpaper_dir" ]; then
-      # Check if it's a git repository
-      if [ -d "$wallpaper_dir/.git" ]; then
-        # Get the remote URL
-        local remote_url=$(git -C "$wallpaper_dir" config --get remote.origin.url 2>/dev/null)
+    # Backup existing wallpapers if path exists (could be file, dir, or symlink)
+    if [ -e "$wallpaper_dir" ] || [ -L "$wallpaper_dir" ]; then
+      local backup_dir="$HOME/Pictures/wallpapers-backup-$(date +%Y%m%d_%H%M%S)"
+      gum style --foreground 220 "Backing up existing wallpapers to: $backup_dir"
 
-        if [ -n "$remote_url" ]; then
-          # Normalize URLs for comparison (handle both HTTPS and SSH formats)
-          local normalized_remote=$(echo "$remote_url" | sed -e 's|\.git$||' -e 's|https://github.com/||' -e 's|git@github.com:||')
-          local normalized_freya=$(echo "$FREYA_URL" | sed -e 's|\.git$||' -e 's|https://github.com/||' -e 's|git@github.com:||')
-
-          if [ "$normalized_remote" = "$normalized_freya" ]; then
-            # Same repo - do a git pull preserving user changes
-            gum style --foreground 82 "Existing Freya wallpaper repository found. Updating..."
-
-            # Stash any local changes
-            git -C "$wallpaper_dir" stash push -m "Auto-stash before Freya update" 2>/dev/null
-
-            # Pull latest changes
-            if git -C "$wallpaper_dir" pull --rebase origin main 2>/dev/null || \
-               git -C "$wallpaper_dir" pull --rebase origin master 2>/dev/null; then
-
-              # Try to reapply stashed changes (don't fail if there's a conflict)
-              git -C "$wallpaper_dir" stash pop 2>/dev/null || {
-                gum style --foreground 220 "⚠ Some local changes were preserved in stash"
-                gum style --foreground 220 "  Run 'git -C $wallpaper_dir stash list' to see them"
-              }
-
-              echo "✓ Wallpaper repository updated!" "beams"
-            else
-              gum style --foreground 196 "✗ Failed to update repository"
-              return 1
-            fi
-            return 0
-          else
-            # Different repo - backup existing directory
-            local backup_dir="$HOME/Pictures/wallpapers-personal"
-            local counter=1
-
-            # Find a unique backup directory name
-            while [ -d "$backup_dir" ]; do
-              backup_dir="$HOME/Pictures/wallpapers-personal-$counter"
-              ((counter++))
-            done
-
-            gum style --foreground 220 "Found different wallpaper repository."
-            gum style --foreground 220 "Moving to: $backup_dir"
-
-            if mv "$wallpaper_dir" "$backup_dir"; then
-              gum style --foreground 82 "✓ Personal wallpapers backed up"
-            else
-              gum style --foreground 196 "✗ Failed to backup existing wallpapers"
-              return 1
-            fi
-          fi
-        fi
-      else
-        # Not a git repo - backup the directory
-        local backup_dir="$HOME/Pictures/wallpapers-personal"
-        local counter=1
-
-        while [ -d "$backup_dir" ]; do
-          backup_dir="$HOME/Pictures/wallpapers-personal-$counter"
-          ((counter++))
-        done
-
-        gum style --foreground 220 "Found existing non-git wallpaper directory."
-        gum style --foreground 220 "Moving to: $backup_dir"
-
-        if mv "$wallpaper_dir" "$backup_dir"; then
-          gum style --foreground 82 "✓ Personal wallpapers backed up"
-        else
-          gum style --foreground 196 "✗ Failed to backup existing wallpapers"
-          return 1
-        fi
+      if [ -L "$wallpaper_dir" ]; then
+        # It's a symlink, just remove it
+        rm -f "$wallpaper_dir"
+      elif [ -d "$wallpaper_dir" ]; then
+        # It's a directory, move it
+        mv "$wallpaper_dir" "$backup_dir"
+      elif [ -f "$wallpaper_dir" ]; then
+        # It's a file, move it
+        mv "$wallpaper_dir" "$backup_dir"
       fi
     fi
 
-    # Clone the repository
-    mkdir -p "$HOME/Pictures"
-    if git clone --depth 1 "$FREYA_URL" "$HOME/Pictures/Freya-temp"; then
-      # Move only the walls directory and rename to wallpapers
-      if [ -d "$HOME/Pictures/Freya-temp/walls" ]; then
-        mv "$HOME/Pictures/Freya-temp/walls" "$wallpaper_dir"
-        rm -rf "$HOME/Pictures/Freya-temp"
-        echo "✓ Full wallpaper collection downloaded!" "beams"
-      else
-        gum style --foreground 196 "✗ Walls directory not found in repository"
-        rm -rf "$HOME/Pictures/Freya-temp"
-        return 1
-      fi
+    # Create temporary directory for sparse checkout
+    local temp_dir="$HOME/Pictures/aesthetic-wallpapers-temp"
+    mkdir -p "$temp_dir"
+
+    # Perform sparse checkout
+    (
+      cd "$temp_dir" || exit 1
+      git init
+      git remote add origin "https://github.com/D3Ext/aesthetic-wallpapers.git"
+      git sparse-checkout init --cone
+      git sparse-checkout set --no-cone images
+      git pull origin main
+    )
+
+    if [ -d "$temp_dir/images" ]; then
+      # Move the images folder to wallpaper_dir
+      mv "$temp_dir/images" "$wallpaper_dir"
+      rm -rf "$temp_dir"
+      echo "✓ Full wallpaper collection downloaded!" "beams"
     else
-      gum style --foreground 196 "✗ Failed to clone wallpaper repository"
+      gum style --foreground 196 "✗ Images folder not found in repository"
+      rm -rf "$temp_dir"
       return 1
     fi
   else
     # User wants only default wallpapers
     gum style --foreground 82 "Downloading default wallpapers..."
-    mkdir -p "$wallpaper_dir"
-    local lock_screen_url="https://raw.githubusercontent.com/Nurysso/Freya/main/walls/hecate-default/lock-screen.png"
-    local wallpaper_url="https://raw.githubusercontent.com/Nurysso/Freya/main/walls/hecate-default/wallpaper.png"
-    local success=0
+    local default_dir="$wallpaper_dir"
+    mkdir -p "$default_dir"
+
+    local lock_screen_url="https://raw.githubusercontent.com/D3Ext/aesthetic-wallpapers/refs/heads/main/images/3squares.png"
+    local wallpaper_url="https://raw.githubusercontent.com/D3Ext/aesthetic-wallpapers/refs/heads/main/images/falltree.jpg"
+
     # Download lock screen
     echo "Downloading lock-screen.png..." "slide"
-    if curl -fsSL "$lock_screen_url" -o "$wallpaper_dir/lock-screen.png"; then
+    curl -fsSL "$lock_screen_url" -o "$default_dir/lock-screen.png" && \
       echo "✓ lock-screen.png downloaded" "slide"
-      ((success++))
-    else
-      gum style --foreground 196 "✗ Failed to download lock-screen.png"
-    fi
+
     # Download wallpaper
     echo "Downloading wallpaper.png..." "slide"
-    if curl -fsSL "$wallpaper_url" -o "$wallpaper_dir/wallpaper.png"; then
+    curl -fsSL "$wallpaper_url" -o "$default_dir/wallpaper.png" && \
       echo "✓ wallpaper.png downloaded" "slide"
-      ((success++))
-    else
-      gum style --foreground 196 "✗ Failed to download wallpaper.png"
-    fi
-    if [ $success -eq 2 ]; then
-      echo ""
-      echo "✓ Default wallpapers downloaded!" "beams"
-    else
-      echo ""
-      gum style --foreground 220 "⚠ Some wallpapers failed to download"
-    fi
+
+    echo ""
+    echo "✓ Default wallpapers downloaded!" "beams"
   fi
+
   echo ""
   gum style --foreground 82 "Wallpapers saved to: $wallpaper_dir"
 }
