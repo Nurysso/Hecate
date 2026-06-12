@@ -454,7 +454,7 @@ backup_config() {
   local config_dirs=(
     "alacritty" "cava" "fastfetch" "foot" "gtk-3.0" "hecate" "kitty"
     "quickshell" "starship" "wallust" "waypaper" "zsh" "bash" "fish"
-    "ghostty" "gtk-4.0" "hypr" "matugen" "rofi" "swaync" "waybar" "wlogout"
+    "ghostty" "gtk-4.0" "hypr" "matugen" "rofi" "swaync" "wlogout"
   )
 
   # Check for shell rc files separately

@@ -301,9 +301,9 @@ show_update_warning() {
 
   gum style --border double --padding "1 2" --border-foreground 141 "Coming Soon"
   echo ""
-  gum style --foreground 141 --bold "Next Major Version (Late Jan/Early Feb):"
+  gum style --foreground 141 --bold "Next Major Version (idk when):"
   gum style --foreground 255 "  • Switching to Quickshell for most components"
-  gum style --foreground 255 "  • No more rofi, swaync, and waybar"
+  gum style --foreground 255 "  • No more rofi, swaync"
   echo ""
   gum style --foreground 82 "Help Wanted: If you know how to build Quickshell widgets and apps,"
   gum style --foreground 82 "   contributions are appreciated!"
@@ -491,7 +491,7 @@ backup_config() {
   local config_dirs=(
     "alacritty" "cava" "fastfetch" "foot" "gtk-3.0" "hecate" "kitty"
     "quickshell" "starship" "wallust" "waypaper" "zsh" "bash" "fish"
-    "ghostty" "gtk-4.0" "hypr" "matugen" "rofi" "swaync" "waybar" "wlogout"
+    "ghostty" "gtk-4.0" "hypr" "matugen" "rofi" "swaync" "wlogout"
   )
 
   # Check for shell rc files separately
@@ -647,33 +647,25 @@ setup_wallpapers() {
   echo ""
   gum style --foreground 82 "Wallpapers saved to: $wallpaper_dir"
 }
-setup_Waybar() {
-  gum style --foreground 220 "Configuring waybar..."
+setup_Symlinks() {
+  gum style --foreground 220 "Configuring Symlinks..."
 
   # Define symlink paths
-  local WAYBAR_STYLE_SYMLINK="$HOME/.config/waybar/style.css"
-  local WAYBAR_CONFIG_SYMLINK="$HOME/.config/waybar/config"
-  local WAYBAR_COLOR_SYMLINK="$HOME/.config/waybar/color.css"
   local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
   local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
   local HYPRLOCK_SYMLINK="$HOME/.config/hypr/hyprlock.conf"
 
   # Remove old symlinks or files
-  [ -e "$WAYBAR_STYLE_SYMLINK" ] && rm -f "$WAYBAR_STYLE_SYMLINK"
-  [ -e "$WAYBAR_CONFIG_SYMLINK" ] && rm -f "$WAYBAR_CONFIG_SYMLINK"
-  [ -e "$WAYBAR_COLOR_SYMLINK" ] && rm -f "$WAYBAR_COLOR_SYMLINK"
   [ -e "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
   [ -e "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
   [ -e "$HYPRLOCK_SYMLINK" ] && rm -f "$HYPRLOCK_SYMLINK"
 
   # Create new symlinks
-  ln -s "$HOME/.config/waybar/style/default.css" "$WAYBAR_STYLE_SYMLINK"
-  ln -s "$HOME/.config/waybar/configs/top" "$WAYBAR_CONFIG_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
   ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
   ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
   ln -s "$HOME/.config/hypr/hyprlock/hecate-lock.conf" "$HYPRLOCK_SYMLINK"
-  gum style --foreground 82 "✓ Waybar configured!"
+  gum style --foreground 82 "✓ Symlinks setuped configured!"
 }
 # Main update flow
 main() {
@@ -710,7 +702,7 @@ main() {
 #   verify_critical_packages_installed
   move_config
   update_hecate_config
-  setup_Waybar
+  setup_Symlinks
 #   install_extra_tools
   setup_wallpapers
 

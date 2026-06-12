@@ -1051,7 +1051,7 @@ EOF
   gum style --foreground 220 "Theme mode: $theme_mode"
 }
 
-# Setup Waybar and link system colors
+# Setup link system colors
 setup_Symlinks() {
   gum style --foreground 220 "Adding symlinks..."
 
@@ -1063,7 +1063,6 @@ setup_Symlinks() {
   safe_remove "$STARSHIP_SYMLINK"
   safe_remove "$HYPRLOCK_SYMLINK"
 
-  # Waybar color symlink is intentionally omitted (waybar lines are commented out)
   ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
   ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
   ln -s "$HOME/.config/hypr/hyprlock/hecate-lock.conf" "$HYPRLOCK_SYMLINK"
