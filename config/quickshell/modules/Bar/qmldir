@@ -11,3 +11,4 @@ Separator 1.0 Separator.qml
 SystemStats 1.0 SystemStats.qml
 Workspaces 1.0 Workspaces.qml
 WindowTitle 1.0 WindowTitle.qml
+IconButton 1.0 IconButton.qml

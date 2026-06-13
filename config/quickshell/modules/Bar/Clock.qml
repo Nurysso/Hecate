@@ -4,37 +4,54 @@ import QtQuick.Layouts
 import "../../utils"
 
 Item {
-    id: clockContainer
-
-    // This tells the RowLayout in the main file how big the clock is
-    implicitWidth: clockText.implicitWidth + (ColorManager.padding * 2)
+    id: root
+    implicitWidth: col.implicitWidth + ColorManager.padding * 2
     implicitHeight: ColorManager.barHeight
 
-    property var currentTime: new Date()
+    property var now: new Date()
 
     Timer {
-        interval: 60000
+        interval: 10000   // update every 10 s is plenty for hh:mm
         running: true
         repeat: true
-        onTriggered: currentTime = new Date()
+        triggeredOnStart: true
+        onTriggered: root.now = new Date()
     }
 
-    Text {
-        id: clockText
+    Column {
+        id: col
         anchors.centerIn: parent
-        text: Qt.formatDateTime(currentTime, "h:mm ap")
-        color: ColorManager.fgColor
-        font.pixelSize: ColorManager.fontSize
-        font.family: ColorManager.fontFamily
-        // Added renderType to prevent text "shaking" or width jumping
-        renderType: Text.NativeRendering
+        spacing: 0
+
+        Text {
+            id: timeText
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: Qt.formatDateTime(root.now, "h:mm ap")
+            color: ColorManager.fgColor
+            font.pixelSize: ColorManager.fontSize
+            font.family: ColorManager.fontFamily
+            font.weight: Font.Medium
+            renderType: Text.NativeRendering
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: Qt.formatDateTime(root.now, "ddd d MMM")
+            color: ColorManager.mutedColor
+            font.pixelSize: ColorManager.fontSize - 2
+            font.family: ColorManager.fontFamily
+            renderType: Text.NativeRendering
+            opacity: 0.7
+        }
     }
 
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onEntered: clockText.opacity = 1.0
-        onExited: clockText.opacity = 0.9
+        onEntered: root.opacity = 0.8
+        onExited:  root.opacity = 1.0
     }
+
+    Behavior on opacity { NumberAnimation { duration: 120 } }
 }

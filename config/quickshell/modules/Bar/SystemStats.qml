@@ -5,286 +5,146 @@ import Quickshell.Io
 import "../../utils"
 
 Item {
-    id: systemUsageContainer
+    id: root
 
-    property bool isHorizontal: true
-    property bool cpuEnabled: true
-    property bool memoryEnabled: true
-    property bool tempEnabled: true
-
-    // Actual system data
     property real cpuPercent: 0
     property real ramPercent: 0
-    // property real cpuTempPercent: 0
 
-    implicitWidth: bgRect.implicitWidth
-    implicitHeight: bgRect.implicitHeight
+    implicitWidth: pill.implicitWidth
+    implicitHeight: 28
 
-    // CPU Usage Process Component
+    // Processes
+
     Component {
-        id: cpuProcessComponent
+        id: cpuProc
         Process {
             running: true
-            command: ["sh", "-c", "top -bn2 -d 0.5 | grep 'Cpu(s)' | tail -1 | awk '{print $2}' | cut -d'%' -f1"]
-
+            command: ["sh", "-c", "top -bn2 -d 0.3 | grep 'Cpu(s)' | tail -1 | awk '{print $2}' | cut -d'%' -f1"]
             stdout: SplitParser {
-                onRead: function(data) {
-                    var usage = parseFloat(data.trim());
-                    if (!isNaN(usage)) {
-                        cpuPercent = usage / 100;
-                    }
+                onRead: data => {
+                    const v = parseFloat(data.trim())
+                    if (!isNaN(v)) root.cpuPercent = Math.min(v / 100, 1.0)
                 }
             }
         }
     }
 
-    // RAM Usage Process Component
     Component {
-        id: ramProcessComponent
+        id: ramProc
         Process {
             running: true
-            command: ["sh", "-c", "free | grep Mem | awk '{print ($3/$2) * 100.0}'"]
-
+            command: ["sh", "-c", "free | awk '/Mem/{printf \"%.1f\", ($3/$2)*100}'"]
             stdout: SplitParser {
-                onRead: function(data) {
-                    var usage = parseFloat(data.trim());
-                    if (!isNaN(usage)) {
-                        ramPercent = usage / 100;
-                    }
+                onRead: data => {
+                    const v = parseFloat(data.trim())
+                    if (!isNaN(v)) root.ramPercent = Math.min(v / 100, 1.0)
                 }
             }
         }
     }
 
-    // Temperature Process Component
-    // Component {
-    //     id: tempProcessComponent
-    //     Process {
-    //         running: true
-    //         command: ["sh", "-c", "sensors 2>/dev/null | grep -E 'Package id 0|Tdie|Tctl' | head -1 | awk '{print $4}' | sed 's/+//;s/°C//' || echo '0'"]
-
-    //         stdout: SplitParser {
-    //             onRead: function(data) {
-    //                 var temp = parseFloat(data.trim());
-    //                 if (!isNaN(temp) && temp > 0) {
-    //                     cpuTempPercent = Math.min(temp / 100, 1.0);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // Update timer
     Timer {
-        interval: 2000
+        interval: 2500
         running: true
         repeat: true
         triggeredOnStart: true
         onTriggered: {
-            if (cpuEnabled) cpuProcessComponent.createObject(systemUsageContainer);
-            if (memoryEnabled) ramProcessComponent.createObject(systemUsageContainer);
-            // if (tempEnabled) tempProcessComponent.createObject(systemUsageContainer);
+            cpuProc.createObject(root)
+            ramProc.createObject(root)
         }
     }
+
+    // UI
 
     Rectangle {
-        id: bgRect
-        color: "transparent"
-        implicitWidth: child.implicitWidth + 16
-        implicitHeight: 32
+        id: pill
+        implicitWidth: row.implicitWidth + 12
+        implicitHeight: 24
+        anchors.centerIn: parent
+        radius: 6
+        color: Qt.rgba(1, 1, 1, 0.04)
+        border.width: 0.5
+        border.color: Qt.rgba(1, 1, 1, 0.07)
+
+        RowLayout {
+            id: row
+            anchors.centerIn: parent
+            spacing: 6
+
+            // CPU ring + label
+            RingIndicator {
+                value: root.cpuPercent
+                ringColor: ColorManager.accentColor
+                label: "C"
+            }
+            Text {
+                text: Math.round(root.cpuPercent * 100) + "%"
+                color: ColorManager.mutedColor
+                font.pixelSize: 11
+                font.family: ColorManager.fontFamily
+            }
+
+            // RAM ring + label
+            RingIndicator {
+                value: root.ramPercent
+                ringColor: "#89ddff"
+                label: "M"
+            }
+            Text {
+                text: Math.round(root.ramPercent * 100) + "%"
+                color: ColorManager.mutedColor
+                font.pixelSize: 11
+                font.family: ColorManager.fontFamily
+            }
+        }
     }
 
-    RowLayout {
-        id: child
-        anchors.centerIn: parent
-        spacing: 6
+    // Ring sub-component
 
-        // CPU Section
-        Item {
-            id: cpuIndicator
-            visible: cpuEnabled
-            Layout.preferredWidth: 24
-            Layout.preferredHeight: 24
-            rotation: !isHorizontal ? 270 : 0
+    component RingIndicator: Item {
+        property real value: 0
+        property color ringColor: ColorManager.accentColor
+        property string label: ""
 
-            Canvas {
-                id: cpuCanvas
-                anchors.fill: parent
+        Layout.preferredWidth: 18
+        Layout.preferredHeight: 18
 
-                onPaint: {
-                    const ctx = getContext("2d");
-                    ctx.clearRect(0, 0, width, height);
+        Canvas {
+            id: cv
+            anchors.fill: parent
 
-                    const cx = width / 2;
-                    const cy = height / 2;
-                    const r = (width - 2) / 2;
-                    const start = -Math.PI / 2;
-                    const end = start + 2 * Math.PI * cpuPercent;
+            property real val: parent.value
+            property color rc: parent.ringColor
 
-                    ctx.lineWidth = 2;
-                    ctx.lineCap = "round";
+            onValChanged: requestPaint()
 
-                    // Background ring
-                    ctx.strokeStyle = "#3a3a3a";
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-                    ctx.stroke();
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const cx = width / 2, cy = height / 2, r = (width - 2.5) / 2
+                const start = -Math.PI / 2
 
-                    // Progress ring
-                    ctx.strokeStyle = ColorManager.accentColor;
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, r, start, end);
-                    ctx.stroke();
+                // Track
+                ctx.lineWidth = 2; ctx.lineCap = "round"
+                ctx.strokeStyle = "#2a2a35"
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI); ctx.stroke()
+
+                // Fill
+                if (val > 0) {
+                    ctx.strokeStyle = rc.toString()
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, r, start, start + 2 * Math.PI * val)
+                    ctx.stroke()
                 }
-
-                Connections {
-                    target: systemUsageContainer
-                    function onCpuPercentChanged() {
-                        cpuCanvas.requestPaint();
-                    }
-                }
-            }
-
-            Text {
-                anchors.centerIn: parent
-                text: ""
-                font.pixelSize: 10
-                font.bold: true
-                color: "#ffffff"
             }
         }
 
         Text {
-            visible: cpuEnabled && isHorizontal
-            text: Math.round(cpuPercent * 100) + "%"
-            color: "white"
-            font.pixelSize: 12
+            anchors.centerIn: parent
+            text: parent.label
+            font.pixelSize: 7
+            font.weight: Font.Bold
+            color: "#888"
         }
-
-        // Memory Section
-        Item {
-            id: memoryIndicator
-            visible: memoryEnabled
-            Layout.preferredWidth: 24
-            Layout.preferredHeight: 24
-            Layout.leftMargin: 4
-            rotation: !isHorizontal ? 270 : 0
-
-            Canvas {
-                id: memoryCanvas
-                anchors.fill: parent
-
-                onPaint: {
-                    const ctx = getContext("2d");
-                    ctx.clearRect(0, 0, width, height);
-
-                    const cx = width / 2;
-                    const cy = height / 2;
-                    const r = (width - 2) / 2;
-                    const start = -Math.PI / 2;
-                    const end = start + 2 * Math.PI * ramPercent;
-
-                    ctx.lineWidth = 2;
-                    ctx.lineCap = "round";
-
-                    // Background ring
-                    ctx.strokeStyle = "#3a3a3a";
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-                    ctx.stroke();
-
-                    // Progress ring
-                    ctx.strokeStyle = ColorManager.accentColor;
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, r, start, end);
-                    ctx.stroke();
-                }
-
-                Connections {
-                    target: systemUsageContainer
-                    function onRamPercentChanged() {
-                        memoryCanvas.requestPaint();
-                    }
-                }
-            }
-
-            Text {
-                anchors.centerIn: parent
-                text: ""
-                font.pixelSize: 10
-                font.bold: true
-                color: "#ffffff"
-            }
-        }
-
-        Text {
-            visible: memoryEnabled && isHorizontal
-            text: Math.round(ramPercent * 100) + "%"
-            color: "white"
-            font.pixelSize: 12
-        }
-
-        // Temperature Section
-       // Item {
-       //     id: tempIndicator
-       //     visible: tempEnabled
-       //     Layout.preferredWidth: 24
-       //     Layout.preferredHeight: 24
-       //     Layout.leftMargin: 4
-       //     rotation: !isHorizontal ? 270 : 0
-
-       //     Canvas {
-       //         id: tempCanvas
-       //         anchors.fill: parent
-
-       //         onPaint: {
-       //             const ctx = getContext("2d");
-       //             ctx.clearRect(0, 0, width, height);
-
-       //             const cx = width / 2;
-       //             const cy = height / 2;
-       //             const r = (width - 2) / 2;
-       //             const start = -Math.PI / 2;
-       //             const end = start + 2 * Math.PI * cpuTempPercent;
-
-       //             ctx.lineWidth = 2;
-       //             ctx.lineCap = "round";
-
-       //             // Background ring
-       //             ctx.strokeStyle = "#3a3a3a";
-       //             ctx.beginPath();
-       //             ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-       //             ctx.stroke();
-
-       //             // Progress ring
-       //             ctx.strokeStyle = "#ff6b6b";
-       //             ctx.beginPath();
-       //             ctx.arc(cx, cy, r, start, end);
-       //             ctx.stroke();
-       //         }
-
-       //         Connections {
-       //             target: systemUsageContainer
-       //             function onCpuTempPercentChanged() {
-       //                 tempCanvas.requestPaint();
-       //             }
-       //         }
-       //     }
-
-       //     Text {
-       //         anchors.centerIn: parent
-       //         text: "T"
-       //         font.pixelSize: 10
-       //         font.bold: true
-       //         color: "#ffffff"
-       //     }
-       // }
-
-        // Text {
-        //     visible: tempEnabled && isHorizontal
-        //     text: Math.round(cpuTempPercent * 100) + "%"
-        //     color: "white"
-        //     font.pixelSize: 12
-        // }
     }
 }

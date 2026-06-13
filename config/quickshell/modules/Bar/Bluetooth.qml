@@ -1,48 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
-import Quickshell.Io
 import "../../utils"
 
-Rectangle {
-    Layout.preferredWidth: 32
-    Layout.preferredHeight: 32
-    radius: 4
-    color: "transparent"
-    Behavior on color {
-        ColorAnimation { duration: 150 }
-    }
-    Text {
-        text: "󰂯"
-        color: mouseArea.containsMouse ? ColorManager.accentColor : ColorManager.fgColor
-        font.pixelSize: 20
-        font.family: "Symbols Nerd Font"
-        anchors.centerIn: parent
-        Behavior on color {
-            ColorAnimation { duration: 150 }
-        }
-    }
-    Component {
-        id: processComponent
-        Process {
-            running: true
-            command: ["blueman-manager"]
-        }
-    }
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            processComponent.createObject(parent)
-        }
-    }
-    scale: mouseArea.pressed ? 0.9 : 1.0
-    Behavior on scale {
-        NumberAnimation {
-            duration: 100
-            easing.type: Easing.OutCubic
-        }
-    }
+IconButton {
+    icon: "󰂯"
+    command: ["blueman-manager"]
 }

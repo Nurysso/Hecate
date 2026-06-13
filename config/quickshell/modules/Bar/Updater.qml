@@ -1,14 +1,14 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.io 
+import Quickshell.io
 
 
 Item{
   id: SysupLauncher
 
   property bool isHorizontal: true
-  property bool 
+  property bool
 }
 
 

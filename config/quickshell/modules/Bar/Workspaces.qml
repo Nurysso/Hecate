@@ -5,84 +5,81 @@ import "../../utils"
 
 RowLayout {
     id: workspaces
-    spacing: 4
+    spacing: 2
 
     Repeater {
         model: 9
+
         Item {
-            id: workspaceItem
-            Layout.preferredWidth: 28
-            Layout.preferredHeight: 28
+            id: wsItem
             required property int index
-            readonly property int workspaceId: index + 1
-            readonly property bool isActive: Hyprland.focusedWorkspace ?
-                Hyprland.focusedWorkspace.id === workspaceId : false
+            readonly property int wsId: index + 1
+            readonly property bool isActive: Hyprland.focusedWorkspace?.id === wsId ?? false
             readonly property bool hasWindows: {
                 if (!Hyprland.workspaces) return false
-                var workspaceList = Hyprland.workspaces.values
-                if (!workspaceList) return false
-                for (var i = 0; i < workspaceList.length; i++) {
-                    var ws = workspaceList[i]
-                    if (ws && ws.id === workspaceId) return true
-                }
+                const list = Hyprland.workspaces.values
+                if (!list) return false
+                for (var i = 0; i < list.length; i++)
+                    if (list[i]?.id === wsId) return true
                 return false
             }
-            property bool isHovered: false
+            property bool hovered: false
 
-            // Workspace number
-            Text {
-                anchors.centerIn: parent
-                text: workspaceId
-                color: {
-                    if (isActive) return ColorManager.accentColor
-                    if (hasWindows) return ColorManager.fgColor
-                    return ColorManager.mutedColor
-                }
-                font.pixelSize: 13
-                font.weight: isActive ? Font.DemiBold : Font.Normal
-                opacity: isActive ? 1.0 : (hasWindows ? 0.8 : 0.5)
-                Behavior on color { ColorAnimation { duration: 150 } }
-                Behavior on opacity { NumberAnimation { duration: 150 } }
+            Layout.preferredWidth: isActive ? 32 : 26
+            Layout.preferredHeight: 26
+
+            Behavior on Layout.preferredWidth {
+                NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
             }
 
-            // Active underline indicator
-            Rectangle {
-                visible: isActive
-                width: 12
-                height: 2
-                radius: 1
-                color: ColorManager.accentColor
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottomMargin: 2
-            }
-
-            // Hover background
+            // Background pill — only visible when active or hovered
             Rectangle {
                 anchors.fill: parent
-                radius: 4
-                color: ColorManager.fgColor
-                opacity: isHovered ? 0.08 : 0.0
+                radius: 5
+                color: isActive
+                    ? Qt.rgba(ColorManager.accent.r, ColorManager.accent.g, ColorManager.accent.b, 0.15)
+                    : Qt.rgba(1, 1, 1, hovered ? 0.07 : 0.0)
+                border.width: isActive ? 1 : 0
+                border.color: Qt.rgba(ColorManager.accent.r, ColorManager.accent.g, ColorManager.accent.b, 0.4)
+
+                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on border.color { ColorAnimation { duration: 150 } }
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: wsItem.wsId
+                font.pixelSize: 12
+                font.weight: isActive ? Font.Medium : Font.Normal
+                color: isActive ? ColorManager.accentColor
+                     : hasWindows ? ColorManager.fgColor
+                     : ColorManager.mutedColor
+                opacity: isActive ? 1.0 : hasWindows ? 0.7 : 0.35
+
+                Behavior on color   { ColorAnimation { duration: 150 } }
                 Behavior on opacity { NumberAnimation { duration: 150 } }
+            }
+
+            // Occupied dot (non-active workspaces with windows)
+            Rectangle {
+                visible: hasWindows && !isActive
+                width: 3; height: 3; radius: 1.5
+                color: ColorManager.mutedColor
+                opacity: 0.6
+                anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 2 }
             }
 
             MouseArea {
                 anchors.fill: parent
-                anchors.margins: -2
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onEntered: workspaceItem.isHovered = true
-                onExited: workspaceItem.isHovered = false
-                onClicked: {
-                    if (Hyprland.dispatch)
-                        Hyprland.dispatch("workspace " + workspaceId)
-                }
+                onEntered: wsItem.hovered = true
+                onExited:  wsItem.hovered = false
+                onClicked: Hyprland.dispatch?.("workspace " + wsItem.wsId)
             }
 
-            scale: isHovered ? 1.1 : 1.0
-            Behavior on scale {
-                NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
-            }
+            scale: hovered && !isActive ? 1.08 : 1.0
+            Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
         }
     }
 }

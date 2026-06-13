@@ -7,7 +7,7 @@ ShellRoot {
     ClockWidget {}
     Bar {}
     // GitHubContributionsWidget {}
-     AudioWidget {}
+    AudioWidget {}
     // QuickAppsWidget  {}
     // WeatherWidget  {}
     SystemInfoWidget {}
