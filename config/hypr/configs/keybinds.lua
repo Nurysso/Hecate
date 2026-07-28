@@ -102,8 +102,8 @@ hl.bind(mainMod .. " + SHIFT + Print", run_script("ScreenShot.sh window"))   -- 
 hl.bind(mainMod .. " + SHIFT + S",     run_script("ScreenShot.sh area"))     -- Select Area Screenshot
 
 --/ Workspaces
-hl.bind(mainMod .. " + Tab",       run_script("cycleTabs"))           -- Next Workspace
-hl.bind(mainMod .. " + SHIFT + Tab", run_script("cycleTabs --prev"))         -- Previous Workspace
+hl.bind(mainMod .. " + Tab",         hl.dsp.focus({ workspace = "m+1" }))  -- Next Workspace
+hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.focus({ workspace = "m-1" }))  -- Previous Workspace
 hl.bind("SUPER + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind("SUPER + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
 
