@@ -11,9 +11,9 @@
 </p>
 
 <p align="center">
-  <a href="https://opensource.org/license/gpl-3-0">
-    <img src="https://img.shields.io/badge/License-GPL_3-a277ff.svg?style=for-the-badge" alt="License: GNU-gpl3"/>
-  </a>
+  <a href="https://opensource.org/licenses/MIT">
+  <img src="https://img.shields.io/badge/License-MIT-a277ff.svg?style=for-the-badge" alt="License: MIT"/>
+</a>
   <a href="https://hyprland.org">
     <img src="https://img.shields.io/badge/Hyprland-Dynamic-61ffca?style=for-the-badge&logo=wayland" alt="Hyprland"/>
   </a>
@@ -549,7 +549,7 @@ post_command = ~/.config/hecate/scripts/hecate-system-colors.sh
 
 <div align="center">
 
-This project is licensed under the **GNU-gpl3 License**
+This project is licensed under the **MIT License**
 
 See the [LICENSE](LICENSE) file for details
 
