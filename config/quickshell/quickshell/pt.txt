@@ -1,0 +1,502 @@
+// shell.qml
+import Quickshell
+import Quickshell.Wayland
+import "widgets"
+import "modules/Bar"
+
+ShellRoot {
+    ClockWidget {}
+    Bar {}
+    GitHubContributionsWidget {}
+    AudioWidget {}
+    QuickAppsWidget  {}
+    WeatherWidget  {}
+    SystemInfoWidget {}
+}
+
+// modules/Bar/Bar.qml
+import Quickshell
+import Quickshell.Wayland
+import QtQuick
+import QtQuick.Layouts
+import "../../utils"
+
+Scope {
+    SystemStats { id: systemStats }
+
+    Variants {
+        model: Quickshell.screens
+
+        PanelWindow {
+            required property var modelData
+            screen: modelData
+            anchors { top: true; left: true; right: true }
+            implicitHeight: ColorManager.barHeight
+            color: "transparent"
+
+            Rectangle {
+                anchors.fill: parent
+                color: ColorManager.bgColor
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: ColorManager.padding * 2
+                    anchors.rightMargin: ColorManager.padding * 2
+                    spacing: 0
+
+                    //  Left
+                    RowLayout {
+                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                        spacing: ColorManager.spacing
+
+                        Launcher {}
+                        Workspaces {}
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    //  Center
+                    RowLayout {
+                        Layout.alignment: Qt.AlignCenter
+                        WindowDock {}
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    //  Right
+                    RowLayout {
+                        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                        Layout.fillWidth: false
+                        spacing: 2
+
+                        SystemStats { Layout.alignment: Qt.AlignVCenter }
+
+                        Separator {}
+
+                        Notification { Layout.alignment: Qt.AlignVCenter }
+                        Bluetooth   { Layout.alignment: Qt.AlignVCenter }
+                        Power       { Layout.alignment: Qt.AlignVCenter }
+
+                        Separator {}
+
+                        Clock {
+                            Layout.preferredWidth: implicitWidth
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+// modules/Bar/Notification.qml
+
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import "../../utils"
+
+IconButton {
+    id: notifIcon
+    icon: ""
+
+    // No `command:` anymore — swaync-client is gone. We own the panel's
+    // lifecycle directly via a Loader, created fresh each time it's opened.
+    onClicked: {
+        if (notifLoader.active) {
+            notifLoader.active = false
+        } else {
+            notifLoader.active = true
+        }
+    }
+
+    LazyLoader {
+        id: notifLoader
+        active: false
+
+        source: "../../launcher/notify/shell.qml"
+
+        // Fired from shell.qml's `closeRequested()` (Esc / click outside).
+        // Setting active: false destroys the PanelWindow entirely rather
+        // than just hiding it.
+        onLoaded: {
+            item.closeRequested.connect(function() {
+                notifLoader.active = false
+            })
+        }
+    }
+}
+
+
+// launcher/notify/shell.qml
+
+import Quickshell
+import Quickshell.Wayland
+import Quickshell.Services.Notifications
+import QtQuick
+import QtQuick.Layouts
+
+PanelWindow {
+    id: notifCenter
+
+    // The window now fills the screen so we have somewhere to catch
+    // "outside" clicks. The visible/hit-testable area is still just
+    // `card`, via the mask below — nothing about the visual result changes.
+    anchors { top: true; right: true; bottom: true; left: true }
+    margins { top: 10; right: 10 }
+
+    visible: true
+    color: "transparent"
+    mask: Region { item: card }
+
+    WlrLayershell.layer: WlrLayer.Overlay
+    // OnDemand (instead of None) lets this window take keyboard focus
+    // while visible, which is required for Esc to reach us at all.
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+    WlrLayershell.namespace: "quickshell-notifications"
+
+    readonly property color accent: "#8ab4f8"
+    readonly property real  accR: accent.r
+    readonly property real  accG: accent.g
+    readonly property real  accB: accent.b
+
+    // Emitted instead of just hiding, so whatever loaded this window
+    // (e.g. a Loader in Notification.qml) can fully unload it — an
+    // invisible layer-shell surface still exists otherwise.
+    signal closeRequested()
+
+    function closePanel() {
+        notifCenter.closeRequested()
+    }
+
+    NotificationServer {
+        id: notifServer
+        keepOnReload: true
+        bodySupported: true
+        bodyMarkupSupported: true
+        imageSupported: true
+        actionsSupported: true
+        persistenceSupported: true
+
+        onNotification: notification => {
+            notification.tracked = true
+        }
+    }
+
+    function urgencyColor(u) {
+        if (u === NotificationUrgency.Critical) return "#f28b82"
+        if (u === NotificationUrgency.Low)      return "#9aa0a6"
+        return notifCenter.accent
+    }
+
+    // ── Click-outside-to-close ─────────────────────────────────────
+    // Sits behind everything, fills the whole (now screen-sized) window.
+    // Since `mask` is still just `card`, this MouseArea only actually
+    // receives clicks that land outside the card's bounds.
+    MouseArea {
+        id: outsideArea
+        anchors.fill: parent
+        propagateComposedEvents: false
+        onClicked: notifCenter.closePanel()
+    }
+
+    // ── Esc-to-close ─────────────────────────────────────────────────
+    FocusScope {
+        id: focusScope
+        anchors.fill: parent
+        focus: true
+
+        Keys.onEscapePressed: notifCenter.closePanel()
+
+        // ── Card ─────────────────────────────────────────────────────────
+        Item {
+            id: card
+            // Card keeps its original size/position: anchored top-right,
+            // inset from the (now full-screen) window's edges by the
+            // original margins.
+            width: 380
+            height: 600
+            anchors { top: parent.top; right: parent.right }
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 20
+                color: Qt.rgba(0.07, 0.07, 0.09, 0.88)
+                border.width: 1
+                border.color: Qt.rgba(1, 1, 1, 0.09)
+            }
+
+            // Eat clicks landing on the card itself so they don't fall
+            // through to outsideArea and close the panel.
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {}
+            }
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 16
+                spacing: 12
+
+                // Header
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    ColumnLayout {
+                        spacing: 1
+                        Layout.fillWidth: true
+                        Text {
+                            text: "Notifications"
+                            color: "#f5f5f5"
+                            font.pixelSize: 17
+                            font.weight: Font.DemiBold
+                        }
+                        Text {
+                            text: notifServer.trackedNotifications.values.length === 0
+                                  ? "All caught up"
+                                  : notifServer.trackedNotifications.values.length + " unread"
+                            color: Qt.rgba(1, 1, 1, 0.45)
+                            font.pixelSize: 11
+                        }
+                    }
+
+                    Rectangle {
+                        visible: notifServer.trackedNotifications.values.length > 0
+                        Layout.preferredWidth: clearLabel.implicitWidth + 20
+                        Layout.preferredHeight: 30
+                        radius: 15
+                        color: clearArea.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06)
+                        border.width: 1
+                        border.color: Qt.rgba(1, 1, 1, 0.1)
+                        Behavior on color { ColorAnimation { duration: 120 } }
+
+                        Text {
+                            id: clearLabel
+                            anchors.centerIn: parent
+                            text: "Clear all"
+                            color: Qt.rgba(1, 1, 1, 0.75)
+                            font.pixelSize: 12
+                        }
+
+                        MouseArea {
+                            id: clearArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                const items = notifServer.trackedNotifications.values.slice()
+                                for (const n of items) n.dismiss()
+                            }
+                        }
+                    }
+                }
+
+                // Empty state
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    visible: notifServer.trackedNotifications.values.length === 0
+                    spacing: 8
+
+                    Item { Layout.fillHeight: true }
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "🔔"
+                        font.pixelSize: 30
+                        opacity: 0.3
+                    }
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "No notifications"
+                        color: Qt.rgba(1, 1, 1, 0.35)
+                        font.pixelSize: 13
+                    }
+                    Item { Layout.fillHeight: true }
+                }
+
+                // Notification list
+                ListView {
+                    id: list
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    visible: notifServer.trackedNotifications.values.length > 0
+                    spacing: 8
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    model: notifServer.trackedNotifications
+
+                    add: Transition {
+                        NumberAnimation { properties: "opacity"; from: 0; to: 1; duration: 160 }
+                        NumberAnimation { properties: "y"; from: -12; duration: 160; easing.type: Easing.OutCubic }
+                    }
+                    removeDisplaced: Transition {
+                        NumberAnimation { properties: "y"; duration: 160; easing.type: Easing.OutCubic }
+                    }
+                    remove: Transition {
+                        NumberAnimation { properties: "opacity"; to: 0; duration: 120 }
+                    }
+
+                    delegate: Item {
+                        id: delegateRoot
+                        width: ListView.view.width
+                        height: cardBg.height
+
+                        Rectangle {
+                            id: cardBg
+                            width: parent.width
+                            height: contentCol.implicitHeight + 24
+                            radius: 14
+                            color: hoverArea.containsMouse ? Qt.rgba(1, 1, 1, 0.07) : Qt.rgba(1, 1, 1, 0.045)
+                            border.width: 1
+                            border.color: Qt.rgba(1, 1, 1, 0.06)
+                            Behavior on color { ColorAnimation { duration: 120 } }
+
+                            // Urgency accent bar
+                            Rectangle {
+                                width: 3
+                                radius: 1.5
+                                anchors { left: parent.left; top: parent.top; bottom: parent.bottom; margins: 8 }
+                                color: notifCenter.urgencyColor(modelData.urgency)
+                                opacity: 0.85
+                            }
+
+                            RowLayout {
+                                id: contentRow
+                                anchors { fill: parent; margins: 12; leftMargin: 20 }
+                                spacing: 10
+
+                                // App icon / image
+                                Rectangle {
+                                    Layout.preferredWidth: 36
+                                    Layout.preferredHeight: 36
+                                    Layout.alignment: Qt.AlignTop
+                                    radius: 10
+                                    color: Qt.rgba(1, 1, 1, 0.08)
+                                    visible: !!(modelData.image || modelData.appIcon)
+
+                                    Image {
+                                        anchors.fill: parent
+                                        anchors.margins: 6
+                                        fillMode: Image.PreserveAspectFit
+                                        source: modelData.image || (modelData.appIcon ? "image://icon/" + modelData.appIcon : "")
+                                        asynchronous: true
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    id: contentCol
+                                    Layout.fillWidth: true
+                                    spacing: 3
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 6
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: modelData.summary || modelData.appName || "Notification"
+                                            color: "#f2f2f2"
+                                            font.pixelSize: 13
+                                            font.weight: Font.Medium
+                                            elide: Text.ElideRight
+                                        }
+                                        Text {
+                                            visible: !!modelData.appName && modelData.summary
+                                            text: modelData.appName
+                                            color: Qt.rgba(1, 1, 1, 0.35)
+                                            font.pixelSize: 10
+                                        }
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        visible: !!modelData.body
+                                        text: modelData.body
+                                        textFormat: notifServer.bodyMarkupSupported ? Text.RichText : Text.PlainText
+                                        color: Qt.rgba(1, 1, 1, 0.62)
+                                        font.pixelSize: 11
+                                        wrapMode: Text.WordWrap
+                                        maximumLineCount: 3
+                                        elide: Text.ElideRight
+                                    }
+
+                                    // Action buttons, if the sender provided any
+                                    Flow {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: 4
+                                        visible: modelData.actions && modelData.actions.length > 0
+                                        spacing: 6
+
+                                        Repeater {
+                                            model: modelData.actions
+                                            delegate: Rectangle {
+                                                required property var modelData
+                                                width: actionLabel.implicitWidth + 16
+                                                height: 24
+                                                radius: 12
+                                                color: actionArea.containsMouse
+                                                       ? Qt.rgba(notifCenter.accR, notifCenter.accG, notifCenter.accB, 0.28)
+                                                       : Qt.rgba(notifCenter.accR, notifCenter.accG, notifCenter.accB, 0.15)
+                                                Behavior on color { ColorAnimation { duration: 120 } }
+
+                                                Text {
+                                                    id: actionLabel
+                                                    anchors.centerIn: parent
+                                                    text: modelData.text
+                                                    color: notifCenter.accent
+                                                    font.pixelSize: 10
+                                                }
+                                                MouseArea {
+                                                    id: actionArea
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: modelData.invoke()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Dismiss button
+                                Rectangle {
+                                    Layout.preferredWidth: 22
+                                    Layout.preferredHeight: 22
+                                    Layout.alignment: Qt.AlignTop
+                                    radius: 11
+                                    color: closeArea.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : "transparent"
+                                    Behavior on color { ColorAnimation { duration: 100 } }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "✕"
+                                        font.pixelSize: 10
+                                        color: Qt.rgba(1, 1, 1, closeArea.containsMouse ? 0.85 : 0.4)
+                                    }
+                                    MouseArea {
+                                        id: closeArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: modelData.dismiss()
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                id: hoverArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                z: -1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

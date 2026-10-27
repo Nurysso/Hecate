@@ -15,30 +15,8 @@ hl.on("hyprland.start", function()
 	local localBin = HOME .. "/.local/bin"
 	local scriptsDir = HOME .. "/.config/hypr/scripts"
 
-	-- Wallpaper and widgets daemon
-	hl.exec_cmd([[bash -c '
-    WALL="]] .. HOME .. [[/Personal/Media/photos/walls/earth/earthSpace.jpg"
-
-    if ! pgrep -x awww-daemon > /dev/null; then
-        awww-daemon --format xrgb --no-cache &
-    fi
-
-    # wait for the socket, polling quickly
-    for i in $(seq 1 100); do
-        awww query > /dev/null 2>&1 && break
-        sleep 0.05
-    done
-
-    # make sure the canvas is black, matching the SDDM fade-out
-    awww clear 000000
-
-    awww img "$WALL" \
-        --transition-type grow \
-        --transition-pos center \
-        --transition-duration 2 \
-        --transition-fps 60 \
-        --transition-step 90
-']])
+	-- Wallpaper (hyprpaper.conf reads ~/.cache/hecate/wallpaper, set by hecate/scripts/set-wallpaper.sh)
+	hl.exec_cmd("hyprpaper")
 	hl.exec_cmd("batsignal")
 
 
@@ -48,10 +26,9 @@ hl.on("hyprland.start", function()
 
 	-- Startup applications
 	hl.exec_cmd("nm-applet --indicator") -- Network Manager
-	hl.exec_cmd("swaync") -- Notification daemon
 	hl.exec_cmd("blueman-applet") -- Bluetooth manager
 
-	-- QuickShell launcher (native Lua, replaces launch-widgets.sh)
+	-- QuickShell: bar, panels and the notification daemon
 
 	launchWidgets()
 
