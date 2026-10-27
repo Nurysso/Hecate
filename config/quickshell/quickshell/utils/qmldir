@@ -1,0 +1,5 @@
+module utils
+singleton ColorManager 1.0 ColorManager.qml
+singleton NotificationState 1.0 NotificationState.qml
+singleton Reveal 1.0 Reveal.qml
+# singleton Logger 1.0 Logger.qml

@@ -22,6 +22,11 @@ local function run(cmd, window_rules)
     return hl.dsp.exec_cmd(cmd, window_rules)
 end
 
+-- Toggles a Quickshell panel (see ~/.config/quickshell/shell.qml)
+local function panel(name)
+    return hl.dsp.exec_cmd("qs ipc call hecate toggle " .. name)
+end
+
 -- Runs a script by name out of Scripts/
 local function run_script(script_name)
     return hl.dsp.exec_cmd(Scripts .. "/" .. script_name)
@@ -64,16 +69,16 @@ hl.bind("XF86MonBrightnessUp",   run("brightnessctl s 10%+"), { locked = true, r
 --/ Session Control
 hl.bind("CTRL + ALT + Delete", hl.dsp.exit())                                   -- Exit Hyprland
 hl.bind("CTRL + ALT + L",      run_script("LockScreen.sh"))                     -- Lock Screen
-hl.bind(mainMod .. " + SHIFT + Q",  run("wlogout"))                             -- Logout Menu
+hl.bind(mainMod .. " + SHIFT + Q",  panel("power"))                             -- Power Menu
 hl.bind(mainMod .. " + ALT + R",    run_script("Refresh.sh"))                   -- Refresh Waybar, swaync, etc.
 hl.bind(mainMod .. " + ALT + L",    run_script("ChangeLayout.sh"))              -- Toggle Layout (Master/Dwindle)
-hl.bind(mainMod .. " + CTRL + W",   run("waypaper --backend swww"))             -- Change Wallpaper
+hl.bind(mainMod .. " + CTRL + W",   panel("wallpaper"))                         -- Change Wallpaper
 hl.bind(mainMod .. " + ALT + B",    run("pkill -SIGUSR1 waybar"))               -- Toggle Waybar Visibility
 hl.bind(mainMod .. " + Q",          hl.dsp.window.close())                      -- Close Active Window
 hl.bind(mainMod .. " + R",          run("hyprctl reload"))                      -- Reload Hyprland
 
 --/ Applications
-hl.bind(mainMod .. " + D",       run_script("drun.sh"))                       -- App Launcher (Rofi)
+hl.bind(mainMod .. " + D",       panel("launcher"))                           -- App Launcher
 hl.bind(mainMod .. " + B",       run_script("System-apps.sh browser"))                -- Launch Browser
 hl.bind(mainMod .. " + C",       run("code"))                                         -- Launch VSCode
 hl.bind(mainMod .. " + E",       run("dolphin"))                                      -- Launch Dolphin File Manager
@@ -88,9 +93,10 @@ hl.bind(mainMod .. " + Space", run(Scripts .. "/Aoiler.sh"))
 hl.bind(mainMod .. " + A", hl.dsp.workspace.toggle_special("aoiler"))
 
 hl.bind(mainMod .. " + ALT + E", run('rofi -modi emoji -show emoji -config ~/.config/rofi/config-emoji.rasi')) -- Emoji Picker
-hl.bind(mainMod .. " + V",       run_script("ClipManager.sh"))               -- Clipboard Manager
+hl.bind(mainMod .. " + V",       panel("clipboard"))                         -- Clipboard Manager
 hl.bind(mainMod .. " + SHIFT + V", run("pavucontrol"))                       -- Audio Control
-hl.bind(mainMod .. " + SHIFT + N", run("swaync-client -t -sw"))              -- Notification Panel
+hl.bind(mainMod .. " + SHIFT + N", panel("notifications"))                   -- Notification Panel
+hl.bind(mainMod .. " + N",         panel("connectivity"))                    -- Wi-Fi & Bluetooth
 hl.bind(mainMod .. " + ALT + C",   run("hyprpicker -a"))                     -- Color Picker (copies to clipboard)
 
 --/ Screenshots

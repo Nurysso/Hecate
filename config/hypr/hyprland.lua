@@ -10,6 +10,14 @@
 --       exec-once = command will execute only on launch
 -- -----------------------------------------
 
+hl.config({
+    misc = {
+        force_default_wallpaper = 0,
+        disable_hyprland_logo = true,
+        background_color = "rgba(000000ff)",
+    },
+})
+
 -- require("variables")
 require("functions")
 require("gestures")
