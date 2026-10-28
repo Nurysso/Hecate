@@ -13,4 +13,11 @@
 --    - Example:  exec-once=hyprctl setcursor [THEME] [SIZE] t
 -- -----------------------------------------
 
-hl.exec_cmd("hyprctl setcursor Bibata-Modern-Ice 23")
+hl.env({
+	"XCURSOR_THEME,Vimix-cursors",
+	"XCURSOR_SIZE,30",
+	"HYPRCURSOR_THEME,Vimix-cursors",
+	"HYPRCURSOR_SIZE,30",
+})
+
+hl.exec_once("hyprctl setcursor Vimix-cursors 24")

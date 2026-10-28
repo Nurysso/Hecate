@@ -1,0 +1,15 @@
+[SddmGreeterTheme]
+Name=Hecate Sddm
+Description=SDDM theme build for hecate setup
+Screenshot=screenshot.png
+Website=https://github.com/Nurysso/Hecate/tree/main/hecate-sddm
+Author=nurysso
+Copyright=
+License=MIT
+Version=0.1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations
+Theme-Id=hecate-sddm
+Theme-API=2.2
+QtVersion=6

@@ -15,7 +15,7 @@ file_exists() {
 }
 
 # --- kill processes safely ---
-_ps=(waybar swaync ags)
+_ps=(waybar ags)
 for _prs in "${_ps[@]}"; do
   pkill -x "$_prs" 2>/dev/null || true
 done
@@ -23,11 +23,6 @@ done
 # --- restart waybar ---
 sleep 1
 WAYBAR_DISABLE_DBUS=1 waybar >~/.cache/waybar.log 2>&1 &
-
-# --- restart swaync ---
-sleep 0.5
-swaync >/dev/null 2>&1 &
-swaync-client --reload-config >/dev/null 2>&1 || true
 
 # --- optional AGS restart ---
 # ags -q && ags >/dev/null 2>&1 &
