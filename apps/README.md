@@ -1,4 +1,8 @@
-# Hecate Apps has been removed and are no longer maintained
+# Apps for hecate dotfiles
+
+Hecate-settings replaces hecate-help app
+
+### Older Hecate Apps has been removed and are no longer maintained
 
 you can find them in void branch.
 
