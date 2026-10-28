@@ -59,6 +59,7 @@ Rectangle {
                 const t = row.modelData.type
                 if (t === "bool") return toggle
                 if (t === "color") return color
+                if (t === "css_gaps") return gaps
                 if ((t === "int" || t === "float") && row.limited) return slider
                 if (t === "int" || t === "float") return number
                 return text
@@ -98,6 +99,20 @@ Rectangle {
             text: String(row.cur ?? 0)
             validator: DoubleValidator {}
             onEditingFinished: row.commit(row.isInt ? Math.round(Number(text)) : Number(text))
+        }
+    }
+
+    Component {
+        id: gaps
+        Field {
+            implicitWidth: 160
+            text: String(row.cur ?? "")
+            placeholderText: "5 or 5,10,5,10"
+            validator: RegularExpressionValidator { regularExpression: /^\d+(\s*,\s*\d+){0,3}$/ }
+            onEditingFinished: {
+                const t = text.replace(/\s/g, "")
+                row.commit(/^\d+$/.test(t) ? Number(t) : t)
+            }
         }
     }
 
