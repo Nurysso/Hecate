@@ -11,14 +11,16 @@ Pill {
     widget: "windows"
     readonly property var cfg: Config.widget(widget)
     readonly property string scope: cfg.scope ?? "workspace"   // "workspace", "monitor" or "all"
-    readonly property string titles: cfg.titles ?? "active"    // "none", "active" or "all"
+    readonly property string titles: cfg.titles ?? "none"      // "none", "active" or "all"
     readonly property int maxTitle: cfg.max_title ?? 24
     readonly property color accent: Config.color(widget, "color", Theme.primary)
     readonly property var monitor: Hyprland.monitorFor(QsWindow.window?.screen)
-    readonly property var windows: Hyprland.toplevels.values.filter(t => t.wayland && (
-        scope === "all" ? true
-        : scope === "monitor" ? t.monitor === monitor
-        : t.workspace?.id === monitor?.activeWorkspace?.id))
+    function inScope(t) {
+        return !!t.wayland && (scope === "all" ? true
+            : scope === "monitor" ? t.monitor === monitor
+            : t.workspace?.id === monitor?.activeWorkspace?.id)
+    }
+    readonly property var windows: Hyprland.toplevels.values.filter(inScope)
 
     visible: windows.length > 0
     Component.onCompleted: Hyprland.refreshToplevels()
@@ -31,7 +33,8 @@ Pill {
     WheelHandler { onWheel: e => root.cycle(e.angleDelta.y > 0 ? -1 : 1) }
 
     Repeater {
-        model: root.windows
+        // Every toplevel keeps its delegate so windows grow in and shrink out instead of popping
+        model: Hyprland.toplevels
 
         Rectangle {
             id: win
@@ -39,15 +42,20 @@ Pill {
             readonly property bool active: modelData.wayland?.activated ?? false
             readonly property string appId: modelData.wayland?.appId ?? ""
             readonly property string iconPath: Quickshell.iconPath(DesktopEntries.heuristicLookup(appId)?.icon ?? appId, true)
+            readonly property bool shown: root.inScope(modelData)
+            property real grow: shown ? 1 : 0
+            Behavior on grow { Anim {} }
             readonly property bool showTitle: root.titles === "all" || root.titles === "active" && active || hover.containsMouse
             readonly property string title: modelData.title.length > root.maxTitle ? modelData.title.slice(0, root.maxTitle - 1) + "…" : modelData.title
 
             anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: row.implicitWidth + 16
+            visible: grow > 0.01
+            opacity: grow
+            clip: true
+            implicitWidth: (row.implicitWidth + 16) * grow
             implicitHeight: 28
             radius: height / 2
             color: active ? Theme.alpha(root.accent, 0.18) : "transparent"
-            Behavior on implicitWidth { Anim {} }
             Behavior on color { CAnim {} }
 
             StateLayer {
@@ -60,17 +68,30 @@ Pill {
             Row {
                 id: row
                 anchors.centerIn: parent
-                spacing: 6
+                spacing: 0
 
                 IconImage { visible: win.iconPath; source: win.iconPath; implicitSize: 18; anchors.verticalCenter: parent.verticalCenter }
                 Icon { visible: !win.iconPath; text: Theme.icon.apps; color: root.fg; anchors.verticalCenter: parent.verticalCenter }
-                StyledText {
-                    visible: win.showTitle
-                    text: win.title
-                    color: win.active ? root.accent : root.fg
-                    font.pixelSize: Theme.fontSize - 1
-                    font.weight: win.active ? Font.Medium : Font.Normal
+                Item {
+                    // Title slides out of the icon on hover (or when titles asks for it)
+                    id: reveal
+                    property real amount: win.showTitle ? 1 : 0
+                    Behavior on amount { Anim {} }
                     anchors.verticalCenter: parent.verticalCenter
+                    width: (label.implicitWidth + 6) * amount
+                    height: label.implicitHeight
+                    clip: true
+                    visible: amount > 0.01
+
+                    StyledText {
+                        id: label
+                        x: 6
+                        opacity: reveal.amount
+                        text: win.title
+                        color: win.active ? root.accent : root.fg
+                        font.pixelSize: Theme.fontSize - 1
+                        font.weight: win.active ? Font.Medium : Font.Normal
+                    }
                 }
             }
 
