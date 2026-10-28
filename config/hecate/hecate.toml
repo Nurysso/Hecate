@@ -31,54 +31,76 @@ left = ["launcher", "workspaces", "windows"]
 center = ["clock"]
 right = [
     "media",
-    "stats",
     "volume",
     "battery",
     "tray",
     "connectivity",
-    "caffeine",
     "notifications",
     "clipboard",
     "wallpaper",
     "power",
 ]
+# available: launcher, workspaces, windows, title, clock, media, volume, stats,
+#            battery, caffeine, tray, connectivity, notifications, clipboard, wallpaper, power
 
-# Per-widget overrides: color/background take an M3 token name or any color
+# Every bar widget also accepts:
+#   color        = "primary"          # M3 name (follows wallpaper) or any color: "#ff8800", "tomato"
+#   background   = "surface_container" # same format
+#   right_click  = "kitty -e btop"     # shell command run on right-click
+
 [widgets.clock]
-format = "ddd d MMM  ·  hh:mm"
+format = "ddd d MMM  ·  hh:mm" # Qt date format
 
-[widgets.power]
-color = "error"
-
-# Any bar widget also takes right_click = "command"
 [widgets.windows]
-scope = "workspace"   # "workspace", "monitor" or "all"
-titles = "active"     # "none", "active" or "all" (hovered always shows)
+scope = "workspace" # "workspace", "monitor" or "all"
+titles = "active"   # "none", "active" or "all"; hovering always shows it
 max_title = 24
 
-[widgets.stats]
-show = ["cpu", "mem", "temp"]   # any of cpu, mem, gpu, temp
-right_click = "kitty -e btop"
-
-[widgets.volume]
-step = 5              # % per scroll notch
-max = 100             # cap, up to 150
-right_click = "pavucontrol"
+[widgets.title]
+max_title = 48
 
 [widgets.media]
 max_title = 32
 
-# Desktop widgets: see config/quickshell/README.md
+[widgets.volume]
+step = 5       # % per scroll notch
+max = 100      # cap in %, can go above 100
+percent = true # show the number next to the icon
+
+[widgets.stats]
+show = ["cpu", "mem"] # any of "cpu", "mem", "gpu", "temp"
+
+[widgets.battery]
+low = 15 # % at which it turns red
+
+# Panels take color and background only:
+[widgets.launcher]
+[widgets.notifications]
+[widgets.connectivity]
+[widgets.power]
+color = "error"
+background = "#2b1a1a"
+[widgets.clipboard]
+[widgets.wallpaper]
+
 [desktop]
+monitor = ""                         # output name such as "HDMI-A-1"; empty = first monitor
 left = ["clock", "weather", "audio"]
 right = ["system", "github", "apps"]
+# available: clock, weather, audio, system, github, apps
+
+# Every desktop card also accepts color and background.
+
+[desktop.clock]
+twelve_hour = true
 
 [desktop.weather]
-location = ""        # city name; empty = guess from your IP
-units = "metric"     # or "imperial"
+location = ""    # city name; empty = guess from IP address
+units = "metric" # or "imperial"
 
 [desktop.github]
-user = "Nurysso"     # token is read from ~/.config/tokens/gpat.txt
+user = "Nurysso"
+# token_file = "/path/to/token"   # token with read:user scope only
 
 [desktop.apps]
-apps = ["firefox", "kitty", "org.gnome.Nautilus"]   # desktop entry names or shell commands
+apps = ["firefox", "kitty", "dolphin"] # desktop entry ids or shell commands
