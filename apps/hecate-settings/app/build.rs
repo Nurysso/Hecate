@@ -18,8 +18,12 @@ fn main() {
                 "qml/PillButton.qml",
                 "qml/KeybindsPage.qml",
                 "qml/CurvesPage.qml",
+                "qml/HomePage.qml",
+                "qml/MonitorsPage.qml",
+                "qml/ConnectivityPage.qml",
             ]),
     )
     .file("src/backend.rs")
+    .file("src/connectivity.rs")
     .build();
 }

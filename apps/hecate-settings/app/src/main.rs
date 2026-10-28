@@ -1,4 +1,5 @@
 mod backend;
+mod connectivity;
 
 use cxx_qt_lib::{QGuiApplication, QQmlApplicationEngine, QUrl};
 

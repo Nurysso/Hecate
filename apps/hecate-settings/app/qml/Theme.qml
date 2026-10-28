@@ -29,11 +29,23 @@ QtObject {
 
     function alpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
 
+    property string wallpaper
+    property string last
+
     property QtObject backend: Backend {}
 
-    Component.onCompleted: {
-        const d = JSON.parse(backend.theme())
+    function load() {
+        const raw = backend.theme()
+        if (raw === last) return
+        last = raw
+        const d = JSON.parse(raw)
         if (d.font) font = d.font
+        wallpaper = d.wallpaper ?? ""
         for (const k in d.colors) if (root[k] !== undefined) root[k] = d.colors[k]
     }
+
+    // shortcut: polls theme.json and the wallpaper link every second, switch to a file watcher if that ever shows up in profiles
+    property Timer poll: Timer { interval: 1000; running: true; repeat: true; onTriggered: root.load() }
+
+    Component.onCompleted: load()
 }
