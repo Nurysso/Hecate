@@ -1,22 +1,106 @@
-theme = "Catppuccin Mocha"
-# Or for auto light/dark switching
-theme = "light:Catppuccin Latte,dark:Catppuccin Mocha"
+#  _   _ _____ ____    _  _____ _____
+# | | | | ____/ ___|  / \|_   _| ____|     /\_/\
+# | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+# |  _  | |__| |___ / ___ \| | | |___      > ^ <
+# |_| |_|_____\____/_/   \_\_| |_____|
 
-background = "#000000"
-foreground = "#dddddd"
-background-opacity = 0.70
-background-blur = 10
-window-padding-x = 16
-window-padding-y = 16
-window-padding-balance = true
-window-padding-color = background
+# Mirrors kitty.conf (font, colors, padding, keybinds). Run `termkeys` to list keybinds.
 
-window-decoration = true
-gtk-titlebar = true
-
-# Font settings
-font-family = "JetBrains Mono"
+# Font
+font-family = "JetBrainsMono Nerd Font"
+font-style = Bold
+font-style-bold = ExtraBold
+font-style-italic = Italic
+font-style-bold-italic = Bold Italic
 font-size = 14
 
 # Cursor
 cursor-style = block
+cursor-style-blink = true
+cursor-color = #c0caf5
+cursor-text = #1a1b26
+
+# Window
+window-padding-x = 8
+window-padding-y = 8
+window-padding-balance = true
+window-padding-color = background
+window-width = 120
+window-height = 32
+window-decoration = auto
+gtk-titlebar = true
+confirm-close-surface = false
+background-opacity = 0.9
+background-blur = true
+
+# Mouse & clipboard
+copy-on-select = clipboard
+mouse-hide-while-typing = true
+link-url = true
+
+# Tokyo Night inspired, same as kitty
+background = #000000
+foreground = #dddddd
+selection-background = #7aa2f7
+selection-foreground = #000000
+palette = 0=#15161e
+palette = 1=#f7768e
+palette = 2=#9ece6a
+palette = 3=#e0af68
+palette = 4=#7aa2f7
+palette = 5=#bb9af7
+palette = 6=#7dcfff
+palette = 7=#a9b1d6
+palette = 8=#414868
+palette = 9=#f7768e
+palette = 10=#9ece6a
+palette = 11=#e0af68
+palette = 12=#7aa2f7
+palette = 13=#bb9af7
+palette = 14=#7dcfff
+palette = 15=#c0caf5
+
+# ─── Clipboard ──────────────────────────────────────────────────
+keybind = ctrl+shift+c=copy_to_clipboard
+keybind = ctrl+shift+v=paste_from_clipboard
+keybind = ctrl+shift+s=paste_from_selection
+
+# ─── Scrolling ──────────────────────────────────────────────────
+keybind = ctrl+shift+arrow_up=scroll_page_lines:-1
+keybind = ctrl+shift+arrow_down=scroll_page_lines:1
+keybind = ctrl+shift+page_up=scroll_page_up
+keybind = ctrl+shift+page_down=scroll_page_down
+keybind = ctrl+shift+home=scroll_to_top
+keybind = ctrl+shift+end=scroll_to_bottom
+keybind = ctrl+shift+f=start_search
+
+# ─── Font Size ──────────────────────────────────────────────────
+keybind = ctrl+equal=increase_font_size:1
+keybind = ctrl+plus=increase_font_size:1
+keybind = ctrl+minus=decrease_font_size:1
+keybind = ctrl+digit_0=reset_font_size
+
+# ─── Window Management ──────────────────────────────────────────
+keybind = ctrl+shift+enter=new_split:auto
+keybind = ctrl+shift+w=close_surface
+keybind = ctrl+shift+bracket_right=goto_split:next
+keybind = ctrl+shift+bracket_left=goto_split:previous
+
+# ─── Tab Management ─────────────────────────────────────────────
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+q=close_tab
+keybind = ctrl+shift+arrow_right=next_tab
+keybind = ctrl+shift+arrow_left=previous_tab
+keybind = ctrl+shift+period=move_tab:1
+keybind = ctrl+shift+comma=move_tab:-1
+keybind = ctrl+shift+d=prompt_surface_title
+keybind = ctrl+shift+digit_1=goto_tab:1
+keybind = ctrl+shift+digit_2=goto_tab:2
+keybind = ctrl+shift+digit_3=goto_tab:3
+keybind = ctrl+shift+digit_4=goto_tab:4
+keybind = ctrl+shift+digit_5=goto_tab:5
+
+# ─── Misc ───────────────────────────────────────────────────────
+keybind = ctrl+shift+f11=toggle_fullscreen
+keybind = ctrl+shift+f2=open_config
+keybind = ctrl+shift+delete=reset

@@ -1,0 +1,56 @@
+#  _   _ _____ ____    _  _____ _____
+# | | | | ____/ ___|  / \|_   _| ____|     /\_/\
+# | |_| |  _|| |     / _ \ | | |  _|      ( o.o )
+# |  _  | |__| |___ / ___ \| | | |___      > ^ <
+# |_| |_|_____\____/_/   \_\_| |_____|
+
+# Aliases shared by bash, zsh and fish. Fish sources this too, so keep it to plain
+# alias name='value' lines.
+
+# ─── System info ────────────────────────────────────────────────
+alias fast='fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc'
+alias meminfo='free -h'
+alias cpuinfo='lscpu'
+alias ports='sudo ss -tulpn'
+alias services='systemctl --type=service --state=running'
+alias df='df -h'
+alias du='du -h'
+
+# ─── Modern replacements ────────────────────────────────────────
+alias ls='eza --icons --group-directories-first'
+alias l='eza -l --icons --group-directories-first'
+alias ll='eza -la --icons --group-directories-first --git'
+alias la='eza -a --icons --group-directories-first'
+alias lt='eza -T --icons --level=2'
+alias cat='bat --style=plain --paging=never'
+alias catp='bat --style=full'
+alias icat='kitty +kitten icat'
+
+# ─── Directories ────────────────────────────────────────────────
+# xdg-user-dir follows ~/.config/user-dirs.dirs, so custom layouts (e.g. ~/Personal/Documents) work
+alias doc='cd "$(xdg-user-dir DOCUMENTS)"'
+alias dow='cd "$(xdg-user-dir DOWNLOAD)"'
+alias pic='cd "$(xdg-user-dir PICTURES)"'
+
+# ─── Packages & clipboard ───────────────────────────────────────
+alias upgrade='sudo pacman -Syu'
+alias rdb='rm ~/.cache/cliphist/db'
+
+# ─── Git ────────────────────────────────────────────────────────
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias glog='git log --oneline --graph --decorate'
+
+# ─── Safety nets ────────────────────────────────────────────────
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# thefuck is set up in each rc file; fk is the short name
+alias fk='fuck'

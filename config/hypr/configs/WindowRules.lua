@@ -48,9 +48,9 @@ hl.window_rule({ float = true, match = { class = "nm-connection-editor" } })
 hl.window_rule({ float = true, match = { class = "org\\.gnome\\.Settings" } })
 hl.window_rule({ size = { "70%", "80%" }, match = { class = "org\\.gnome\\.Settings" } })
 hl.window_rule({ center = true, match = { class = "org\\.gnome\\.Settings" } })
-hl.window_rule({ float = true, match = { class = "org\\.pulseaudio\\.pavucontrol|yad-icon-browser|waypaper" } })
-hl.window_rule({ size = { "80%", "70%" }, match = { class = "org\\.pulseaudio\\.pavucontrol|yad-icon-browser|waypaper" } })
-hl.window_rule({ center = true, match = { class = "org\\.pulseaudio\\.pavucontrol|yad-icon-browser|waypaper" } })
+hl.window_rule({ float = true, match = { class = "org\\.pulseaudio\\.pavucontrol|yad-icon-browser" } })
+hl.window_rule({ size = { "80%", "70%" }, match = { class = "org\\.pulseaudio\\.pavucontrol|yad-icon-browser" } })
+hl.window_rule({ center = true, match = { class = "org\\.pulseaudio\\.pavucontrol|yad-icon-browser" } })
 hl.window_rule({ float = true, match = { class = "nwg-look" } })
 hl.window_rule({ size = { "50%", "60%" }, match = { class = "nwg-look" } })
 hl.window_rule({ center = true, match = { class = "nwg-look" } })
@@ -81,7 +81,6 @@ hl.workspace_rule({ workspace = "f[1]s[false]",   gaps_out = 10 })
 -- Layer Rules
 --------------------------------------------------------------------------------
 hl.layer_rule({ animation = "fade", match = { namespace = "hyprpicker" } })      -- Colour picker out animation
-hl.layer_rule({ animation = "fade", match = { namespace = "logout_dialog" } })   -- wlogout
 hl.layer_rule({ animation = "fade", match = { namespace = "selection" } })       -- slurp
 hl.layer_rule({ animation = "fade", match = { namespace = "wayfreeze" } })
 

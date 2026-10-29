@@ -1,6 +1,6 @@
 # Hecate shell
 
-The Quickshell half of Hecate: a bar, desktop widgets, and the panels behind them (app launcher, notifications, Wi-Fi and Bluetooth, power menu, clipboard history, wallpaper picker). Everything takes its colors from the wallpaper through matugen, and everything is set from one file, `~/.config/hecate/hecate.toml`.
+The Quickshell half of Hecate: a bar, desktop widgets, and the panels behind them (app launcher, notifications, Wi-Fi and Bluetooth, power menu, clipboard history, emoji picker, wallpaper picker). Everything takes its colors from the wallpaper through matugen, and everything is set from one file, `~/.config/hecate/hecate.toml`.
 
 - [Settings](#settings)
 - [Bar](#bar)
@@ -94,7 +94,7 @@ show = ["cpu", "mem"] # any of "cpu", "mem", "gpu", "temp"
 low = 15              # % at which it turns red
 ```
 
-Panels are styled the same way: `[widgets.launcher]`, `[widgets.notifications]`, `[widgets.connectivity]`, `[widgets.power]`, `[widgets.clipboard]` and `[widgets.wallpaper]` take `color` and `background`.
+Panels are styled the same way: `[widgets.launcher]`, `[widgets.notifications]`, `[widgets.connectivity]`, `[widgets.power]`, `[widgets.clipboard]`, `[widgets.emoji]` and `[widgets.wallpaper]` take `color` and `background`.
 
 ## Desktop widgets
 
@@ -157,7 +157,7 @@ M3 color names: `primary` `on_primary` `primary_container` `on_primary_container
 
 `~/.config/hecate/scripts/set-wallpaper.sh <image>` is the only thing that changes the wallpaper. The picker calls it, and you can run it yourself. It:
 
-1. points `~/.cache/hecate/wallpaper` at the image and restarts hyprpaper, which reads that link through `hypr/hyprpaper.conf`. hyprpaper 0.8 ignores the old `hyprctl hyprpaper wallpaper` command, so a restart is how the new image gets loaded, and why the screen may flash once.
+1. points `~/.cache/hecate/wallpaper` at the image and fades to it with `awww img`. On login, Hyprland's autostart starts `awww-daemon` on black and fades that link back in, so the desktop rises out of hecate-sddm's fade.
 2. in `dynamic` mode, runs `matugen image` and writes the colors to `~/.cache/hecate/theme.json`.
 
 The shell watches `theme.json` and fades to the new colors. Any templates in `~/.config/matugen/config.toml` are rendered on the same run.
@@ -168,24 +168,25 @@ The shell watches `theme.json` and fades to the new colors. Any templates in `~/
 |---|---|
 | `SUPER+D` | app launcher |
 | `SUPER+V` | clipboard history |
+| `SUPER+ALT+E` | emoji picker |
 | `SUPER+SHIFT+N` | notifications |
 | `SUPER+N` | Wi-Fi & Bluetooth |
 | `SUPER+SHIFT+Q` | power menu |
 | `SUPER+CTRL+W` | wallpaper picker |
 
-Inside a panel, the arrow keys move, Enter picks, and Esc or a click outside closes it. In the clipboard, Delete with the cursor at the end of the search text removes the selected entry. The wallpaper picker closes once the wallpaper is applied.
+Inside a panel, the arrow keys move, Enter picks, and Esc or a click outside closes it. The emoji picker copies the emoji you pick with `wl-copy`; type words from its name (e.g. "fire", "heart eyes") to filter. In the clipboard, Delete with the cursor at the end of the search text removes the selected entry. The wallpaper picker closes once the wallpaper is applied.
 
 Any panel can be toggled from a script or your own keybind:
 
 ```
-qs ipc call hecate toggle <launcher|notifications|connectivity|power|clipboard|wallpaper>
+qs ipc call hecate toggle <launcher|notifications|connectivity|power|clipboard|emoji|wallpaper>
 ```
 
 ## Requirements
 
-- `quickshell`, `hyprpaper`, `matugen`, `jq`
+- `quickshell`, `awww`, `matugen`, `jq`
 - `python` 3.11 or newer (reads the TOML)
-- `cliphist` and `wl-clipboard`
+- `cliphist` and `wl-clipboard` (the emoji picker also needs an emoji font such as `noto-fonts-emoji`)
 - a Symbols Nerd Font
 - optional: NetworkManager for the Wi-Fi panel and BlueZ for Bluetooth (without them the panel says so), PipeWire for `volume`, UPower for `battery`, `cava` for the audio visualizer
 
@@ -211,5 +212,5 @@ services/        shared state: Notifs (notification server), Cliphist, Net, SysS
 modules/
   bar/           the bar, and bar/widgets with one file per bar widget
   desktop/       the desktop layer, desktop/widgets with one file per card, and cava.conf
-  launcher/ notifications/ connectivity/ power/ clipboard/ wallpaper/   the panels
+  launcher/ notifications/ connectivity/ power/ clipboard/ emoji/ wallpaper/   the panels
 ```
