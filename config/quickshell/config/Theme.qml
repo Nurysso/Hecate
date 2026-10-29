@@ -39,7 +39,7 @@ Singleton {
         headphones: "\u{f02cb}", keyboard: "\u{f030c}", mouse: "\u{f037d}", phone: "\u{f011c}", speaker: "\u{f04c3}", gamepad: "\u{f0297}",
         bell: "\u{f009c}", bellBadge: "\u{f116b}", bellOff: "\u{f0a93}",
         power: "\u{f0425}", reboot: "\u{f0709}", lock: "\u{f033e}", logout: "\u{f0343}", suspend: "\u{f0904}",
-        clipboard: "\u{f014c}", text: "\u{f09ed}", image: "\u{f02e9}", wallpaper: "\u{f0e09}", folder: "\u{f024f}",
+        clipboard: "\u{f014c}", emoji: "\u{f01f4}", text: "\u{f09ed}", image: "\u{f02e9}", wallpaper: "\u{f0e09}", folder: "\u{f024f}",
         check: "\u{f05e0}", close: "\u{f0156}", delete: "\u{f09e7}", clearAll: "\u{f0c62}", loading: "\u{f0772}",
         music: "\u{f075a}", play: "\u{f040a}", pause: "\u{f03e4}", next: "\u{f04ad}", prev: "\u{f04ae}", shuffle: "\u{f049d}", repeat: "\u{f0456}",
         cpu: "\u{f061a}", memory: "\u{f035b}", gpu: "\u{f08ae}", disk: "\u{f02ca}", fan: "\u{f0210}", bolt: "\u{f0241}", timer: "\u{f13ab}",

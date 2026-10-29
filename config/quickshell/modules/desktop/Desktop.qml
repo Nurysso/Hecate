@@ -27,7 +27,7 @@ PanelWindow {
                 source: Qt.resolvedUrl(`widgets/${modelData[0].toUpperCase()}${modelData.slice(1)}.qml`)
                 opacity: 0
                 transform: Translate { y: (1 - loader.opacity) * 16 }
-                Behavior on opacity { Anim { duration: 700 } }
+                Behavior on opacity { Anim { duration: 900; easing.type: Easing.InOutQuad } }   // matches the awww wallpaper fade
                 Timer { running: true; interval: 150 + loader.index * 90; onTriggered: loader.opacity = 1 }
             }
         }

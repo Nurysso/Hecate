@@ -36,7 +36,7 @@ Variants {
             opacity: 0
             transform: Translate { y: (content.opacity - 1) * 16 }
             Component.onCompleted: opacity = 1
-            Behavior on opacity { Anim { duration: 700 } }
+            Behavior on opacity { Anim { duration: 900; easing.type: Easing.InOutQuad } }   // matches the awww wallpaper fade
 
             Section { names: Config.bar.left; anchors.left: parent.left }
             Section { names: Config.bar.center; anchors.horizontalCenter: parent.horizontalCenter }
