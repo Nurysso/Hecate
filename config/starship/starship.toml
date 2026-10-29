@@ -1,12 +1,11 @@
 # ═══════════════════════════════════════════════════════════════
 # Starship config - Hecate
-# Generated: 2026-02-16 13:11:22
-# this file will be replaced when wallpaper is
-# changed so your changes will be overwritten, if need any changes
-# edit this file ~/.config/starship/starship-dummt.toml
+# Edit freely. Only the [palettes.hecate] block at the bottom is rewritten,
+# from the wallpaper colors, by ~/.config/hecate/scripts/set-wallpaper.sh.
 # ═══════════════════════════════════════════════════════════════
 
 "$schema" = 'https://starship.rs/config-schema.json'
+palette = "hecate"
 
 # Performance
 command_timeout = 500
@@ -15,6 +14,8 @@ add_newline = true
 
 # Prompt format - clean stylish layout (no boxes!)
 format = """
+$username\
+$hostname\
 $os\
 $directory\
 $git_branch\
@@ -25,10 +26,14 @@ $rust\
 $golang\
 $java\
 $lua\
+$c\
+$php\
+$ruby\
+$docker_context\
 $package\
 $fill\
 $cmd_duration\
-$time
+$time\
 $line_break\
 $character"""
 
@@ -38,14 +43,14 @@ symbol = " "
 
 # ─── PROMPT CHARACTER ───────────────────────────────────────────
 [character]
-success_symbol = "[❯](bold #DC392F)"
-error_symbol = "[❯](bold #A03D3A)"
-vimcmd_symbol = "[❮](bold #3E827C)"
+success_symbol = "[❯](bold primary)"
+error_symbol = "[❯](bold error)"
+vimcmd_symbol = "[❮](bold tertiary)"
 
 # ─── OS ICON ────────────────────────────────────────────────────
 [os]
 disabled = false
-style = "bold #4D877A"
+style = "bold tertiary"
 format = "[$symbol]($style)"
 
 [os.symbols]
@@ -62,11 +67,12 @@ Raspbian = ""
 [directory]
 home_symbol = "~"
 read_only = " 󰌾"
-style = "bold #3E827C"
+style = "bold primary"
 truncation_length = 3
 truncation_symbol = "…/"
 truncate_to_repo = true
-format = '[󰉋 $path]($style)[](#3E827C) '
+read_only_style = "bold error"
+format = '[󰉋 $path]($style)[$read_only]($read_only_style)[](primary) '
 
 [directory.substitutions]
 "Documents" = "󰈙 "
@@ -80,12 +86,12 @@ format = '[󰉋 $path]($style)[](#3E827C) '
 # ─── GIT ────────────────────────────────────────────────────────
 [git_branch]
 symbol = " "
-style = "bold #E14235"
-format = "[$symbol$branch(:$remote_branch)]($style) "
+style = "bold tertiary"
+format = "[$symbol$branch]($style) "
 truncation_length = 20
 
 [git_status]
-style = "bold #E14235"
+style = "bold tertiary"
 format = '[$all_status$ahead_behind]($style) '
 conflicted = "󰞇"
 ahead = "⇡${count}"
@@ -99,195 +105,117 @@ renamed = "»${count}"
 deleted = "✘${count}"
 disabled = false
 
-# Only check status in repos < 4096 files (performance)
 ignore_submodules = true
 
 # ─── LANGUAGE MODULES ───────────────────────────────────────────
 [nodejs]
 symbol = ""
-style = "bold #E23C31"
+style = "bold secondary"
 format = "[$symbol $version]($style) "
 detect_files = ["package.json", ".node-version"]
 detect_folders = ["node_modules"]
 
 [python]
 symbol = ""
-style = "bold #E23C31"
-format = "[$symbol $version]($style) "
+style = "bold secondary"
+format = "[$symbol $version( \\($virtualenv\\))]($style) "
 detect_extensions = ["py"]
 detect_files = [".python-version", "pyproject.toml", "requirements.txt"]
 
 [rust]
 symbol = ""
-style = "bold #E23C31"
+style = "bold secondary"
 format = "[$symbol $version]($style) "
 detect_extensions = ["rs"]
 detect_files = ["Cargo.toml"]
 
 [golang]
 symbol = ""
-style = "bold #E23C31"
+style = "bold secondary"
 format = "[$symbol $version]($style) "
 detect_extensions = ["go"]
 detect_files = ["go.mod", "go.sum"]
 
 [java]
 symbol = ""
-style = "bold #E23C31"
+style = "bold secondary"
 format = "[$symbol $version]($style) "
 detect_extensions = ["java", "class", "jar"]
 
 [lua]
 symbol = ""
-style = "bold #E23C31"
+style = "bold secondary"
 format = "[$symbol $version]($style) "
 detect_extensions = ["lua"]
 
 [package]
 symbol = "󰏗"
-style = "bold #E23C31"
+style = "bold secondary"
 format = "[$symbol $version]($style) "
 display_private = false
 
 # ─── COMMAND DURATION ───────────────────────────────────────────
 [cmd_duration]
 min_time = 1000
-style = "bold #6b8480"
+style = "bold muted"
 format = "[$duration]($style) "
 show_milliseconds = false
 
 # ─── TIME ───────────────────────────────────────────────────────
 [time]
 disabled = false
-style = "bold #6b8480"
+style = "bold muted"
 format = "[$time]($style)"
 time_format = "%R"
 use_12hr = false
 
-# ─── DOCKER / CONTAINERS ────────────────────────────────────────
+# ─── CONTAINERS ─────────────────────────────────────────────────
 [docker_context]
 symbol = ""
-style = "bold #E14235"
+style = "bold tertiary"
 format = "[$symbol $context]($style) "
 only_with_files = true
 detect_files = ["docker-compose.yml", "Dockerfile"]
 
-[kubernetes]
-symbol = "󱃾"
-style = "bold #E14235"
-format = '[$symbol $context( \($namespace\))]($style) '
-disabled = true  # Enable only if you use k8s
-
-# ─── CLOUD PROVIDERS ────────────────────────────────────────────
-[aws]
-symbol = ""
-style = "bold #E23C31"
-format = '[$symbol ($profile)($region)]($style) '
-disabled = true  # Enable if you use AWS
-
-[gcloud]
-symbol = "󱇶"
-style = "bold #E23C31"
-format = '[$symbol $account(@$domain)($region)]($style) '
-disabled = true  # Enable if you use GCP
-
-[azure]
-symbol = "󰠅"
-style = "bold #E23C31"
-format = '[$symbol ($subscription)]($style) '
-disabled = true  # Enable if you use Azure
-
-# ─── BATTERY (for laptops) ──────────────────────────────────────
-[battery]
-disabled = false
-full_symbol = "󰁹"
-charging_symbol = "󰂄"
-discharging_symbol = "󰂃"
-format = "[$symbol $percentage]($style) "
-
-[[battery.display]]
-threshold = 10
-style = "bold #A03D3A"
-
-[[battery.display]]
-threshold = 30
-style = "bold #E23C31"
-
-[[battery.display]]
-threshold = 100
-style = "bold #DC392F"
-
 # ─── ADDITIONAL LANGUAGES ───────────────────────────────────────
 [c]
 symbol = ""
-style = "bold #E23C31"
-format = "[$symbol $version]($style) "
-disabled = false
-
-[cmake]
-symbol = "△"
-style = "bold #E23C31"
+style = "bold secondary"
 format = "[$symbol $version]($style) "
 disabled = false
 
 [php]
 symbol = ""
-style = "bold #E23C31"
+style = "bold secondary"
 format = "[$symbol $version]($style) "
 disabled = false
 
 [ruby]
 symbol = ""
-style = "bold #E23C31"
+style = "bold secondary"
 format = "[$symbol $version]($style) "
 disabled = false
 
-# ─── MISC MODULES ───────────────────────────────────────────────
+# ─── USER & HOST (SSH / root only) ─────────────────────────────
 [username]
-disabled = true  # Disabled for cleaner look
-style_user = "bold #E23C31"
-style_root = "bold #A03D3A"
+disabled = false
+style_user = "bold secondary"
+style_root = "bold error"
 format = "[$user]($style) "
 show_always = false
 
 [hostname]
-disabled = true  # Disabled for cleaner look
+disabled = false
 ssh_only = true
-style = "bold #E14235"
+style = "bold tertiary"
 format = "[@$hostname]($style) "
 
-[memory_usage]
-disabled = true
-symbol = "󰍛"
-style = "bold #E23C31"
-format = "[$symbol $ram( | $swap)]($style) "
-threshold = 70
-
-[status]
-disabled = true
-symbol = "✖"
-format = '[$symbol $status]($style) '
-style = "bold #A03D3A"
-
-# ─── PERFORMANCE TIPS ───────────────────────────────────────────
-# 1. scan_timeout = 30 (faster directory scanning)
-# 2. git status only checked in small repos
-# 3. Language modules only activate with specific files
-# 4. Disabled modules set to "disabled = true"
-# 5. truncate_to_repo keeps paths short in git repos
-
-# ─── P10K TRANSIENT PROMPT WORKAROUND ──────────────────────────
-# Unfortunately, Starship doesn't support transient prompts like P10k
-# However, you can achieve similar behavior with these alternatives:
-#
-# OPTION 1: Use a shell integration
-# For Zsh, add to your .zshrc:
-#   # Clear previous prompts on new command
-#   precmd() { print -P '\n' }
-#
-# OPTION 2: Use minimal prompt after execution
-# You could write a shell script that uses ANSI escape codes to
-# replace the prompt after command execution
-#
-# OPTION 3: Use 'atuin' or 'mcfly' for cleaner history
-# These tools provide better history management and cleaner output
+# ─── PALETTE ────────────────────────────────────────────────────
+# Keep this block last: set-wallpaper.sh replaces everything from here down
+# with the matugen colors. Defaults match the terminals (Tokyo Night).
+[palettes.hecate]
+primary = "#7aa2f7"
+secondary = "#bb9af7"
+tertiary = "#7dcfff"
+error = "#f7768e"
+muted = "#565f89"
