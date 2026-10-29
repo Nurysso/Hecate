@@ -5,290 +5,221 @@
 # |_| |_|_____\____/_/   \_\_| |_____|
 
 # ═══════════════════════════════════════════════════════════════
-# ZSH Configuration with Starship and custom functions for quality of life
+# ~/.config/zsh/zshrc — Plugins, completions, prompt, widgets
+# Managed by hecate. Do not add personal config here.
+# Personal config → ~/.zshrc
+# Aliases, env, fzf and functions → ~/.config/shell (shared with bash and fish)
 # ═══════════════════════════════════════════════════════════════
 
-# ZSH installation path
-export ZSH="$HOME/.oh-my-zsh"
-
-# PATH Configuration
-export PATH="$HOME/.local/bin:$PATH"              # User local binaries (priority)
-export PATH="$PATH:/snap/bin"                     # Snap package binaries
-
-# ───────────────────────────────────────────────────────────────
-# Plugin Configuration
-# ───────────────────────────────────────────────────────────────
-plugins=(
-    sudo                      # Press ESC twice to prepend sudo
-    history                   # History command enhancements
-    fzf                       # Fuzzy finder integration
-    zsh-autosuggestions       # Fish-like autosuggestions
-    zsh-syntax-highlighting   # Syntax highlighting for commands
-    thefuck                   # Corrects previous command errors
-    command-not-found         # Suggests package for missing commands
-    colored-man-pages         # Colorful man pages
-)
-
-# Load Oh-My-Zsh (without theme)
-ZSH_THEME=""  # Disable Oh-My-Zsh themes (Starship will handle this)
-source $ZSH/oh-my-zsh.sh
-
-# ───────────────────────────────────────────────────────────────
-# Starship Prompt Initialization
-# ───────────────────────────────────────────────────────────────
-eval "$(starship init zsh)"
-
-# ───────────────────────────────────────────────────────────────
-# History Configuration
-# ───────────────────────────────────────────────────────────────
-HISTFILE=~/.zsh_history
-HISTSIZE=100000
-SAVEHIST=100000
-setopt SHARE_HISTORY                  # Share history between sessions
-setopt HIST_EXPIRE_DUPS_FIRST         # Remove duplicates first
-setopt HIST_IGNORE_DUPS               # Don't store duplicated commands
-setopt HIST_FIND_NO_DUPS              # Don't display duplicates when searching
-setopt HIST_REDUCE_BLANKS             # Remove superfluous blanks
-setopt APPENDHISTORY                  # Append to history file
-setopt HIST_IGNORE_SPACE              # Don't save commands starting with space
-
-# ───────────────────────────────────────────────────────────────
-# FZF Configuration
-# ───────────────────────────────────────────────────────────────
-# Source FZF if installed
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-source <(fzf --zsh) 2>/dev/null || true
-
-# FZF Appearance - Match Starship theme
-export FZF_DEFAULT_OPTS="
-  --height=40%
-  --layout=reverse
-  --border=rounded
-  --margin=1
-  --padding=1
-  --color=fg:#c0caf5,bg:#1a1b26,hl:#7aa2f7
-  --color=fg+:#c0caf5,bg+:#292e42,hl+:#7dcfff
-  --color=info:#7aa2f7,prompt:#7dcfff,pointer:#7dcfff
-  --color=marker:#9ece6a,spinner:#9ece6a,header:#9ece6a
-  --preview-window=right:60%:wrap
-"
-
-# FZF Commands - Use modern tools
-export FZF_CTRL_T_COMMAND="fd --type f --hidden --follow --exclude .git"
-export FZF_CTRL_T_OPTS="
-  --preview 'bat --style=numbers --color=always --line-range :500 {}'
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'
-"
-
-export FZF_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
-export FZF_ALT_C_OPTS="
-  --preview 'exa --tree --level=2 --icons --color=always {}'
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'
-"
-
-export FZF_CTRL_R_OPTS="
-  --preview 'echo {}'
-  --preview-window up:3:wrap
-  --bind 'ctrl-/:toggle-preview'
-  --bind 'ctrl-y:execute-silent(echo -n {2..} | xclip -selection clipboard)+abort'
-"
-
-# ───────────────────────────────────────────────────────────────
-# Completion System
-# ───────────────────────────────────────────────────────────────
-autoload -Uz compinit
-
-# Load completions only once a day for faster shell startup
-for dump in ~/.zcompdump(N.mh+24); do
-  compinit
-done
-compinit -C
-
-# Better completion behavior
-zstyle ':completion:*' menu select                          # Menu-driven completion
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'   # Case-insensitive completion
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"     # Colorful completion
-zstyle ':completion:*' rehash true                          # Automatically find new executables
-
-# ───────────────────────────────────────────────────────────────
-# Aliases - System Information
-# ───────────────────────────────────────────────────────────────
-alias fast='fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc'
-
-# ───────────────────────────────────────────────────────────────
-# Aliases - Modern Command Replacements
-# ───────────────────────────────────────────────────────────────
-alias ls='exa --icons --group-directories-first'
-alias ll='exa -la --icons --group-directories-first'
-alias lt='exa -T --icons --level=2'
-alias la='exa -la --icons --group-directories-first --git'
-alias l='exa -l --icons --group-directories-first'
-
-alias cat='bat --style=plain'                    # Use bat for cat
-alias catp='bat --style=full'                    # Bat with line numbers
-
-alias icat='kitty icat'                          # Display images in terminal
-
-# ───────────────────────────────────────────────────────────────
-# Aliases - Directory Navigation
-# ───────────────────────────────────────────────────────────────
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias doc='cd ~/Documents/'
-alias dow='cd ~/Downloads/'
-alias pic='cd ~/Pictures/'
-
-# ───────────────────────────────────────────────────────────────
-# Aliases - System Utilities
-# ───────────────────────────────────────────────────────────────
-alias meminfo='free -m'
-alias cpuinfo='lscpu'
-alias ports='sudo netstat -tulanp'
-alias rdb='rm ~/.cache/cliphist/db'
-
-# Git shortcuts
-alias g='git'
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gp='git push'
-alias gl='git pull'
-alias gd='git diff'
-alias glog='git log --oneline --graph --decorate'
-
-# Safety nets
-alias rm='rm -i'
-alias cp='cp -i'
-alias mv='mv -i'
-
-# ───────────────────────────────────────────────────────────────
-# Custom Functions
-# ───────────────────────────────────────────────────────────────
-
-# Fuzzy cd to any directory
-cdf() {
-  local dir
-  dir=$(fd --type d --hidden --exclude .git . ~ | \
-    fzf --prompt="📁 Select directory: " \
-        --height 50% \
-        --preview 'exa --tree --level=2 --icons --color=always {}')
-  if [[ -n "$dir" ]]; then
-    cd "$dir" || return
-    ls  # Show contents after cd
-  fi
-}
-
-# Fuzzy file edit
-vf() {
-  local file
-  file=$(fd --type f --hidden --exclude .git | \
-    fzf --prompt="✏️  Select file to edit: " \
-        --height 50% \
-        --preview 'bat --color=always --style=numbers --line-range :500 {}')
-  if [[ -n "$file" ]]; then
-    ${EDITOR:-nvim} "$file"
-  fi
-}
-
-# Fuzzy history search and execute
-fh() {
-  local cmd
-  cmd=$(history | \
-    fzf --prompt="🔍 Search history: " \
-        --tac \
-        --height 50% \
-        --preview 'echo {}' \
-        --preview-window up:3:wrap | \
-    sed 's/ *[0-9]* *//')
-  if [[ -n "$cmd" ]]; then
-    eval "$cmd"
-  fi
-}
-
-# Fuzzy kill process
-fkill() {
-  local pid
-  pid=$(ps -ef | sed 1d | \
-    fzf --prompt="💀 Select process to kill: " \
-        --height 50% \
-        --preview 'echo {}' \
-        --preview-window down:3:wrap | \
-    awk '{print $2}')
-  if [[ -n "$pid" ]]; then
-    echo "Killing process $pid"
-    kill -9 "$pid"
-  fi
-}
-
-# Create and enter directory
-mkcd() {
-  mkdir -p "$1" && cd "$1"
-}
-
-# Extract various archive formats
-extract() {
-  if [ -f "$1" ]; then
-    case "$1" in
-      *.tar.bz2)   tar xjf "$1"     ;;
-      *.tar.gz)    tar xzf "$1"     ;;
-      *.bz2)       bunzip2 "$1"     ;;
-      *.rar)       unrar x "$1"     ;;
-      *.gz)        gunzip "$1"      ;;
-      *.tar)       tar xf "$1"      ;;
-      *.tbz2)      tar xjf "$1"     ;;
-      *.tgz)       tar xzf "$1"     ;;
-      *.zip)       unzip "$1"       ;;
-      *.Z)         uncompress "$1"  ;;
-      *.7z)        7z x "$1"        ;;
-      *)           echo "'$1' cannot be extracted via extract()" ;;
-    esac
-  else
-    echo "'$1' is not a valid file"
-  fi
-}
-
-# ───────────────────────────────────────────────────────────────
-# Key Bindings
-# ───────────────────────────────────────────────────────────────
-bindkey -v  # Vi mode (comment out if you prefer emacs mode)
-
-# Custom key bindings
-bindkey '^[[A' history-substring-search-up      # Up arrow
-bindkey '^[[B' history-substring-search-down    # Down arrow
-bindkey '^[[3~' delete-char                     # Delete key
-bindkey '^?' backward-delete-char               # Backspace key
-
-# FZF key bindings (using zle)
-bindkey -s '^g' 'cdf\n'      # Ctrl+G: fuzzy cd
-bindkey -s '^e' 'vf\n'       # Ctrl+E: fuzzy edit
-bindkey -s '^f' 'fh\n'       # Ctrl+F: fuzzy history
-
-# ───────────────────────────────────────────────────────────────
-# TheFuck Integration
-# ───────────────────────────────────────────────────────────────
-eval $(thefuck --alias)
-eval $(thefuck --alias fk)  # Short alias 'fk'
-
-# ───────────────────────────────────────────────────────────────
-# Environment Variables
-# ───────────────────────────────────────────────────────────────
-export EDITOR='nvim'
-export VISUAL='nvim'
-export PAGER='less'
-export LESS='-R'
-
-# Load custom environment variables if they exist
-[ -f "$HOME/.local/bin/env" ] && source "$HOME/.local/bin/env"
-
-# ───────────────────────────────────────────────────────────────
-# Performance & Misc Settings
-# ───────────────────────────────────────────────────────────────
-# Reduce ESC key delay in vi mode
+# ── Shared config (PATH, env, fzf, aliases, functions, thefuck) ─
+source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/common.sh"
 export KEYTIMEOUT=1
 
-# Enable colors
-autoload -U colors && colors
+# ── History ────────────────────────────────────────────────────
+HISTFILE="${HOME}/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_SPACE   # Don't save commands starting with space
 
-# Disable beep
-unsetopt BEEP
+# ── Options ────────────────────────────────────────────────────
+setopt INTERACTIVE_COMMENTS   # Allow comments in interactive shell
+setopt NO_BEEP                # Stop that annoying beep
+setopt AUTO_CD                # cd by typing directory name
+setopt AUTO_PUSHD             # Push dirs on cd
+setopt PUSHD_IGNORE_DUPS
+setopt GLOB_DOTS              # Include dotfiles in globs
+unsetopt FLOW_CONTROL         # Free Ctrl+S for forward history search
+
+# ── Zinit (Plugin Manager) ────────────────────────────────────
+# Installs zinit if missing
+if [[ ! -f "$HOME/.local/share/zinit/zinit.git/zinit.zsh" ]]; then
+    print -P "%F{33}▓▒░ Installing Zinit…%f"
+    command mkdir -p "$HOME/.local/share/zinit" && command chmod g-rwX "$HOME/.local/share/zinit"
+    command git clone https://github.com/zdharma-continuum/zinit "$HOME/.local/share/zinit/zinit.git" && \
+        print -P "%F{33}▓▒░ Zinit installed.%f"
+fi
+source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+
+# Completion definitions must be on fpath before compinit
+zinit light zsh-users/zsh-completions
+
+# ── Completions ────────────────────────────────────────────────
+autoload -Uz compinit
+# Full rebuild only when the dump is older than a day, otherwise use the cache
+zcompdump_old=(${ZDOTDIR:-$HOME}/.zcompdump(N.mh+24))
+if (( $#zcompdump_old )); then compinit; else compinit -C; fi
+unset zcompdump_old
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' accept-exact-dirs true
+zstyle ':completion:*' rehash true
+zstyle ':completion:*:kill:*' command ps -e -o pid,%cpu,tty,cputime,cmd
+zstyle ':completion:*:cd:*' ignore-parents parent pwd
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$HOME/.zsh/cache"
+
+# fzf-tab goes after compinit and before plugins that wrap widgets (autosuggestions, highlighting)
+zinit light-mode for \
+    Aloxaf/fzf-tab \
+    zsh-users/zsh-history-substring-search \
+    zsh-users/zsh-autosuggestions \
+    z-shell/zsh-unique-id \
+    momo-lab/zsh-abbrev-alias \
+    zdharma-continuum/fast-syntax-highlighting
+
+# ── Smart ls (plain ls in huge dirs, eza elsewhere) ────────────
+function check_dir_size() {
+    local filecount=$(command ls -1A 2>/dev/null | head -n 1001 | wc -l)
+    export LARGE_DIR=$(( filecount > 1000 ))
+}
+autoload -U add-zsh-hook
+add-zsh-hook chpwd check_dir_size
+check_dir_size
+
+unalias ls ll la 2>/dev/null
+ls() {
+    if [[ $LARGE_DIR -eq 1 ]]; then
+        command ls --color=auto --group-directories-first "$@"
+    else
+        eza --icons --group-directories-first "$@"
+    fi
+}
+ll() {
+    if [[ $LARGE_DIR -eq 1 ]]; then
+        command ls -lA --color=auto --group-directories-first "$@"
+    else
+        eza -la --icons --group-directories-first --git "$@"
+    fi
+}
+alias la='ll'
+
+# ── Key Bindings ───────────────────────────────────────────────
+# Same in bash and fish:
+#   Ctrl+R history · Ctrl+T files · Alt+C dirs   (fzf)
+#   Ctrl+G cdf · Ctrl+E vf · Ctrl+F fh · Up/Down prefix history search
+bindkey -e
+source <(fzf --zsh)
+
+# History
+bindkey '^[[A' history-substring-search-up          # Up arrow
+bindkey '^[OA' history-substring-search-up
+bindkey '^[[B' history-substring-search-down        # Down arrow
+bindkey '^[OB' history-substring-search-down
+bindkey '^P' history-substring-search-up            # Ctrl+P
+bindkey '^N' history-substring-search-down          # Ctrl+N
+bindkey '^S' history-incremental-search-forward     # Ctrl+S
+
+# Word navigation
+bindkey '^[[1;5C' forward-word                      # Ctrl+Right
+bindkey '^[[1;5D' backward-word                     # Ctrl+Left
+bindkey '^[f' forward-word                          # Alt+F
+bindkey '^[b' backward-word                         # Alt+B
+
+# Line navigation
+bindkey '^A' beginning-of-line                      # Ctrl+A
+bindkey '^[[H' beginning-of-line                    # Home
+bindkey '^[OH' beginning-of-line
+bindkey '^[[F' end-of-line                          # End
+bindkey '^[OF' end-of-line
+
+# Delete
+bindkey '^[[3~' delete-char                         # Delete
+bindkey '^[[P' delete-char                          # Delete (kitty variant)
+bindkey '^?' backward-delete-char                   # Backspace
+bindkey '^H' backward-kill-word                     # Ctrl+Backspace
+bindkey '^[^?' backward-kill-word                   # Alt+Backspace
+bindkey '^[[3;5~' kill-word                         # Ctrl+Delete
+bindkey '^[d' kill-word                             # Alt+D
+
+# Editing
+bindkey '^K' kill-line                              # Ctrl+K - delete to end
+bindkey '^U' backward-kill-line                     # Ctrl+U - delete to start
+bindkey '^W' backward-kill-word                     # Ctrl+W - delete previous word
+bindkey '^Y' yank                                   # Ctrl+Y - paste deleted text
+bindkey '^[v' yank                                  # Alt+V - paste deleted text
+bindkey '^_' undo                                   # Ctrl+_ - undo
+bindkey '^Z' undo                                   # Ctrl+Z - undo (like VS Code)
+bindkey '^[.' insert-last-word                      # Alt+. - insert last argument
+bindkey '^L' clear-screen                           # Ctrl+L
+bindkey '^[l' clear-screen                          # Alt+L
+bindkey '^[^I' autosuggest-accept                   # Alt+Tab - accept autosuggestion
+
+# ── Widgets ────────────────────────────────────────────────────
+# Run the shared fuzzy functions as widgets so nothing is typed into the line or history
+cdf-widget() { cdf; zle reset-prompt }
+vf-widget() { vf </dev/tty; zle reset-prompt }
+fh-widget() { local cmd; cmd=$(fh_pick) && BUFFER=$cmd && zle accept-line; zle reset-prompt }
+zle -N cdf-widget
+zle -N vf-widget
+zle -N fh-widget
+bindkey '^G' cdf-widget                             # Ctrl+G - fuzzy cd
+bindkey '^E' vf-widget                              # Ctrl+E - fuzzy file edit
+bindkey '^F' fh-widget                              # Ctrl+F - fuzzy history
+
+# Insert a fuzzy-picked file or directory at the cursor
+find-file() {
+    local file
+    file=$(fd --type f --hidden --exclude .git | fzf --prompt="📁 Find file: " --height=40%)
+    [[ -n "$file" ]] && LBUFFER="${LBUFFER}${(q)file}"
+    zle reset-prompt
+}
+find-dir() {
+    local dir
+    dir=$(fd --type d --hidden --exclude .git . ~ | fzf --prompt="📂 Find directory: " --height=40%)
+    [[ -n "$dir" ]] && LBUFFER="${LBUFFER}${(q)dir}"
+    zle reset-prompt
+}
+zle -N find-file
+zle -N find-dir
+bindkey '^X^F' find-file                            # Ctrl+X Ctrl+F
+bindkey '^[o' find-file                             # Alt+O
+bindkey '^X^D' find-dir                             # Ctrl+X Ctrl+D
+bindkey '^[O' find-dir                              # Alt+Shift+O
+
+# Empty Enter lists the directory
+magic_enter() {
+    [[ -z $BUFFER ]] && echo && ls
+    zle accept-line
+}
+zle -N magic_enter
+bindkey '^M' magic_enter
+
+# Toggle sudo on the current line / rerun the last command with sudo
+prepend_sudo() {
+    if [[ $BUFFER != "sudo "* ]]; then
+        BUFFER="sudo $BUFFER"
+        CURSOR=$(( CURSOR+5 ))
+    else
+        BUFFER="${BUFFER#sudo }"
+        CURSOR=$(( CURSOR-5 ))
+    fi
+}
+sudo_last() {
+    local last_cmd=$(fc -ln -1)
+    [[ $last_cmd != "sudo "* ]] && last_cmd="sudo $last_cmd"
+    BUFFER=$last_cmd
+    CURSOR=${#BUFFER}
+}
+zle -N prepend_sudo
+zle -N sudo_last
+bindkey '^[s' prepend_sudo                          # Alt+S
+bindkey '^[S' sudo_last                             # Alt+Shift+S
+
+# Insert date / datetime
+insert_date() { LBUFFER="${LBUFFER}$(date '+%Y-%m-%d')" }
+insert_datetime() { LBUFFER="${LBUFFER}$(date '+%Y-%m-%d %H:%M:%S')" }
+zle -N insert_date
+zle -N insert_datetime
+bindkey '^[D' insert_date                           # Alt+Shift+D
+bindkey '^[T' insert_datetime                       # Alt+Shift+T
+
+# ── Prompt ─────────────────────────────────────────────────────
+command -v starship >/dev/null && eval "$(starship init zsh)"
