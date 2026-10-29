@@ -6,6 +6,7 @@ import qs.modules.bar
 import qs.modules.clipboard
 import qs.modules.connectivity
 import qs.modules.desktop
+import qs.modules.emoji
 import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.power
@@ -20,9 +21,10 @@ ShellRoot {
     Connectivity {}
     PowerMenu {}
     ClipboardHistory {}
+    EmojiPicker {}
     WallpaperSelector {}
 
-    // qs ipc call hecate toggle <launcher|notifications|connectivity|power|clipboard|wallpaper>
+    // qs ipc call hecate toggle <launcher|notifications|connectivity|power|clipboard|emoji|wallpaper>
     IpcHandler {
         target: "hecate"
         function toggle(panel: string): void { GlobalStates.toggle(panel) }
