@@ -4,48 +4,116 @@
 # |  _  | |__| |___ / ___ \| | | |___      > ^ <
 # |_| |_|_____\____/_/   \_\_| |_____|
 
-[colors.cursor]
-cursor = "0xdddddd"
-text = "0x000000"
-
-[colors.primary]
-background = "0x000000"
-foreground = "0xdddddd"
-
-[colors.selection]
-background = "0x555555"
-text = "0x000000"
-
-[cursor]
-blink_interval = 600
-style = "Block"
-unfocused_hollow = false
+# Mirrors kitty.conf (font, colors, padding, keybinds). Run `termkeys` to list keybinds.
 
 [font]
 size = 14.0
-
-[font.bold]
-style = "Bold"
-
-[font.italic]
-style = "Italic"
 
 [font.normal]
 family = "JetBrainsMono Nerd Font"
 style = "Bold"
 
-[mouse]
-hide_when_typing = false
+[font.bold]
+family = "JetBrainsMono Nerd Font"
+style = "ExtraBold"
+
+[font.italic]
+family = "JetBrainsMono Nerd Font"
+style = "Italic"
+
+[font.bold_italic]
+family = "JetBrainsMono Nerd Font"
+style = "Bold Italic"
+
+[cursor]
+blink_interval = 600
+blink_timeout = 15
+unfocused_hollow = true
+
+[cursor.style]
+shape = "Block"
+blinking = "On"
 
 [scrolling]
-history = 5000
-multiplier = 1
+history = 10000
+multiplier = 5
 
 [window]
-decorations = "full"
+decorations = "Full"
 dynamic_title = true
 opacity = 0.9
+blur = true
+dimensions = { columns = 120, lines = 32 }
 
 [window.padding]
 x = 8
 y = 8
+
+[selection]
+save_to_clipboard = true
+
+[mouse]
+hide_when_typing = true
+
+[bell]
+duration = 0
+
+# Tokyo Night inspired, same as kitty
+[colors.primary]
+background = "#000000"
+foreground = "#dddddd"
+
+[colors.cursor]
+cursor = "#c0caf5"
+text = "#1a1b26"
+
+[colors.selection]
+background = "#7aa2f7"
+text = "#000000"
+
+[colors.normal]
+black = "#15161e"
+red = "#f7768e"
+green = "#9ece6a"
+yellow = "#e0af68"
+blue = "#7aa2f7"
+magenta = "#bb9af7"
+cyan = "#7dcfff"
+white = "#a9b1d6"
+
+[colors.bright]
+black = "#414868"
+red = "#f7768e"
+green = "#9ece6a"
+yellow = "#e0af68"
+blue = "#7aa2f7"
+magenta = "#bb9af7"
+cyan = "#7dcfff"
+white = "#c0caf5"
+
+[keyboard]
+bindings = [
+  # ─── Clipboard ──────────────────────────────────────────────────
+  { key = "C", mods = "Control|Shift", action = "Copy" },
+  { key = "V", mods = "Control|Shift", action = "Paste" },
+  { key = "S", mods = "Control|Shift", action = "PasteSelection" },
+  # ─── Scrolling ──────────────────────────────────────────────────
+  { key = "ArrowUp", mods = "Control|Shift", action = "ScrollLineUp" },
+  { key = "ArrowDown", mods = "Control|Shift", action = "ScrollLineDown" },
+  { key = "PageUp", mods = "Control|Shift", action = "ScrollPageUp" },
+  { key = "PageDown", mods = "Control|Shift", action = "ScrollPageDown" },
+  { key = "Home", mods = "Control|Shift", action = "ScrollToTop" },
+  { key = "End", mods = "Control|Shift", action = "ScrollToBottom" },
+  { key = "F", mods = "Control|Shift", action = "SearchForward" },
+  # ─── Font Size ──────────────────────────────────────────────────
+  { key = "=", mods = "Control", action = "IncreaseFontSize" },
+  { key = "+", mods = "Control", action = "IncreaseFontSize" },
+  { key = "-", mods = "Control", action = "DecreaseFontSize" },
+  { key = "0", mods = "Control", action = "ResetFontSize" },
+  # ─── Window Management ──────────────────────────────────────────
+  { key = "Enter", mods = "Control|Shift", action = "CreateNewWindow" },
+  # ─── Misc ───────────────────────────────────────────────────────
+  { key = "F11", mods = "Control|Shift", action = "ToggleFullscreen" },
+  { key = "Space", mods = "Control|Shift", action = "ToggleViMode" },
+  { key = "Delete", mods = "Control|Shift", action = "ClearHistory" },
+]

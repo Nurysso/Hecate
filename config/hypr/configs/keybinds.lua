@@ -32,16 +32,6 @@ local function run_script(script_name)
     return hl.dsp.exec_cmd(Scripts .. "/" .. script_name)
 end
 
--- toggle_rofi adds toggle behavior to rofi.
--- If the menu is already shown, this closes it.
-local function toggle_rofi(cmd)
-    return hl.dsp.exec_cmd(Scripts .. "/toggle_rofi " .. cmd)
-end
-
-local function toggle_rofi_script(script_name)
-    return toggle_rofi(Scripts .. "/" .. script_name)
-end
-
 -- Safe bind for dispatchers whose exact Lua name/args I could not verify
 -- against the docs. If the dispatcher doesn't exist, the bind is skipped
 -- instead of aborting the rest of this file.
@@ -92,7 +82,7 @@ hl.bind(mainMod .. " + Space", run(Scripts .. "/Aoiler.sh"))
 -- SUPER + A: Hide/show Aoiler (without killing)
 hl.bind(mainMod .. " + A", hl.dsp.workspace.toggle_special("aoiler"))
 
-hl.bind(mainMod .. " + ALT + E", run('rofi -modi emoji -show emoji -config ~/.config/rofi/config-emoji.rasi')) -- Emoji Picker
+hl.bind(mainMod .. " + ALT + E", panel("emoji"))                             -- Emoji Picker
 hl.bind(mainMod .. " + V",       panel("clipboard"))                         -- Clipboard Manager
 hl.bind(mainMod .. " + SHIFT + V", run("pavucontrol"))                       -- Audio Control
 hl.bind(mainMod .. " + SHIFT + N", panel("notifications"))                   -- Notification Panel
