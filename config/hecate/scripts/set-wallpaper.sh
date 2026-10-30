@@ -35,3 +35,11 @@ if [ -f "$starship" ] && jq -e .primary "$cache/theme.json" >/dev/null; then
     } >"$tmp"
     mv "$tmp" "$starship"
 fi
+
+# Recolor the GTK and Kvantum (Qt) themes, then flip the GTK theme away and back so running GTK3 apps reload it.
+# GTK4 and Qt apps pick the new colors up on their next launch.
+python3 "$HOME/.config/hecate/scripts/app-theme.py" || echo "set-wallpaper: app theme recolor failed" >&2
+if command -v gsettings >/dev/null && [ "$(gsettings get org.gnome.desktop.interface gtk-theme)" = "'Hecate'" ]; then
+    gsettings set org.gnome.desktop.interface gtk-theme Materia-dark
+    gsettings set org.gnome.desktop.interface gtk-theme Hecate
+fi
