@@ -12,7 +12,7 @@ You can explore the linked official documentation below to learn more about each
 | Platform | Support Status | Notes |
 |-----------|----------------|-------|
 | **Arch Linux** | ✅ Full Support | Recommended platform — all features and scripts are tested here. |
-| **Fedora** | 🧪 Partial | Upcoming support. Core configs work, install script pending |
+| **Fedora** | ⚠️ Manual only | Install script is outdated, follow the [manual guide](../Installation/manual-install.md) |
 | **Ubuntu** | 🧪 Partial | Under development. Some shell integrations may require manual setup. |
 | **NixOS** | 🚧 Planned | Not yet supported, will be added after Fedora and Ubuntu testing. |
 | **Others (Debian, OpenSUSE, etc.)** | ❌ Not Supported | Might work with manual configuration but not officially maintained. |
@@ -21,7 +21,7 @@ You can explore the linked official documentation below to learn more about each
 
 ### 💡 Notes
 - **Arch Linux** is the *reference system* for Hecate — all scripts and integrations (like dynamic colors, Pulse, and other features) are verified here.
-- Fedora and Ubuntu support is actively being worked on. Expect official releases soon.
+- Fedora install is manual only for now; Ubuntu support is under development.
 - For installation instructions, check the respective guides in the [`Installation`](../Installation) folder:
   - [Arch](../Installation/arch.md)
   - [Fedora](../Installation/fedora.md)

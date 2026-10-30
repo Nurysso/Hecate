@@ -23,7 +23,7 @@
 - **Centralized Configuration**: Single source of truth for all component colors
 - **Real-time Updates**: Components reload automatically when wallpaper changes
 - **Mode Switching**: Toggle between dynamic (wallpaper-based) and static themes    `run hecate theme to change`
-- **Component Support**: Waybar, SwayNC, Rofi, Wlogout, Starship,Quickshell
+- **Component Support**: Waybar, SwayNC, Rofi, Wlogout, Starship, Quickshell, GTK, Qt (Kvantum)
 
 ### Supported Components
 
@@ -35,6 +35,8 @@
 | Wlogout | CSS | On launch |
 | Starship | TOML | Next prompt |
 |Quickshell|QML| Reloads itself|
+| GTK 3/4 | `Hecate` theme (Materia-dark recolored by `app-theme.py`) | GTK3 live, GTK4 on relaunch |
+| Qt | Kvantum `Hecate` theme (MateriaDark recolored) | On relaunch |
 
 ---
 
@@ -78,7 +80,6 @@
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
 │    COMPONENT-SPECIFIC UPDATES                               │
-│     ├─ update_starship-colors.sh   (Starship TOML)          │
 │     ├─ update_wlogout_color.sh     (Wlogout CSS + blur)     │
 │     └─ colors-rofi.rasi            (Rofi RASI format)       │
 └────────────────────┬────────────────────────────────────────┘
@@ -104,7 +105,6 @@
 │   └── scripts/
 │       ├── hecate-system-colors.sh    # Waypaper hook (entry point)
 │       ├── update_hecate_colors.sh    # Central color generator
-│       ├── update_starship-colors.sh  # Starship prompt colors
 │       └── update_wlogout_color.sh    # Wlogout colors + blur
 ├── waybar/
 │   └── color.css -> ~/.config/hecate/hecate.css (symlink)
@@ -114,7 +114,7 @@
 │   └── theme/colors-rofi.rasi         # Generated RASI file
 ├── wlogout/
 │   └── color.css                      # Generated CSS
-├── starship.toml                      # Generated TOML
+├── starship.toml                      # Palette block recolored by set-wallpaper.sh
 └── waypaper/
     └── config.ini                     # Contains post_command hook
 
@@ -204,10 +204,11 @@ This ensures text is always readable regardless of wallpaper brightness.
 - Uses ImageMagick for blur effect
 
 #### Starship
-- Complete TOML regeneration
-- Maps colors to prompt segments
+- Not part of the pywal flow above: `set-wallpaper.sh` (the Quickshell wallpaper picker) rewrites only the
+  `[palettes.hecate]` block at the bottom of `~/.config/starship/starship.toml` from the matugen colors
+  (`primary`, `secondary`, `tertiary`, `error`, `muted` = outline)
+- Edit the rest of `starship.toml` freely; keep the palette block last
 - Updates on next shell prompt
-- so if wants to have custom starship config then edit the `~/.config/hecate/scripts/update_starship-colors.sh` or comment the `update_starship-colors.sh` section in `~/.config/hecate/scripts/update_hecate-colors.sh`
 
 ### Quickshell
 - Generates colors by itself, by reading `hecate.css`.
@@ -240,7 +241,6 @@ mkdir -p ~/.cache/wlogout
 # Place the provided scripts in:
 ~/.config/hecate/scripts/hecate-system-colors.sh
 ~/.config/hecate/scripts/update_hecate_colors.sh
-~/.config/hecate/scripts/update_starship-colors.sh
 ~/.config/hecate/scripts/update_wlogout_color.sh
 ```
 
@@ -398,30 +398,6 @@ Edit `update_hecate_colors.sh` to change semantic mappings:
 - `hex_to_rgb()`: Converts hex to RGB tuple
 - `get_luminance()`: Calculates relative luminance
 - `is_light()`: Determines if background is light
-
-### 3. `update_starship-colors.sh`
-
-**Purpose:** Generate Starship prompt configuration
-**Location:** `~/.config/hecate/scripts/`
-
-**What it does:**
-1. Sources `~/.cache/wal/colors.sh` (shell variables)
-2. Generates complete `starship.toml`
-3. Maps colors to prompt segments
-4. Creates backup of previous config
-
-**Color Mapping:**
-- Frame: `color2` (green)
-- Username: `color3` (yellow)
-- Hostname: `color4` (blue)
-- Directory: `color6` (cyan)
-- Git branch: `color5` (magenta)
-- Git status: `color1` (red)
-
-**Manual Usage:**
-```bash
-~/.config/hecate/scripts/update_starship-colors.sh
-```
 
 ### 4. `update_wlogout_color.sh`
 
