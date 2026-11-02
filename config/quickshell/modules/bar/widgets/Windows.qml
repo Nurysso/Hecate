@@ -1,7 +1,6 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Widgets
 import qs.config
 import qs.components
 
@@ -9,9 +8,12 @@ import qs.components
 Pill {
     id: root
     widget: "windows"
-    readonly property var cfg: Config.widget(widget)
+    interactive: false
+    spacing: Theme.px(2)
+    padding: Theme.px(2)
+
     readonly property string scope: cfg.scope ?? "workspace"   // "workspace", "monitor" or "all"
-    readonly property string titles: cfg.titles ?? "none"      // "none", "active" or "all"
+    readonly property string titles: cfg.titles ?? "active"    // "none", "active" or "all"
     readonly property int maxTitle: cfg.max_title ?? 24
     readonly property color accent: Config.color(widget, "color", Theme.primary)
     readonly property var monitor: Hyprland.monitorFor(QsWindow.window?.screen)
@@ -41,7 +43,6 @@ Pill {
             required property HyprlandToplevel modelData
             readonly property bool active: modelData.wayland?.activated ?? false
             readonly property string appId: modelData.wayland?.appId ?? ""
-            readonly property string iconPath: Quickshell.iconPath(DesktopEntries.heuristicLookup(appId)?.icon ?? appId, true)
             readonly property bool shown: root.inScope(modelData)
             property real grow: shown ? 1 : 0
             Behavior on grow { Anim {} }
@@ -52,10 +53,10 @@ Pill {
             visible: grow > 0.01
             opacity: grow
             clip: true
-            implicitWidth: (row.implicitWidth + 16) * grow
-            implicitHeight: 28
-            radius: height / 2
-            color: active ? Theme.alpha(root.accent, 0.18) : "transparent"
+            implicitWidth: (row.implicitWidth + Theme.px(14)) * grow
+            implicitHeight: root.height - Theme.px(8)
+            radius: Math.min(height / 2, Theme.radiusTiny * 1.5)
+            color: active ? Theme.alpha(root.accent, 0.16) : "transparent"
             Behavior on color { CAnim {} }
 
             StateLayer {
@@ -68,29 +69,31 @@ Pill {
             Row {
                 id: row
                 anchors.centerIn: parent
-                spacing: 0
 
-                IconImage { visible: win.iconPath; source: win.iconPath; implicitSize: 18; anchors.verticalCenter: parent.verticalCenter }
-                Icon { visible: !win.iconPath; text: Theme.icon.apps; color: root.fg; anchors.verticalCenter: parent.verticalCenter }
+                AppIcon {
+                    anchors.verticalCenter: parent.verticalCenter
+                    app: win.appId
+                    implicitSize: Theme.px(18)
+                }
                 Item {
                     // Title slides out of the icon on hover (or when titles asks for it)
                     id: reveal
                     property real amount: win.showTitle ? 1 : 0
                     Behavior on amount { Anim {} }
                     anchors.verticalCenter: parent.verticalCenter
-                    width: (label.implicitWidth + 6) * amount
+                    width: (label.implicitWidth + Theme.px(7)) * amount
                     height: label.implicitHeight
                     clip: true
                     visible: amount > 0.01
 
                     StyledText {
                         id: label
-                        x: 6
+                        x: Theme.px(7)
                         opacity: reveal.amount
                         text: win.title
                         color: win.active ? root.accent : root.fg
                         font.pixelSize: Theme.fontSize - 1
-                        font.weight: win.active ? Font.Medium : Font.Normal
+                        font.weight: win.active ? Font.DemiBold : Font.Normal
                     }
                 }
             }
@@ -100,9 +103,10 @@ Pill {
                 visible: win.modelData.urgent
                 anchors.top: parent.top
                 anchors.right: parent.right
-                width: 6
-                height: 6
-                radius: 3
+                anchors.margins: Theme.px(2)
+                width: Theme.px(7)
+                height: width
+                radius: width / 2
                 color: Theme.error
             }
         }

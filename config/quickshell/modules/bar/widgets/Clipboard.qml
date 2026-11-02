@@ -3,6 +3,7 @@ import qs.components
 
 Pill {
     widget: "clipboard"
-    icon: Theme.icon.clipboard
-    onClicked: GlobalStates.toggle("clipboard")
+    panel: "clipboard"
+    icon: Theme.glyph(cfg.icon, "clipboard")
+    tooltip: "Clipboard history"
 }

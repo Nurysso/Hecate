@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Hecate Settings
+GenericName=Settings
+Comment=Configure the Hecate Hyprland dotfiles
+Exec=/home/user/.local/bin/hecate-settings
+Icon=/home/user/.cache/hecate/hecate-settings.svg
+Terminal=false
+Categories=Settings;DesktopSettings;
+Keywords=hecate;hyprland;settings;config;
+StartupWMClass=hecate-settings

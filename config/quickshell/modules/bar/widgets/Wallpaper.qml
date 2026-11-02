@@ -3,6 +3,7 @@ import qs.components
 
 Pill {
     widget: "wallpaper"
-    icon: Theme.icon.wallpaper
-    onClicked: GlobalStates.toggle("wallpaper")
+    panel: "wallpaper"
+    icon: Theme.glyph(cfg.icon, "wallpaper")
+    tooltip: "Wallpapers"
 }
