@@ -400,6 +400,12 @@ install_shell_scripts() {
     gum style --foreground 220 "⚠ hecate.sh not found at $scripts_dir/hecate.sh"
   fi
 
+  if [ -f "$scripts_dir/termkeys.sh" ]; then
+    cp "$scripts_dir/termkeys.sh" "$HOME/.local/bin/termkeys"
+    chmod +x "$HOME/.local/bin/termkeys"
+    echo "✓ termkeys installed to ~/.local/bin/termkeys"
+  fi
+
   # Install freya.sh
   if [ -f "$scripts_dir/file_convert.sh" ]; then
     echo "Installing freya script..." "slide"
@@ -490,8 +496,8 @@ backup_config() {
   # List of config directories to check
   local config_dirs=(
     "alacritty" "cava" "fastfetch" "foot" "gtk-3.0" "hecate" "kitty"
-    "quickshell" "starship" "wallust" "waypaper" "zsh" "bash" "fish"
-    "ghostty" "gtk-4.0" "hypr" "matugen" "rofi" "swaync" "wlogout"
+    "quickshell" "starship" "zsh" "bash" "fish" "shell"
+    "ghostty" "gtk-4.0" "hypr" "matugen" "qt6ct" "Kvantum"
   )
 
   # Check for shell rc files separately
@@ -651,18 +657,14 @@ setup_Symlinks() {
   gum style --foreground 220 "Configuring Symlinks..."
 
   # Define symlink paths
-  local SWAYNC_COLOR_SYMLINK="$HOME/.config/swaync/color.css"
   local STARSHIP_SYMLINK="$HOME/.config/starship.toml"
   local HYPRLOCK_SYMLINK="$HOME/.config/hypr/hyprlock.conf"
 
   # Remove old symlinks or files
-  [ -e "$SWAYNC_COLOR_SYMLINK" ] && rm -f "$SWAYNC_COLOR_SYMLINK"
   [ -e "$STARSHIP_SYMLINK" ] && rm -f "$STARSHIP_SYMLINK"
   [ -e "$HYPRLOCK_SYMLINK" ] && rm -f "$HYPRLOCK_SYMLINK"
 
   # Create new symlinks
-  ln -s "$HOME/.config/hecate/hecate.css" "$WAYBAR_COLOR_SYMLINK"
-  ln -s "$HOME/.config/hecate/hecate.css" "$SWAYNC_COLOR_SYMLINK"
   ln -s "$HOME/.config/starship/starship.toml" "$STARSHIP_SYMLINK"
   ln -s "$HOME/.config/hypr/hyprlock/hecate-lock.conf" "$HYPRLOCK_SYMLINK"
   gum style --foreground 82 "✓ Symlinks setuped configured!"
