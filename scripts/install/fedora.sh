@@ -5,6 +5,12 @@
 
 set -e
 
+# This script has not kept up with the dotfiles (new bar, awww, hecate-settings, ...)
+printf '\033[0;31m✗ The Fedora install script is outdated and no longer matches the dotfiles.\033[0m\n' >&2
+printf 'Please follow the manual install guide instead:\n' >&2
+printf '  https://github.com/Nurysso/Hecate/blob/main/documentation/Installation/manual-install.md\n' >&2
+exit 1
+
 # Colors for output
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -79,7 +85,7 @@ backup_config() {
 
   # List of config directories to check (excluding shell rc files)
    local config_dirs=(
- "alacritty"  "cava" "fastfetch"  "foot"     "gtk-3.0"  "hecate"  "kitty"    "quickshell"  "starship" "wallust" "waypaper" "zsh" "bash"  "fish" "ghostty" "gtk-4.0" "hypr" "matugen" "rofi" "swaync" "wlogout"
+ "alacritty"  "cava" "fastfetch"  "foot"     "gtk-3.0"  "hecate"  "kitty"    "quickshell"  "starship" "wallust" "waypaper" "zsh" "bash"  "fish" "ghostty" "gtk-4.0" "hypr" "matugen" "qt6ct" "Kvantum" "rofi" "swaync" "wlogout"
   )
 
   # Check for shell rc files separately
@@ -223,7 +229,7 @@ build_package_list() {
   gum style --border double --padding "1 2" --border-foreground 212 "Building Package List"
 
   # Base packages - Fedora equivalents
-  INSTALL_PACKAGES+=(git wget curl unzip SwayNotificationCenter rofi dunst fastfetch thunar btop wl-clipboard jq hyprpaper jetbrains-mono-fonts-all tesseract google-noto-emoji-fonts swww hyprlock hypridle starship google-noto-sans-fonts grim slurp neovim nano webkit2gtk4.1)
+  INSTALL_PACKAGES+=(git wget curl unzip SwayNotificationCenter rofi dunst fastfetch thunar btop wl-clipboard jq hyprpaper jetbrains-mono-fonts-all tesseract google-noto-emoji-fonts swww hyprlock hypridle starship google-noto-sans-fonts grim slurp neovim nano webkit2gtk4.1 materia-gtk-theme materia-kde kvantum qt6ct breeze-icon-theme vimix-cursor-theme)
 
   # Check if Hyprland is already installed
   if command -v Hyprland &>/dev/null; then
@@ -597,6 +603,23 @@ FZFEOF
   fi
 
   gum style --foreground 82 "✓ Bash setup complete!"
+}
+
+# Build the Hecate GTK/Kvantum themes (Materia recolored from the wallpaper) and apply them with the icon/cursor/font settings
+apply_gtk_theme() {
+  local theme="Hecate"
+  if [ ! -d /usr/share/themes/Materia-dark ]; then
+    gum style --foreground 220 "Materia-dark not installed, falling back to Adwaita for GTK"
+    theme="Adwaita-dark"
+  fi
+  python3 "$HOME/.config/hecate/scripts/app-theme.py" || gum style --foreground 220 "Could not generate the Hecate GTK/Qt themes"
+  if command -v gsettings &>/dev/null; then
+    gsettings set org.gnome.desktop.interface gtk-theme "$theme" 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface icon-theme "breeze-dark" 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface cursor-theme "Vimix-cursors" 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface font-name "JetBrainsMono Nerd Font Mono 12" 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface color-scheme "prefer-dark" 2>/dev/null || true
+  fi
 }
 
 # Move configs from cloned repo to ~/.config
@@ -1051,6 +1074,7 @@ main() {
   backup_config
   # Install configuration files
   move_config
+  apply_gtk_theme
   # Enable SDDM if it was installed
   enable_sddm
 

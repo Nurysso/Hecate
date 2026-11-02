@@ -34,6 +34,9 @@ profile = "minimal"
 [wallpaper]
 dir = "~/Pictures/Wallpapers"
 
+[screenshot]
+dir = "~/Pictures/Screenshots" # where Super+Print and friends save; leave out for ~/Pictures/Screenshots
+
 [bar]
 position = "top"       # "top" or "bottom"
 style = "islands"      # "islands" (one glass group per section), "floating" (one rounded bar) or "full" (edge to edge)

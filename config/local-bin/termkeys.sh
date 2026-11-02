@@ -27,12 +27,18 @@ case "$term" in
 esac
 [ -f "$file" ] || { echo "termkeys: $file not found" >&2; exit 1; }
 
-[ -t 1 ] && color=1
-awk -v t="$term" -v color="$color" '
-  function out(k, a) { printf "  %-32s %s\n", k, a }
+# Groups and keys take the wallpaper palette's primary/secondary, plain blue without theme.json
+if [ -t 1 ]; then
+  hdr=$'\033[1;34m' key="" rst=$'\033[0m'
+  rgb() { local h=${1#\#}; printf '\033[38;2;%d;%d;%dm' "0x${h:0:2}" "0x${h:2:2}" "0x${h:4:2}"; }
+  read -r primary secondary < <(jq -r '"\(.primary) \(.secondary)"' "${XDG_CACHE_HOME:-$HOME/.cache}/hecate/theme.json" 2>/dev/null)
+  [[ $primary$secondary =~ ^#[0-9a-fA-F]{6}#[0-9a-fA-F]{6}$ ]] && { hdr=$'\033[1m'$(rgb "$primary"); key=$(rgb "$secondary"); }
+fi
+awk -v t="$term" -v hdr="$hdr" -v key="$key" -v rst="$rst" '
+  function out(k, a) { printf "  %s%-32s%s %s\n", key, k, (key ? rst : ""), a }
   /^[[:space:]]*# ─── / {
     sub(/^[[:space:]]*# ─── /, ""); sub(/ ─.*$/, "")
-    printf (color ? "\n\033[1;34m%s\033[0m\n" : "\n%s\n"), $0
+    printf "\n%s%s%s\n", hdr, $0, rst
     next
   }
   t == "kitty" && /^map / { k = $2; $1 = $2 = ""; sub(/^ +/, ""); out(k, $0) }
