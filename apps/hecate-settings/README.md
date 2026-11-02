@@ -68,13 +68,28 @@ sudo pacman -S --needed rust qt6-base qt6-declarative
 
 Anything missing only affects its own section. For example, without `bluez-utils` the Bluetooth card says so and the rest of the app works normally.
 
-## Build and run
+## Install
+
+The Hecate installer does this for you. To install or update just this app:
 
 ```bash
-cd hecate-settings
-cargo build --release
-./target/release/hecate-settings
+cd apps/hecate-settings
+./install.sh
 ```
+
+It builds a release binary and installs, for your user only:
+
+| What | Where |
+|---|---|
+| Binary | `~/.local/bin/hecate-settings` |
+| Icon | `~/.local/share/icons/hicolor/scalable/apps/hecate-settings.svg` |
+| Desktop entry | `~/.local/share/applications/hecate-settings.desktop` |
+
+The desktop entry is what gives the app its icon in the bar's windows module, which looks windows up by their class (`hecate-settings`). To replace the placeholder icon, overwrite `data/hecate-settings.svg` and run `./install.sh` again.
+
+`./install.sh --uninstall` removes all three. Set `BIN_DIR` or `DATA_DIR` to install somewhere else.
+
+To build without installing: `cargo build --release`, then run `./target/release/hecate-settings`.
 
 ## Files it reads and writes
 
@@ -92,7 +107,9 @@ Your config is loaded in a sandboxed Lua interpreter. It can `require` modules f
 ## Project layout
 
 ```
-hecate-settings/
+apps/hecate-settings/
+├── install.sh       # builds and installs the binary, icon and desktop entry
+├── data/            # the icon (placeholder) and desktop entry template
 ├── engine/          # hecate-engine: loads hyprland.lua in a Lua sandbox, writes the overrides file
 │   ├── src/lib.rs
 │   └── tests/       # with fixture configs, including a hostile one and an infinite loop

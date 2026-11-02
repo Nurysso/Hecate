@@ -5,38 +5,40 @@ import qs.config
 import qs.components
 
 // GitHub contribution calendar: a column per week, filling the card width.
+// [desktop.github] user and token_file (a token with the read:user scope, nothing else in the file).
 Card {
     id: root
     widget: "github"
 
-    readonly property string user: cfg.user ?? "Nurysso"
-    readonly property int cell: 14
-    readonly property int cellGap: 4
-    readonly property int weekCount: Math.floor((width - Theme.pad * 2 + cellGap) / (cell + cellGap))
+    readonly property string user: cfg.user ?? ""
+    readonly property int cell: Theme.px(14)
+    readonly property int cellGap: Theme.px(4)
+    readonly property int weekCount: Math.max(1, Math.floor((width - Theme.pad * 2 + cellGap) / (cell + cellGap)))
     property string token
     property var weeks: []        // [[{date, contributionCount}]]
     property string error
     property var hovered: null
 
     readonly property var shown: weeks.slice(-weekCount)
-    readonly property var shownDays: [].concat(...shown)
+    readonly property var shownDays: shown.reduce((all, w) => all.concat(w), [])
     readonly property int total: shownDays.reduce((n, d) => n + d.contributionCount, 0)
-    readonly property int peak: Math.max(1, ...shownDays.map(d => d.contributionCount))
+    readonly property int peak: shownDays.reduce((m, d) => Math.max(m, d.contributionCount), 1)
 
     function shade(count) {
-        if (count === 0) return Theme.alpha(Theme.on_surface, 0.08)
+        if (count === 0) return Theme.layerHigh
         return Theme.alpha(root.accent, [0.3, 0.5, 0.75, 1][Math.min(3, Math.floor(count / peak * 4))])
     }
 
     function fetch() {
-        if (!token) return
+        if (!token || !user) return
         const xhr = new XMLHttpRequest()
         xhr.onreadystatechange = () => {
             if (xhr.readyState !== XMLHttpRequest.DONE) return
-            const r = xhr.status === 200 ? JSON.parse(xhr.responseText) : null
-            const cal = r?.data?.user?.contributionsCollection.contributionCalendar
-            if (cal) {
-                root.weeks = cal.weeks.map(w => w.contributionDays)
+            let r = null
+            try { r = JSON.parse(xhr.responseText) } catch (e) {}
+            const weeks = r?.data?.user?.contributionsCollection?.contributionCalendar?.weeks
+            if (Array.isArray(weeks)) {
+                root.weeks = weeks.map(w => w?.contributionDays ?? []).filter(d => d.length)
                 root.error = ""
             } else {
                 root.error = r?.errors?.[0]?.message ?? (xhr.status === 401 ? "GitHub token rejected" : "GitHub unavailable")
@@ -60,35 +62,28 @@ Card {
     onUserChanged: fetch()
     Timer { running: true; repeat: true; interval: 30 * 60000; onTriggered: root.fetch() }
 
-    RowLayout {
-        spacing: Theme.gap
-        Rectangle {
-            implicitWidth: 32
-            implicitHeight: 32
-            radius: 16
-            color: Theme.alpha(root.accent, 0.16)
-            Icon { anchors.centerIn: parent; text: Theme.icon.github; color: root.accent; font.pixelSize: 16 }
-        }
-        StyledText { text: root.user; font.weight: Font.DemiBold; Layout.fillWidth: true }
+    CardHeader {
+        icon: Theme.icon.github
+        title: root.user || "GitHub"
+        accent: root.accent
         Rectangle {
             visible: root.shownDays.length > 0
             implicitWidth: chip.implicitWidth + Theme.pad
-            implicitHeight: 26
-            radius: 13
-            color: Theme.surface_container_highest
+            implicitHeight: Theme.px(26)
+            radius: height / 2
+            color: Theme.layerHigh
             StyledText {
                 id: chip
                 anchors.centerIn: parent
                 text: `<b>${root.total}</b>  ·  ${(root.total / Math.max(1, root.shownDays.length)).toFixed(1)}/day`
                 textFormat: Text.StyledText
                 color: Theme.on_surface_variant
-                font.pixelSize: 12
+                font.pixelSize: Theme.fontSmall
             }
         }
     }
 
     Row {
-        id: grid
         Layout.fillWidth: true
         spacing: root.cellGap
         visible: root.shown.length > 0
@@ -104,7 +99,7 @@ Card {
                         required property var modelData
                         width: root.cell
                         height: root.cell
-                        radius: 4
+                        radius: Theme.px(4)
                         color: root.shade(modelData.contributionCount)
                         scale: hover.containsMouse ? 1.25 : 1
                         Behavior on scale { Anim { duration: Theme.animFast } }
@@ -122,11 +117,12 @@ Card {
     }
 
     StyledText {
-        text: root.error ? root.error
+        text: !root.user ? "Set [desktop.github] user in hecate.toml"
+            : root.error ? root.error
             : root.hovered ? `${root.hovered.contributionCount} contribution${root.hovered.contributionCount === 1 ? "" : "s"} on ${Qt.formatDate(new Date(root.hovered.date + "T12:00"), "ddd d MMM")}`
             : root.shown.length ? `Last ${root.weekCount} weeks` : "Loading…"
         color: root.error ? Theme.error : Theme.on_surface_variant
-        font.pixelSize: Theme.fontSize - 2
+        font.pixelSize: Theme.fontSmall
         Layout.alignment: Qt.AlignHCenter
     }
 }

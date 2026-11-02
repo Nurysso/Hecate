@@ -6,9 +6,9 @@ import qs.config
 Shape {
     id: root
     property real value
-    property real thickness: 6
+    property real thickness: Theme.px(6)
     property color color: Theme.primary
-    property color track: Theme.surface_container_highest
+    property color track: Theme.layerHigh
     property real shown: Math.max(0, Math.min(value, 1))
     readonly property real r: (Math.min(width, height) - thickness) / 2
 

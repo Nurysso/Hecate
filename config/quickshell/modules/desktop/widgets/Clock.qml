@@ -4,6 +4,7 @@ import Quickshell
 import qs.config
 import qs.components
 
+// Hour and minute rings around the time, the date, and how far through the day and year we are.
 Card {
     id: root
     widget: "clock"
@@ -13,21 +14,21 @@ Card {
     SystemClock { id: clock; precision: SystemClock.Minutes }
 
     RowLayout {
-        spacing: Theme.pad * 1.25
+        spacing: Theme.px(20)
 
         Item {
-            implicitWidth: 132
-            implicitHeight: 132
+            implicitWidth: Theme.px(132)
+            implicitHeight: Theme.px(132)
 
-            Ring { anchors.fill: parent; value: (clock.hours % 12 + clock.minutes / 60) / 12; thickness: 6; color: root.accent }
-            Ring { anchors.fill: parent; anchors.margins: 14; value: clock.minutes / 60; thickness: 4; color: Theme.alpha(root.accent, 0.55) }
+            Ring { anchors.fill: parent; value: (clock.hours % 12 + clock.minutes / 60) / 12; thickness: Theme.px(7); color: root.accent }
+            Ring { anchors.fill: parent; anchors.margins: Theme.px(14); value: clock.minutes / 60; thickness: Theme.px(4); color: Theme.alpha(root.accent, 0.5) }
 
             Column {
                 anchors.centerIn: parent
                 StyledText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: String(root.hour).padStart(2, "0") + ":" + String(clock.minutes).padStart(2, "0")
-                    font.pixelSize: 26
+                    font.pixelSize: Theme.px(28)
                     font.weight: Font.Bold
                     font.features: { "tnum": 1 }
                 }
@@ -36,31 +37,29 @@ Card {
                     visible: root.twelve
                     text: clock.hours < 12 ? "AM" : "PM"
                     color: root.accent
-                    font.pixelSize: 11
-                    font.weight: Font.Medium
+                    font.pixelSize: Theme.fontTiny
+                    font.weight: Font.DemiBold
                     font.letterSpacing: 1.5
                 }
             }
         }
 
-        Rectangle { implicitWidth: 1; implicitHeight: 88; color: Theme.outline_variant }
-
         ColumnLayout {
             spacing: Theme.gap
 
             RowLayout {
-                spacing: Theme.gap * 1.5
+                spacing: Theme.px(12)
                 StyledText {
                     text: Qt.formatDate(clock.date, "dd")
-                    font.pixelSize: 54
+                    font.pixelSize: Theme.px(56)
                     font.weight: Font.Bold
                     font.features: { "tnum": 1 }
                 }
                 Column {
-                    spacing: 2
-                    StyledText { text: Qt.formatDate(clock.date, "dddd").toUpperCase(); font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1.5; color: root.accent }
-                    StyledText { text: Qt.formatDate(clock.date, "MMMM").toUpperCase(); font.pixelSize: 11; font.letterSpacing: 1.5; color: Theme.on_surface_variant }
-                    StyledText { text: Qt.formatDate(clock.date, "yyyy"); font.pixelSize: 11; color: Theme.outline }
+                    spacing: Theme.px(2)
+                    StyledText { text: Qt.formatDate(clock.date, "dddd").toUpperCase(); font.pixelSize: Theme.fontTiny; font.weight: Font.Bold; font.letterSpacing: 1.5; color: root.accent }
+                    StyledText { text: Qt.formatDate(clock.date, "MMMM").toUpperCase(); font.pixelSize: Theme.fontTiny; font.letterSpacing: 1.5; color: Theme.on_surface_variant }
+                    StyledText { text: Qt.formatDate(clock.date, "yyyy"); font.pixelSize: Theme.fontTiny; color: Theme.outline }
                 }
             }
 
@@ -68,8 +67,8 @@ Card {
                 property alias label: caption.text
                 property alias value: meter.value
                 spacing: Theme.gap
-                Meter { id: meter; implicitWidth: 120; implicitHeight: 4; fill: root.accent }
-                StyledText { id: caption; font.pixelSize: 10; font.letterSpacing: 1; color: Theme.outline }
+                Meter { id: meter; implicitWidth: Theme.px(120); implicitHeight: Theme.px(4); fill: root.accent }
+                StyledText { id: caption; font.pixelSize: Theme.px(10); font.letterSpacing: 1; color: Theme.outline }
             }
 
             Progress { label: "DAY"; value: (clock.hours * 60 + clock.minutes) / 1440 }

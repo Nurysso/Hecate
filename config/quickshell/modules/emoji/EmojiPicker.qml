@@ -1,30 +1,21 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Io
 import qs.config
 import qs.components
+import qs.services
 
-// Data: emojis.tsv, one "<emoji>\t<name>\t<keywords>" per line (from the Unicode CLDR names).
+// Emoji search: words from an emoji's name or keywords narrow the grid ("heart eyes", "fire"), the
+// arrows move, Enter copies. Recent picks come first. Data: emojis.tsv, through the Emojis service.
 Panel {
     id: root
     name: "emoji"
+    kind: "modal"
+    contentWidth: Theme.px(600)
+    contentHeight: Theme.px(540)
 
     ColumnLayout {
-        id: column
-        width: 560
-        height: 520
-        spacing: Theme.gap * 1.5
-
-        FileView {
-            id: data
-            path: Quickshell.shellPath("modules/emoji/emojis.tsv")
-            printErrors: false
-        }
-        readonly property var all: data.text().split("\n").filter(l => l).map(l => {
-            const f = l.split("\t")
-            return { char: f[0], name: f[1], search: (f[1] + " " + f[2]).toLowerCase() }
-        })
+        spacing: Theme.px(12)
 
         SearchField {
             id: search
@@ -41,18 +32,20 @@ Panel {
 
         GridView {
             id: grid
-            readonly property int cols: Math.floor(width / 56)
+            readonly property int cols: Math.max(1, Math.floor(width / Theme.px(56)))
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
             cellWidth: width / cols
-            cellHeight: 56
+            cellHeight: Theme.px(56)
             highlightMoveDuration: Theme.animFast
-            highlight: Rectangle { radius: Theme.radiusSmall; color: Theme.secondary_container }
+            highlight: Rectangle { radius: Theme.radiusSmall; color: Theme.layerHigh }
             model: ScriptModel {
                 values: {
                     const words = search.text.toLowerCase().split(/\s+/).filter(w => w)
-                    return column.all.filter(e => words.every(w => e.search.includes(w)))
+                    if (words.length) return Emojis.all.filter(e => words.every(w => e.search.includes(w)))
+                    const recent = Emojis.recent.map(c => Emojis.all.find(e => e.char === c)).filter(e => e)
+                    return recent.concat(Emojis.all.filter(e => !Emojis.recent.includes(e.char)))
                 }
                 onValuesChanged: grid.currentIndex = 0
             }
@@ -64,14 +57,16 @@ Panel {
                 width: grid.cellWidth
                 height: grid.cellHeight
                 function pick() {
-                    Quickshell.execDetached(["wl-copy", "--", modelData.char])
-                    GlobalStates.panel = ""
+                    Emojis.pick(modelData)
+                    GlobalStates.close()
                 }
 
                 StyledText {
                     anchors.centerIn: parent
                     text: cell.modelData.char
-                    font.pixelSize: 28
+                    font.pixelSize: Theme.px(30)
+                    scale: cell.GridView.isCurrentItem ? 1.15 : 1
+                    Behavior on scale { Anim { duration: Theme.animFast } }
                 }
 
                 MouseArea {
@@ -88,17 +83,22 @@ Panel {
             StyledText {
                 anchors.centerIn: parent
                 visible: !grid.count
-                text: "No emoji found"
+                text: Emojis.all.length ? "No emoji found" : "Loading…"
                 color: Theme.on_surface_variant
             }
         }
 
-        // Name of the highlighted emoji
-        StyledText {
-            Layout.fillWidth: true
-            text: grid.currentItem ? grid.currentItem.modelData.name : ""
-            color: Theme.on_surface_variant
-            horizontalAlignment: Text.AlignHCenter
+        RowLayout {
+            Layout.leftMargin: Theme.px(4)
+            spacing: Theme.px(10)
+            StyledText { text: grid.currentItem?.modelData.char ?? ""; font.pixelSize: Theme.px(22) }
+            StyledText {
+                Layout.fillWidth: true
+                text: grid.currentItem?.modelData.name ?? ""
+                color: Theme.on_surface_variant
+                font.capitalization: Font.Capitalize
+            }
+            Hints { keys: [["↵", "copy"], ["esc", "close"]] }
         }
     }
 }

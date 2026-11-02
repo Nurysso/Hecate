@@ -3,7 +3,7 @@ import qs.config
 
 StyledText {
     font.family: Theme.iconFont
-    font.pixelSize: 18
+    font.pixelSize: Theme.iconSize
     elide: Text.ElideNone
     horizontalAlignment: Text.AlignHCenter
 }
