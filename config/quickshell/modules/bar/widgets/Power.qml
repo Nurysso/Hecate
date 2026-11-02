@@ -3,6 +3,7 @@ import qs.components
 
 Pill {
     widget: "power"
-    icon: Theme.icon.power
-    onClicked: GlobalStates.toggle("power")
+    panel: "power"
+    icon: Theme.glyph(cfg.icon, "power")
+    tooltip: "Power"
 }

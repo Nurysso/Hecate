@@ -10,26 +10,26 @@ Card {
 
     readonly property bool imperial: cfg.units === "imperial"
     readonly property string query: cfg.location ?? ""
-    property var place: null   // { name, lat, lon }
-    property var data: null
+    property var place: null      // { name, lat, lon }
+    property var forecast: null   // the Open-Meteo response
     property string error
 
-    readonly property var now: data?.current ?? null
-    readonly property var today: data ? day(0) : null
+    readonly property var now: forecast?.current ?? null
+    readonly property var today: forecast ? day(0) : null
     readonly property var hours: {
-        if (!data) return []
-        const t = data.hourly.time, start = t.findIndex(x => x >= data.current.time.slice(0, 13))
+        if (!forecast) return []
+        const t = forecast.hourly.time, start = t.findIndex(x => x >= forecast.current.time.slice(0, 13))
         return [1, 3, 5, 7, 9, 11].map(o => start + o).filter(i => i < t.length).map(i => ({
-            time: t[i].slice(11, 16), temp: data.hourly.temperature_2m[i],
-            icon: icon(data.hourly.weather_code[i], data.hourly.is_day[i]), rain: data.hourly.precipitation_probability[i]
+            time: t[i].slice(11, 16), temp: forecast.hourly.temperature_2m[i],
+            icon: icon(forecast.hourly.weather_code[i], forecast.hourly.is_day[i]), rain: forecast.hourly.precipitation_probability[i]
         }))
     }
-    readonly property var days: data ? [1, 2, 3, 4, 5].map(day) : []
+    readonly property var days: forecast ? [1, 2, 3, 4, 5].map(day) : []
     readonly property real weekLow: Math.min(...days.map(d => d.low))
     readonly property real weekHigh: Math.max(...days.map(d => d.high))
 
     function day(i) {
-        const d = data.daily
+        const d = forecast.daily
         return {
             name: i === 0 ? "Today" : Qt.formatDate(new Date(d.time[i] + "T12:00"), "ddd"),
             icon: icon(d.weather_code[i], 1), low: d.temperature_2m_min[i], high: d.temperature_2m_max[i],
@@ -71,7 +71,7 @@ Card {
                 done(JSON.parse(xhr.responseText))
                 root.error = ""
             } catch (e) {
-                root.error = data ? "" : "Weather unavailable"
+                root.error = root.forecast ? "" : "Weather unavailable"
                 retry.start()
             }
         }
@@ -98,7 +98,7 @@ Card {
             + "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day,wind_speed_10m"
             + "&hourly=temperature_2m,weather_code,is_day,precipitation_probability"
             + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset"
-            + (imperial ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : ""), r => data = r)
+            + (imperial ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : ""), r => forecast = r)
     }
 
     Component.onCompleted: refresh()
@@ -112,23 +112,22 @@ Card {
         property string icon
         property string text
         property color color: Theme.on_surface_variant
-        property int size: Theme.fontSize - 2
-        spacing: 4
+        property int size: Theme.fontSmall
+        spacing: Theme.px(4)
         Icon { text: parent.icon; color: parent.color; font.pixelSize: parent.size + 2; anchors.verticalCenter: parent.verticalCenter }
         StyledText { text: parent.text; color: parent.color; font.pixelSize: parent.size; anchors.verticalCenter: parent.verticalCenter }
     }
 
-    // Header
-    RowLayout {
-        spacing: 6
-        Icon { text: Theme.icon.pin; color: root.accent; font.pixelSize: 16 }
-        StyledText { text: root.place?.name ?? "Locating…"; font.weight: Font.DemiBold; Layout.fillWidth: true }
+    CardHeader {
+        icon: Theme.icon.pin
+        title: root.place?.name ?? "Locating…"
+        accent: root.accent
         Fact { visible: !!root.today; icon: Theme.icon.sunrise; text: root.today?.sunrise ?? "" }
         Fact { visible: !!root.today; icon: Theme.icon.sunset; text: root.today?.sunset ?? "" }
     }
 
     StyledText {
-        visible: !root.data
+        visible: !root.forecast
         text: root.error || "Loading forecast…"
         color: Theme.on_surface_variant
         Layout.alignment: Qt.AlignHCenter
@@ -140,15 +139,15 @@ Card {
     RowLayout {
         visible: !!root.now
         spacing: Theme.pad
-        Icon { text: root.now ? root.icon(root.now.weather_code, root.now.is_day) : ""; color: root.accent; font.pixelSize: 64 }
+        Icon { text: root.now ? root.icon(root.now.weather_code, root.now.is_day) : ""; color: root.accent; font.pixelSize: Theme.px(64) }
         ColumnLayout {
             spacing: 0
             Layout.fillWidth: true
-            StyledText { text: root.now ? root.deg(root.now.temperature_2m) : ""; font.pixelSize: 44; font.weight: Font.Bold }
+            StyledText { text: root.now ? root.deg(root.now.temperature_2m) : ""; font.pixelSize: Theme.px(44); font.weight: Font.Bold }
             StyledText { text: root.now ? root.describe(root.now.weather_code) : ""; color: Theme.on_surface_variant }
         }
         ColumnLayout {
-            spacing: 4
+            spacing: Theme.px(4)
             Layout.alignment: Qt.AlignTop
             Fact { icon: Theme.icon.thermometer; text: root.now ? "Feels " + root.deg(root.now.apparent_temperature) : ""; Layout.alignment: Qt.AlignRight }
             Fact { icon: Theme.icon.humidity; text: root.now ? root.now.relative_humidity_2m + "%" : ""; Layout.alignment: Qt.AlignRight }
@@ -162,7 +161,7 @@ Card {
         Layout.fillWidth: true
         implicitHeight: hourRow.implicitHeight + Theme.gap * 2
         radius: Theme.radiusSmall
-        color: Theme.alpha(Theme.surface_container_highest, 0.6)
+        color: Theme.layer
 
         RowLayout {
             id: hourRow
@@ -172,16 +171,16 @@ Card {
                 model: root.hours
                 ColumnLayout {
                     required property var modelData
-                    spacing: 2
+                    spacing: Theme.px(2)
                     Layout.fillWidth: true
-                    StyledText { text: modelData.time; color: Theme.on_surface_variant; font.pixelSize: 11; Layout.alignment: Qt.AlignHCenter }
-                    Icon { text: modelData.icon; color: root.accent; font.pixelSize: 20; Layout.alignment: Qt.AlignHCenter }
+                    StyledText { text: modelData.time; color: Theme.on_surface_variant; font.pixelSize: Theme.fontTiny; Layout.alignment: Qt.AlignHCenter }
+                    Icon { text: modelData.icon; color: root.accent; font.pixelSize: Theme.px(20); Layout.alignment: Qt.AlignHCenter }
                     StyledText { text: root.deg(modelData.temp); font.weight: Font.Medium; Layout.alignment: Qt.AlignHCenter }
                     StyledText {
                         text: modelData.rain + "%"
                         opacity: modelData.rain >= 20 ? 1 : 0
                         color: Theme.secondary
-                        font.pixelSize: 10
+                        font.pixelSize: Theme.px(10)
                         Layout.alignment: Qt.AlignHCenter
                     }
                 }
@@ -192,7 +191,7 @@ Card {
     // Next days: the bar spans each day's low–high within the week's range
     ColumnLayout {
         visible: root.days.length > 0
-        spacing: 6
+        spacing: Theme.px(6)
         Repeater {
             model: root.days
             RowLayout {
@@ -200,27 +199,27 @@ Card {
                 required property var modelData
                 readonly property real span: Math.max(1, root.weekHigh - root.weekLow)
                 spacing: Theme.gap
-                StyledText { text: modelData.name; Layout.preferredWidth: 40 }
-                Icon { text: modelData.icon; color: root.accent; Layout.preferredWidth: 24 }
+                StyledText { text: modelData.name; Layout.preferredWidth: Theme.px(40) }
+                Icon { text: modelData.icon; color: root.accent; Layout.preferredWidth: Theme.px(24) }
                 Fact {
                     icon: Theme.icon.umbrella
                     text: modelData.rain + "%"
                     opacity: modelData.rain >= 20 ? 1 : 0
                     color: Theme.secondary
-                    size: 11
-                    Layout.preferredWidth: 48
+                    size: Theme.fontTiny
+                    Layout.preferredWidth: Theme.px(48)
                 }
-                StyledText { text: root.deg(modelData.low); color: Theme.on_surface_variant; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 32 }
+                StyledText { text: root.deg(modelData.low); color: Theme.on_surface_variant; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: Theme.px(32) }
                 Rectangle {
                     Layout.fillWidth: true
-                    implicitHeight: 6
-                    radius: 3
-                    color: Theme.surface_container_highest
+                    implicitHeight: Theme.px(6)
+                    radius: height / 2
+                    color: Theme.layerHigh
                     Rectangle {
                         x: parent.width * (modelData.low - root.weekLow) / dayRow.span
-                        width: Math.max(6, parent.width * (modelData.high - modelData.low) / dayRow.span)
+                        width: Math.max(parent.height, parent.width * (modelData.high - modelData.low) / dayRow.span)
                         height: parent.height
-                        radius: 3
+                        radius: height / 2
                         gradient: Gradient {
                             orientation: Gradient.Horizontal
                             GradientStop { position: 0; color: Theme.secondary }
@@ -228,7 +227,7 @@ Card {
                         }
                     }
                 }
-                StyledText { text: root.deg(modelData.high); font.weight: Font.Medium; Layout.preferredWidth: 32 }
+                StyledText { text: root.deg(modelData.high); font.weight: Font.Medium; Layout.preferredWidth: Theme.px(32) }
             }
         }
     }

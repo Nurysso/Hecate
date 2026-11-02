@@ -14,6 +14,14 @@ repo_url = "https://github.com/Nurysso/Hecate.git"
 mode = "dynamic"
 # Shell text font (icons use Symbols Nerd Font)
 font = "Inter"
+# How the shell looks; every change shows up as soon as you save
+rounding = 16          # corner radius in px, 0 for square corners
+opacity = 0.78         # how solid the bar, panels and cards are, 0 (clear) to 1 (opaque)
+blur = true            # frosted glass: Hyprland blurs what's behind them
+border = true          # a hairline edge around them
+scale = 1.0            # size of everything; try 1.15 on a high-resolution screen
+animations = true
+animation_speed = 1.0  # 2 is twice as fast
 
 [preferences]
 term = "kitty"
@@ -26,30 +34,33 @@ profile = "minimal"
 [wallpaper]
 dir = "~/Pictures/Wallpapers"
 
+[screenshot]
+dir = "~/Pictures/Screenshots" # where Super+Print and friends save; leave out for ~/Pictures/Screenshots
+
 [bar]
+position = "top"       # "top" or "bottom"
+style = "islands"      # "islands" (one glass group per section), "floating" (one rounded bar) or "full" (edge to edge)
+height = 40
+# margin = 6           # space around the bar in px; leave out to match Hyprland's gaps_out
+# monitors = ["DP-1"]  # outputs that get a bar; leave out for all of them
 left = ["launcher", "workspaces", "windows"]
 center = ["clock"]
-right = [
-    "media",
-    "volume",
-    "battery",
-    "tray",
-    "connectivity",
-    "notifications",
-    "clipboard",
-    "wallpaper",
-    "power",
-]
-# available: launcher, workspaces, windows, title, clock, media, volume, stats,
-#            battery, caffeine, tray, connectivity, notifications, clipboard, wallpaper, power
+right = ["media", "tray", "status", "notifications", "power"]
+# available: launcher, workspaces, windows, title, clock, media, volume, stats, battery, caffeine, tray,
+#            status, connectivity, keyboard, submap, notifications, clipboard, wallpaper, power
 
 # Every bar widget also accepts:
 #   color        = "primary"          # M3 name (follows wallpaper) or any color: "#ff8800", "tomato"
 #   background   = "surface_container" # same format
 #   right_click  = "kitty -e btop"     # shell command run on right-click
 
-[widgets.clock]
-format = "ddd d MMM  ·  hh:mm" # Qt date format
+[widgets.launcher]
+icon = "arch"          # "arch", "owl", or any glyph
+
+[widgets.workspaces]
+style = "dots"         # "dots", "numbers" or "icons" (the apps on each workspace)
+count = 0              # always show workspaces 1..count, even empty ones
+special = true         # mark an open special workspace (scratchpad)
 
 [widgets.windows]
 scope = "workspace" # "workspace", "monitor" or "all"
@@ -58,6 +69,10 @@ max_title = 24
 
 [widgets.title]
 max_title = 48
+
+[widgets.clock]
+time = "hh:mm"         # Qt date formats; click the clock for a calendar
+date = "ddd d MMM"     # "" hides the date
 
 [widgets.media]
 max_title = 32
@@ -73,14 +88,24 @@ show = ["cpu", "mem"] # any of "cpu", "mem", "gpu", "temp"
 [widgets.battery]
 low = 15 # % at which it turns red
 
-# Panels take color and background only:
-[widgets.launcher]
 [widgets.notifications]
+popup = "top-right"    # "top-right", "top", "top-left", "bottom-right", "bottom" or "bottom-left"
+timeout = 5            # seconds a popup stays; critical ones stay until dismissed
+max = 4                # popups shown at once
+
+[widgets.osd]
+position = "bottom"    # where volume changes show: "bottom" or "top"
+enabled = true
+
+# Panels take color and background:
+[widgets.control]
 [widgets.connectivity]
+[widgets.calendar]
 [widgets.power]
 color = "error"
 background = "#2b1a1a"
 [widgets.clipboard]
+[widgets.emoji]
 [widgets.wallpaper]
 
 [desktop]

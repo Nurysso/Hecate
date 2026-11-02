@@ -10,11 +10,18 @@
 
 set -euo pipefail
 
-SAVE_DIR="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
+# [screenshot] dir in hecate.toml, ~ allowed; Pictures/Screenshots when unset
+SAVE_DIR=$(python3 -c 'import sys,tomllib; print(tomllib.load(open(sys.argv[1],"rb")).get("screenshot",{}).get("dir",""))' \
+  "$HOME/.config/hecate/hecate.toml" 2>/dev/null || true)
+SAVE_DIR="${SAVE_DIR:-${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots}"
+SAVE_DIR="${SAVE_DIR/#\~/$HOME}"
 mkdir -p "$SAVE_DIR"
 
-TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
-FILE="$SAVE_DIR/Screenshot_$TIMESTAMP.png"
+# ScreenShot-<focused window class>-mm-dd-hh-mm-ss.png; "Desktop" when nothing is focused
+CLASS=$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // empty' 2>/dev/null || true)
+CLASS=$(tr -c 'A-Za-z0-9._\n-' '_' <<<"${CLASS:-Desktop}")
+TIMESTAMP=$(date +"%m-%d-%H-%M-%S")
+FILE="$SAVE_DIR/ScreenShot-$CLASS-$TIMESTAMP.png"
 
 # Argument: full | window | area
 MODE="${1:-full}"

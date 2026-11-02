@@ -1,11 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Widgets
 import qs.config
 import qs.components
+import qs.services
 
-// Quick launch: [desktop.apps] apps = desktop-entry ids or plain commands.
+// Quick launch: [desktop.apps] apps = desktop entry ids or plain commands.
 Card {
     id: root
     widget: "apps"
@@ -19,39 +19,31 @@ Card {
             model: root.cfg.apps ?? ["firefox", "kitty", "thunar"]
 
             Rectangle {
-                id: app
+                id: tile
                 required property string modelData
-                readonly property DesktopEntry entry: DesktopEntries.heuristicLookup(modelData)
+                readonly property DesktopEntry entry: DesktopEntries.applications.values.length >= 0 ? DesktopEntries.heuristicLookup(modelData) : null
                 Layout.fillWidth: true
-                implicitHeight: 84
+                implicitHeight: Theme.px(88)
                 radius: Theme.radiusSmall
                 color: "transparent"
 
                 StateLayer {
-                    onClicked: app.entry ? app.entry.execute() : Quickshell.execDetached(["sh", "-c", app.modelData])
+                    onClicked: tile.entry ? Launches.launch(tile.entry) : Quickshell.execDetached(["sh", "-c", tile.modelData])
                 }
 
                 Column {
                     anchors.centerIn: parent
-                    spacing: 6
-                    IconImage {
+                    spacing: Theme.px(8)
+                    AppIcon {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        visible: !!app.entry
-                        implicitSize: 40
-                        source: app.entry ? Quickshell.iconPath(app.entry.icon, true) : ""
-                    }
-                    Icon {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        visible: !app.entry
-                        text: Theme.icon.apps
-                        color: root.accent
-                        font.pixelSize: 36
+                        app: tile.entry?.icon ?? tile.modelData
+                        implicitSize: Theme.px(42)
                     }
                     StyledText {
-                        width: 72
+                        width: Theme.px(76)
                         horizontalAlignment: Text.AlignHCenter
-                        text: app.entry?.name ?? app.modelData
-                        font.pixelSize: 12
+                        text: tile.entry?.name ?? tile.modelData
+                        font.pixelSize: Theme.fontSmall
                     }
                 }
             }

@@ -7,9 +7,9 @@ Rectangle {
     property real value
     property color fill: Theme.primary
 
-    implicitHeight: 6
+    implicitHeight: Theme.px(6)
     radius: height / 2
-    color: Theme.surface_container_highest
+    color: Theme.layerHigh
 
     Rectangle {
         width: Math.max(parent.height, parent.width * Math.max(0, Math.min(root.value, 1)))

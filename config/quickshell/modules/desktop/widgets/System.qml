@@ -4,6 +4,7 @@ import qs.config
 import qs.components
 import qs.services
 
+// CPU, memory and GPU gauges, per-thread load, then VRAM, disk and GPU power.
 Card {
     id: root
     widget: "system"
@@ -12,50 +13,42 @@ Card {
     function level(v) { return v > 0.9 ? Theme.error : v > 0.7 ? Theme.tertiary : root.accent }
     function gib(bytes) { return (bytes / 1073741824).toFixed(1) }
 
-    // Header
-    RowLayout {
-        spacing: Theme.gap
-        Rectangle {
-            implicitWidth: 32
-            implicitHeight: 32
-            radius: 16
-            color: Theme.alpha(root.accent, 0.16)
-            Icon { anchors.centerIn: parent; text: Theme.icon.cpu; color: root.accent; font.pixelSize: 16 }
-        }
-        StyledText { text: SysStats.cpuName; font.weight: Font.DemiBold; Layout.fillWidth: true }
+    CardHeader {
+        icon: Theme.icon.cpu
+        title: SysStats.cpuName
+        accent: root.accent
         StyledText {
             readonly property int mins: Math.floor(SysStats.uptime / 60)
             text: "up " + (mins >= 1440 ? Math.floor(mins / 1440) + "d " : "") + Math.floor(mins % 1440 / 60) + "h " + mins % 60 + "m"
             color: Theme.on_surface_variant
-            font.pixelSize: Theme.fontSize - 2
+            font.pixelSize: Theme.fontSmall
         }
     }
 
-    // Gauges
     component Gauge: ColumnLayout {
         id: gauge
         property real value
         property string label
         property string detail
         property bool available: true
-        spacing: 4
+        spacing: Theme.px(4)
         Layout.fillWidth: true
 
         Item {
-            implicitWidth: 92
-            implicitHeight: 92
+            implicitWidth: Theme.px(92)
+            implicitHeight: Theme.px(92)
             Layout.alignment: Qt.AlignHCenter
-            Ring { anchors.fill: parent; value: gauge.available ? gauge.value : 0; thickness: 8; color: root.level(gauge.value) }
+            Ring { anchors.fill: parent; value: gauge.available ? gauge.value : 0; thickness: Theme.px(8); color: root.level(gauge.value) }
             StyledText {
                 anchors.centerIn: parent
                 text: gauge.available ? Math.round(gauge.value * 100) + "%" : "—"
-                font.pixelSize: 20
+                font.pixelSize: Theme.px(20)
                 font.weight: Font.Bold
                 font.features: { "tnum": 1 }
             }
         }
         StyledText { text: gauge.label; font.weight: Font.Medium; Layout.alignment: Qt.AlignHCenter }
-        StyledText { text: gauge.detail; color: Theme.on_surface_variant; font.pixelSize: Theme.fontSize - 3; Layout.alignment: Qt.AlignHCenter }
+        StyledText { text: gauge.detail; color: Theme.on_surface_variant; font.pixelSize: Theme.fontTiny; Layout.alignment: Qt.AlignHCenter }
     }
 
     RowLayout {
@@ -80,16 +73,16 @@ Card {
 
     // Per-thread load
     ColumnLayout {
-        spacing: 6
+        spacing: Theme.px(6)
         RowLayout {
-            StyledText { text: "Threads"; color: Theme.on_surface_variant; font.pixelSize: Theme.fontSize - 2; Layout.fillWidth: true }
-            StyledText { text: SysStats.cores.length; color: Theme.outline; font.pixelSize: Theme.fontSize - 2 }
+            StyledText { text: "Threads"; color: Theme.on_surface_variant; font.pixelSize: Theme.fontSmall; Layout.fillWidth: true }
+            StyledText { text: SysStats.cores.length; color: Theme.outline; font.pixelSize: Theme.fontSmall }
         }
         Row {
             id: threads
             Layout.fillWidth: true
-            height: 36
-            spacing: 4
+            height: Theme.px(36)
+            spacing: Theme.px(4)
             readonly property real barW: SysStats.cores.length ? (width - spacing * (SysStats.cores.length - 1)) / SysStats.cores.length : 0
 
             Repeater {
@@ -98,14 +91,14 @@ Card {
                     required property real modelData
                     width: threads.barW
                     height: threads.height
-                    radius: 4
-                    color: Theme.surface_container_highest
+                    radius: Math.min(width / 2, Theme.px(4))
+                    color: Theme.layerHigh
 
                     Rectangle {
                         anchors.bottom: parent.bottom
                         width: parent.width
-                        height: Math.max(4, parent.height * modelData)
-                        radius: 4
+                        height: Math.max(Theme.px(4), parent.height * modelData)
+                        radius: parent.radius
                         color: root.level(modelData)
                         Behavior on height { Anim {} }
                         Behavior on color { CAnim {} }
@@ -115,7 +108,6 @@ Card {
         }
     }
 
-    // Detail rows
     component Stat: RowLayout {
         property string icon
         property string label
@@ -123,11 +115,11 @@ Card {
         property real value: -1
         spacing: Theme.gap
         Layout.fillWidth: true
-        Icon { text: parent.icon; color: root.accent; font.pixelSize: 16; Layout.preferredWidth: 20 }
-        StyledText { text: parent.label; color: Theme.on_surface_variant; Layout.preferredWidth: 52 }
+        Icon { text: parent.icon; color: root.accent; font.pixelSize: Theme.px(16); Layout.preferredWidth: Theme.px(20) }
+        StyledText { text: parent.label; color: Theme.on_surface_variant; Layout.preferredWidth: Theme.px(52) }
         Meter { visible: parent.value >= 0; value: parent.value; fill: root.level(parent.value); Layout.fillWidth: true }
         Item { visible: parent.value < 0; Layout.fillWidth: true }
-        StyledText { text: parent.text; font.pixelSize: Theme.fontSize - 2; font.features: { "tnum": 1 } }
+        StyledText { text: parent.text; font.pixelSize: Theme.fontSmall; font.features: { "tnum": 1 } }
     }
 
     ColumnLayout {

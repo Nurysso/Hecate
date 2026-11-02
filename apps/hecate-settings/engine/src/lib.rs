@@ -9,7 +9,7 @@ use std::{
     rc::Rc,
 };
 
-const SCHEMA: &str = include_str!("../../../scripts/config_schema.json");
+const SCHEMA: &str = include_str!("../../../../scripts/config_schema.json");
 
 const SANDBOX: &str = r#"
 local function proxy() return setmetatable({}, { __index = proxy, __call = proxy }) end

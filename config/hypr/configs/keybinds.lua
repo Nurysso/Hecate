@@ -22,9 +22,15 @@ local function run(cmd, window_rules)
     return hl.dsp.exec_cmd(cmd, window_rules)
 end
 
--- Toggles a Quickshell panel (see ~/.config/quickshell/shell.qml)
+-- Calls one of the shell's global shortcuts (see ~/.config/quickshell/shell.qml).
+-- They go straight to the running shell, with no qs process started per key press.
+local function shell(name)
+    return hl.dsp.global("hecate:" .. name)
+end
+
+-- Toggles a Quickshell panel
 local function panel(name)
-    return hl.dsp.exec_cmd("qs ipc call hecate toggle " .. name)
+    return shell(name)
 end
 
 -- Runs a script by name out of Scripts/
@@ -176,15 +182,15 @@ hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })  --
 hl.bind(mainMod .. " + ALT + mouse_down", zoomCursor(2.0))   -- Zoom In Cursor
 hl.bind(mainMod .. " + ALT + mouse_up",   zoomCursor(0.5))   -- Zoom Out Cursor
 
---/ Media
-hl.bind("xf86audioraisevolume", run_script("Volume.sh --inc"),        { repeating = true })
-hl.bind("xf86audiolowervolume", run_script("Volume.sh --dec"),        { repeating = true })
-hl.bind("XF86AudioMicMute",     run_script("Volume.sh --toggle-mic"), { locked = true })
-hl.bind("xf86audiomute",        run_script("Volume.sh --toggle"),     { locked = true })
-hl.bind("XF86AudioPause",       run_script("MediaContol.sh --pause"), { locked = true })
-hl.bind("XF86AudioPlay",        run_script("MediaContol.sh --pause"), { locked = true })
-hl.bind("XF86AudioNext",        run_script("MediaContol.sh --nxt"),   { locked = true })
-hl.bind("XF86AudioPrev",        run_script("MediaContol.sh --prv"),   { locked = true })
-hl.bind("xf86audiostop",        run_script("MediaContol.sh --stop"),  { locked = true })
+--/ Media (handled by the shell, which shows volume changes on screen)
+hl.bind("xf86audioraisevolume", shell("volume-up"),        { repeating = true })
+hl.bind("xf86audiolowervolume", shell("volume-down"),      { repeating = true })
+hl.bind("XF86AudioMicMute",     shell("mic-mute"),         { locked = true })
+hl.bind("xf86audiomute",        shell("volume-mute"),      { locked = true })
+hl.bind("XF86AudioPause",       shell("media-play-pause"), { locked = true })
+hl.bind("XF86AudioPlay",        shell("media-play-pause"), { locked = true })
+hl.bind("XF86AudioNext",        shell("media-next"),       { locked = true })
+hl.bind("XF86AudioPrev",        shell("media-previous"),   { locked = true })
+hl.bind("xf86audiostop",        shell("media-stop"),       { locked = true })
 hl.bind("XF86Sleep",            run("systemctl suspend"),             { locked = true })
 hl.bind("XF86Rfkill",           run_script("AirplaneMode.sh"),        { locked = true })
