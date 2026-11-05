@@ -5,11 +5,14 @@ Reads the M3 colors set-wallpaper.sh writes to ~/.cache/hecate/theme.json and wr
   ~/.local/share/themes/Hecate        GTK theme (gtk-theme-name=Hecate)
   ~/.config/gtk-4.0/gtk.css           symlink to the Hecate GTK4 css (libadwaita ignores the theme name)
   ~/.config/Kvantum/Hecate            Kvantum theme (theme=Hecate)
+  ~/.cache/hecate/palette.png         grid of the palette's colors, for a quick look or fastfetch's logo
 Without theme.json the stock Materia colors are kept, so the themes always exist.
 """
 import json
 import re
 import shutil
+import struct
+import zlib
 from pathlib import Path
 
 HOME = Path.home()
@@ -92,6 +95,57 @@ def recolor_text(text, recolor):
     return re.sub(r"(rgba?)\(\s*(\d+),\s*(\d+),\s*(\d+)(\s*[,)])", rgbsub, text)
 
 
+# Palette swatches, left to right and top to bottom: accents, their containers, then the surfaces and text
+SWATCHES = [
+    "primary", "secondary", "tertiary", "error", "primary_container", "secondary_container",
+    "tertiary_container", "error_container", "surface_dim", "surface", "surface_container", "surface_container_high",
+    "surface_container_highest", "surface_bright", "on_surface", "on_surface_variant", "outline", "outline_variant",
+]
+COLS, CELL, GAP, RADIUS = 6, 96, 8, 18
+
+
+def write_palette(path):
+    """A transparent PNG of rounded swatches, built with the standard library only (no Pillow/ImageMagick)."""
+    try:
+        theme = json.loads((HOME / ".cache/hecate/theme.json").read_text())
+    except (OSError, ValueError):
+        return
+    colors = [rgb(theme[k][1:]) for k in SWATCHES if re.fullmatch(r"#[0-9a-fA-F]{6}", str(theme.get(k, "")))]
+    if not colors:
+        return
+    rows = -(-len(colors) // COLS)
+    width, height = COLS * CELL + (COLS + 1) * GAP, rows * CELL + (rows + 1) * GAP
+
+    def inside(x, y):  # x, y inside one cell: false in the rounded-off corners
+        dx = RADIUS - min(x, CELL - 1 - x)
+        dy = RADIUS - min(y, CELL - 1 - y)
+        return dx <= 0 or dy <= 0 or dx * dx + dy * dy <= RADIUS * RADIUS
+
+    mask = [[inside(x, y) for x in range(CELL)] for y in range(CELL)]
+    raw = bytearray()
+    for py in range(height):
+        raw.append(0)  # filter: none
+        row, y = divmod(py - GAP, CELL + GAP)
+        in_row = py >= GAP and y < CELL and row < rows
+        for px in range(width):
+            col, x = divmod(px - GAP, CELL + GAP)
+            i = row * COLS + col
+            if in_row and px >= GAP and x < CELL and col < COLS and i < len(colors) and mask[y][x]:
+                raw += bytes(colors[i]) + b"\xff"
+            else:
+                raw += b"\0\0\0\0"
+
+    def chunk(tag, data):
+        body = tag + data
+        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body))
+
+    png = (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
+           + chunk(b"IDAT", zlib.compress(bytes(raw), 9)) + chunk(b"IEND", b""))
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_bytes(png)
+    tmp.replace(path)
+
+
 def link(target, path):
     if path.is_symlink() or path.is_file():
         path.unlink()
@@ -107,6 +161,7 @@ def write(path, text):  # atomic, so running apps never read half a file
 
 
 def main():
+    write_palette(HOME / ".cache/hecate/palette.png")
     recolor = make_recolor(*load_palette())
 
     if GTK_SRC.is_dir():

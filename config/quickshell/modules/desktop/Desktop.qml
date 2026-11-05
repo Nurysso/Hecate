@@ -14,6 +14,7 @@ PanelWindow {
     color: "transparent"
     WlrLayershell.layer: WlrLayer.Bottom
     WlrLayershell.namespace: "hecate-desktop"
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand   // the todo card's field takes keys once clicked
     mask: Region { item: left; Region { item: right } }
     // a card's blur joins once it has started fading in, or the blur would show before the glass
     BackgroundEffect.blurRegion: Region { regions: Theme.blur ? root.cards.filter(l => l.item && l.faded).map(l => l.blur) : [] }

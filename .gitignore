@@ -24,6 +24,7 @@ tmp/
 # ─────────────────────────────
 # Build outputs
 /apps/**/frontend/wailsjs/
+/apps/**/build/bin/
 dist/
 ignore/
 *.exe

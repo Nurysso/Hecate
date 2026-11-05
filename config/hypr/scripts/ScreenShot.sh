@@ -10,18 +10,24 @@
 
 set -euo pipefail
 
-# [screenshot] dir in hecate.toml, ~ allowed; Pictures/Screenshots when unset
+# [screenshot] dir in hecate.toml, ~ allowed; $HOME/Screenshots when unset
 SAVE_DIR=$(python3 -c 'import sys,tomllib; print(tomllib.load(open(sys.argv[1],"rb")).get("screenshot",{}).get("dir",""))' \
   "$HOME/.config/hecate/hecate.toml" 2>/dev/null || true)
-SAVE_DIR="${SAVE_DIR:-${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots}"
+SAVE_DIR="${SAVE_DIR:-$HOME/Screenshots}"
 SAVE_DIR="${SAVE_DIR/#\~/$HOME}"
 mkdir -p "$SAVE_DIR"
 
-# ScreenShot-<focused window class>-mm-dd-hh-mm-ss.png; "Desktop" when nothing is focused
+# ScreenShot-<focused window class>-dd-mm-yy-HH-MM-SS.png; "Desktop" when nothing is focused
 CLASS=$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // empty' 2>/dev/null || true)
 CLASS=$(tr -c 'A-Za-z0-9._\n-' '_' <<<"${CLASS:-Desktop}")
-TIMESTAMP=$(date +"%m-%d-%H-%M-%S")
+TIMESTAMP=$(date +"%d-%m-%y-%H-%M-%S")
 FILE="$SAVE_DIR/ScreenShot-$CLASS-$TIMESTAMP.png"
+# The name only goes down to the second, so never overwrite: a second one in the same second gets -2, -3, ...
+n=2
+while [[ -e "$FILE" ]]; do
+  FILE="$SAVE_DIR/ScreenShot-$CLASS-$TIMESTAMP-$n.png"
+  n=$((n + 1))
+done
 
 # Argument: full | window | area
 MODE="${1:-full}"
@@ -75,6 +81,11 @@ take_screenshot() {
     exit 1
     ;;
   esac
+
+  # Remember the file name by content hash so the clipboard history can label the image
+  names="$HOME/.cache/hecate/clipnames"
+  mkdir -p "$names"
+  basename -- "$temp_file" >"$names/$(sha1sum <"$temp_file" | cut -d' ' -f1)" 2>/dev/null || true
 
   echo "$temp_file"
 }

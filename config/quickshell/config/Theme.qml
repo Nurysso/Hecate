@@ -85,6 +85,7 @@ Singleton {
         cpu: "\u{f061a}", memory: "\u{f035b}", gpu: "\u{f08ae}", disk: "\u{f02ca}", fan: "\u{f0210}", bolt: "\u{f0241}", timer: "\u{f13ab}",
         github: "\u{f02a4}", pin: "\u{f034e}", humidity: "\u{f058e}", wind: "\u{f059d}", umbrella: "\u{f054a}", thermometer: "\u{f050f}",
         sunrise: "\u{f059c}", sunset: "\u{f059b}",
+        plus: "\u{f0415}", download: "\u{f01da}", upload: "\u{f0552}", update: "\u{f06b0}", refresh: "\u{f0450}",
         volume: ["\u{f057f}", "\u{f0580}", "\u{f057e}"], volumeOff: "\u{f0581}", mic: "\u{f036c}", micOff: "\u{f036d}",
         battery: ["\u{f007a}", "\u{f007c}", "\u{f007e}", "\u{f0080}", "\u{f0082}", "\u{f0079}"], batteryCharging: "\u{f0084}",
         coffee: "\u{f0176}", coffeeOff: "\u{f06ca}", moon: "\u{f0f65}",

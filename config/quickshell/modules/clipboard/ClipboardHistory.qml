@@ -48,7 +48,7 @@ Panel {
             model: ScriptModel {
                 values: {
                     const q = search.text.toLowerCase()
-                    return Cliphist.entries.filter(e => e.slice(e.indexOf("\t") + 1).toLowerCase().includes(q))
+                    return Cliphist.entries.filter(e => (e.slice(e.indexOf("\t") + 1) + " " + Cliphist.name(e)).toLowerCase().includes(q))
                 }
             }
             Connections { target: search; function onTextChanged() { list.currentIndex = 0 } }
@@ -59,6 +59,7 @@ Panel {
                 readonly property string preview: modelData.slice(modelData.indexOf("\t") + 1)
                 // "[[ binary data 1.2 MiB png 1920x1080 ]]"
                 readonly property var binary: preview.match(/^\[\[ binary data (\S+ \S+) (\w+)(?: (\d+)x(\d+))?/)
+                readonly property string fileName: Cliphist.name(modelData)
                 property bool decoded
                 function pick() {
                     Cliphist.copy(modelData)
@@ -107,12 +108,12 @@ Panel {
                         spacing: 0
                         StyledText {
                             Layout.fillWidth: true
-                            text: entry.binary ? `${entry.binary[2].toUpperCase()} image` : entry.preview.replace(/\s+/g, " ")
+                            text: entry.binary ? (entry.fileName || `${entry.binary[2].toUpperCase()} image`) : entry.preview.replace(/\s+/g, " ")
                         }
                         StyledText {
                             Layout.fillWidth: true
                             visible: !!entry.binary
-                            text: entry.binary ? [entry.binary[3] ? `${entry.binary[3]} × ${entry.binary[4]}` : "", entry.binary[1]].filter(s => s).join("  ·  ") : ""
+                            text: entry.binary ? [entry.binary[2].toUpperCase(), entry.binary[3] ? `${entry.binary[3]} × ${entry.binary[4]}` : "", entry.binary[1]].filter(s => s).join("  ·  ") : ""
                             color: Theme.on_surface_variant
                             font.pixelSize: Theme.fontSmall
                         }
