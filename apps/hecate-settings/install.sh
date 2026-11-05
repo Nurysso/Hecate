@@ -15,6 +15,7 @@ DATA_DIR=${DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}}
 bin=$BIN_DIR/hecate-settings
 icon=$DATA_DIR/icons/hicolor/scalable/apps/hecate-settings.svg
 entry=$DATA_DIR/applications/hecate-settings.desktop
+cache_icon=${XDG_CACHE_HOME:-$HOME/.cache}/hecate/hecate-settings.svg
 
 fail() {
   printf '\033[0;31m✗ %s\033[0m\n' "$1" >&2
@@ -23,7 +24,7 @@ fail() {
 }
 
 if [ "${1:-}" = "--uninstall" ]; then
-  rm -f -- "$bin" "$icon" "$entry"
+  rm -f -- "$bin" "$icon" "$entry" "$cache_icon"
   echo "✓ hecate-settings removed"
   exit 0
 fi
@@ -55,10 +56,25 @@ locked=()
 
 install -Dm755 "$here/target/release/hecate-settings" "$bin"
 install -Dm644 "$here/data/hecate-settings.svg" "$icon"
-install -Dm644 "$here/data/hecate-settings.desktop" "$entry"
+install -Dm644 "$here/data/hecate-settings.svg" "$cache_icon"
+# Write the desktop entry for the current user (paths resolved at install time)
 exec_path=$bin
 case "$bin" in *" "*) exec_path=\"$bin\" ;; esac
-sed -i "s|^Exec=.*|Exec=$exec_path|" "$entry"
+install -dm755 "$(dirname -- "$entry")"
+cat >"$entry" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Hecate Settings
+GenericName=Settings
+Comment=Configure the Hecate Hyprland dotfiles
+Exec=$exec_path
+Icon=$cache_icon
+Terminal=false
+Categories=Settings;DesktopSettings;
+Keywords=hecate;hyprland;settings;config;
+StartupWMClass=hecate-settings
+EOF
+chmod 644 "$entry"
 update-desktop-database "$DATA_DIR/applications" >/dev/null 2>&1 || true
 
 echo "✓ hecate-settings installed"

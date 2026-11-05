@@ -112,7 +112,7 @@ background = "#2b1a1a"
 monitor = ""                         # output name such as "HDMI-A-1"; empty = first monitor
 left = ["clock", "weather", "audio"]
 right = ["system", "github", "apps"]
-# available: clock, weather, audio, system, github, apps
+# available: clock, weather, audio, system, github, apps, keybinds, todo, updates, network
 
 # Every desktop card also accepts color and background.
 
@@ -129,3 +129,23 @@ user = "Nurysso"
 
 [desktop.apps]
 apps = ["firefox", "kitty", "dolphin"] # desktop entry ids or shell commands
+
+[desktop.keybinds]
+# file = "~/.config/hypr/configs/keybinds.lua"
+rows = 8        # binds per page (the header arrows flip pages)
+rotate = 0      # seconds between pages; 0 = only when you click
+# categories = ["Applications", "Screenshots"]   # only these "--/" categories
+
+[desktop.todo]
+# file = "~/.local/share/hecate/todo.md"   # "- [ ] task" lines, editable by hand
+max = 8
+
+[desktop.updates]
+interval = 60   # minutes between checks
+packages = 5    # packages listed
+news = true     # Arch news headlines
+news_count = 3
+# command = "kitty -e ~/.config/hecate/scripts/install-updates.sh"   # what the Update button runs
+
+[desktop.network]
+seconds = 60    # how much history the graph shows

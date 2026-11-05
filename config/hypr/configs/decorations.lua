@@ -21,60 +21,60 @@
 -- General
 --------------------------------------------------------------------------------
 hl.config({
-    general = {
-        col = {
-            active_border   = "rgba(F7DCDE39)",
-            inactive_border = "rgba(A58A8D30)",
-        },
-        gaps_in           = 2,
-        gaps_out          = 6,
-        resize_on_border  = true,
-        layout            = "dwindle",
-    },
+	general = {
+		col = {
+			active_border = "rgba(F7DCDE39)",
+			inactive_border = "rgba(A58A8D30)",
+		},
+		gaps_in = 2,
+		gaps_out = 6,
+		resize_on_border = true,
+		layout = "dwindle",
+	},
 })
 
 --------------------------------------------------------------------------------
 -- Layout Tweaks & Cursor
 --------------------------------------------------------------------------------
 hl.config({
-    dwindle = {
-        preserve_split       = true,
-        special_scale_factor = 0.8,
-        -- smart_split       = true,
-    },
+	dwindle = {
+		preserve_split = true,
+		-- special_scale_factor = 0.8, -- deprecated use workspace rules
+		-- smart_split       = true,
+	},
 })
 
 hl.config({
-    master = {
-        new_status = "master",
-        new_on_top = true,
-        mfact      = 0.5,
-    },
+	master = {
+		new_status = "master",
+		new_on_top = true,
+		mfact = 0.5,
+	},
 })
 
 --------------------------------------------------------------------------------
 -- Rendering & XWayland
 --------------------------------------------------------------------------------
 hl.config({
-    render = {
-        direct_scanout = false,
-    },
+	render = {
+		direct_scanout = false,
+	},
 })
 
 hl.config({
-    xwayland = {
-        enabled            = true,
-        force_zero_scaling = true,
-    },
+	xwayland = {
+		enabled = true,
+		force_zero_scaling = true,
+	},
 })
 
 --------------------------------------------------------------------------------
 -- Bind Behavior
 --------------------------------------------------------------------------------
 hl.config({
-    binds = {
-        workspace_back_and_forth = true,
-        allow_workspace_cycles   = true,
-        pass_mouse_when_bound    = false,
-    },
+	binds = {
+		workspace_back_and_forth = true,
+		allow_workspace_cycles = true,
+		pass_mouse_when_bound = false,
+	},
 })

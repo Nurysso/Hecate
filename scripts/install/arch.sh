@@ -367,7 +367,7 @@ build_package_list() {
 
   # Official repo packages install in one fast pacman transaction; anything else comes from the AUR
   INSTALL_PACKAGES+=(
-    git wget curl unzip jq python base-devel pacman-contrib
+    git wget curl unzip jq python python-pillow base-devel pacman-contrib
     awww hyprlock hypridle hyprpicker xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
     cliphist wl-clipboard xdg-user-dirs grim slurp tesseract tesseract-data-eng libnotify
     pipewire pipewire-pulse wireplumber pavucontrol playerctl cava brightnessctl
