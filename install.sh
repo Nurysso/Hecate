@@ -85,13 +85,7 @@ main() {
   fi
 
   case "$OS" in
-  fedora)
-    echo "✗ The Fedora install script is outdated and no longer matches the dotfiles." >&2
-    echo "  Please follow the manual install guide instead:" >&2
-    echo "  https://github.com/Nurysso/Hecate/blob/main/documentation/Installation/manual-install.md" >&2
-    exit 1
-    ;;
-  ubuntu)
+  fedora | ubuntu)
     echo "⚠ $OS support is experimental and untested."
     if [ "$quick" = false ] && ! gum confirm "Continue with the $OS installation?"; then
       exit 1

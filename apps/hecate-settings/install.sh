@@ -31,6 +31,7 @@ fi
 
 case "$(. /etc/os-release 2>/dev/null; echo "${ID:-}")" in
   arch | manjaro | endeavouros | cachyos) hint="sudo pacman -S --needed rust qt6-base qt6-declarative qt6-wayland base-devel" ;;
+  fedora) hint="sudo dnf install cargo rust gcc-c++ qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtwayland" ;;
   *) hint="install Rust (cargo), a C++ compiler, and the Qt 6 base, declarative (QML) and wayland packages for your distro" ;;
 esac
 

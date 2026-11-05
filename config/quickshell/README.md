@@ -1,96 +1,149 @@
-# Hecate shell
+<div align="center">
 
-The Quickshell half of Hecate: a bar, desktop widgets, and the panels behind them (app launcher, control center, notifications, calendar, Wi-Fi and Bluetooth, power menu, clipboard history, emoji picker, wallpaper picker), plus notification popups and an on-screen display for volume. Everything sits on frosted glass that Hyprland blurs, takes its colors from the wallpaper through matugen, and is set from one file, `~/.config/hecate/hecate.toml`.
+# Hecate Quickshell
 
-- [Settings](#settings)
-- [Bar](#bar)
-- [Panels](#panels)
-- [Notifications and the OSD](#notifications-and-the-osd)
-- [Desktop widgets](#desktop-widgets)
-- [Colors](#colors)
-- [Wallpaper and theming](#wallpaper-and-theming)
-- [Keys, shortcuts and IPC](#keys-shortcuts-and-ipc)
-- [How it works with Hyprland](#how-it-works-with-hyprland)
-- [Requirements](#requirements)
-- [Troubleshooting](#troubleshooting)
-- [Layout of this folder](#layout-of-this-folder)
+<a href="https://quickshell.org"><img src="../../.github/readme/chip-quickshell.svg" height="28" alt="Quickshell 0.3+"></a>
+<a href="https://hyprland.org"><img src="../../.github/readme/chip-hyprland-lua.svg" height="28" alt="Hyprland 0.55+, Lua config"></a>
+<a href="#-colors"><img src="../../.github/readme/chip-colors.svg" height="28" alt="Material You colors"></a>
+<a href="#%EF%B8%8F-configure-everything"><img src="../../.github/readme/chip-config.svg" height="28" alt="Configured from hecate.toml"></a>
 
-## Settings
+<img src="https://github.com/user-attachments/assets/c1ed0b82-c60b-46e8-89c5-869eab4e5fac" width="100%" alt="The Hecate shell: the bar and desktop cards on a pink wallpaper">
 
-All settings live in `~/.config/hecate/hecate.toml`. The shell rereads it when you save, so changes show up without a restart, and only the parts you changed are rebuilt. Anything you leave out falls back to the default shown here. A value the shell can't use (a word where a number goes, a style that doesn't exist) falls back to its default and says so in `qs log`; if the TOML itself has a syntax error, the shell keeps the last good settings.
+[Look](#-the-look) · [Bar](#-the-bar) · [Panels](#%EF%B8%8F-panels) · [Desktop](#%EF%B8%8F-desktop-widgets) · [Configure](#%EF%B8%8F-configure-everything) · [Hyprland](#-built-for-hyprland) · [Keys](#%EF%B8%8F-keys-shortcuts-and-ipc) · [Help](#-troubleshooting)
+
+</div>
+
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
+
+## ✨ What you get
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### 🧊 Real glass
+
+Every surface tells Hyprland its exact rounded shape, so the blur sits under the glass and nowhere else, even while a panel slides out of the bar.
+
+</td>
+<td width="33%" valign="top">
+
+### 🎨 Wallpaper colors
+
+Pick a wallpaper and matugen recolors the whole shell, GTK, Qt and your prompt. The shell fades to the new palette.
+
+</td>
+<td width="33%" valign="top">
+
+### 📜 One file
+
+Look, layout and behaviour all live in `hecate.toml`. Save it and the shell updates on the spot; a typo falls back to the default and tells you.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### ⚡ Wired into Hyprland
+
+Keybinds arrive through Hyprland's global shortcuts, state comes from its event socket, and the bar lines up with your window gaps.
+
+</td>
+<td valign="top">
+
+### 🎛️ A control center
+
+Wi-Fi, Bluetooth, do not disturb, keep awake, power mode and game mode, plus volume and mic with device switching.
+
+</td>
+<td valign="top">
+
+### 🔔 It's your notifier
+
+Popups you can swipe away, a history with do not disturb, and an on-screen pill when the volume changes.
+
+</td>
+</tr>
+</table>
+
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
+
+## 🪟 The look
+
+Three shapes for the bar, set with `[bar] style`. Each one can sit at the top or bottom of the screen.
+
+<img src="https://github.com/user-attachments/assets/79045ae8-39cf-4352-a023-ecae1fc05230" width="100%" alt="The three bar styles: islands, floating and full">
+
+| `islands` (default)                                                                      | `floating`                                   | `full`                    |
+| :--------------------------------------------------------------------------------------- | :------------------------------------------- | :------------------------ |
+| Each section floats on its own glass, sized to what's in it; an empty section disappears | One rounded bar, inset from the screen edges | One bar from edge to edge |
+
+The glass itself is tuned in `[theme]`:
 
 ```toml
 [theme]
-mode = "dynamic"        # "dynamic": new wallpaper → new colors. "static": colors stay as they are
-font = "Inter"          # text font; icons always use Symbols Nerd Font
+mode = "dynamic"        # "static" keeps the colors when the wallpaper changes
+font = "Inter"          # text font; icons use Symbols Nerd Font
 rounding = 16           # corner radius in px, 0 for square corners
-opacity = 0.78          # how solid the bar, panels and cards are, 0 (clear) to 1 (opaque); 0.94 without blur
-blur = true             # frosted glass: Hyprland blurs what's behind them
-border = true           # a hairline edge around them
-scale = 1.0             # size of everything (text, icons, spacing); try 1.15 on a high-resolution screen
+opacity = 0.78          # 0 (clear) to 1 (opaque); 0.94 without blur
+blur = true             # Hyprland blurs what's behind the glass
+border = true           # a hairline edge
+scale = 1.0             # text, icons and spacing; try 1.15 on a high-resolution screen
 animations = true
 animation_speed = 1.0   # 2 is twice as fast
-
-[wallpaper]
-dir = "~/Pictures/Wallpapers"   # images the picker shows (top level only, no subfolders)
 ```
 
-## Bar
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
+
+## 🧭 The bar
 
 ```toml
 [bar]
 position = "top"        # "top" or "bottom"
-style = "islands"       # see below
+style = "islands"       # "islands", "floating" or "full"
 height = 40
-# margin = 6            # space around the bar in px; leave out to match Hyprland's gaps_out
-# monitors = ["DP-1"]   # outputs that get a bar; leave out for all of them
+# margin = 6            # leave out to match Hyprland's gaps_out
+# monitors = ["DP-1"]   # leave out for every monitor
 left   = ["launcher", "workspaces", "windows"]
 center = ["clock"]
 right  = ["media", "tray", "status", "notifications", "power"]
 ```
 
-`style` picks the shape:
+List widgets by name. Each name loads `modules/bar/widgets/<Name>.qml`, so your own widget is just a file dropped in there. Buttons that open a panel stay lit while it's open, the panel hangs right beneath them, and most widgets show a tooltip on hover.
 
-- `islands`: each section (left, center, right) floats on its own piece of glass, sized to what's in it. A section with nothing to show disappears.
-- `floating`: one rounded bar, inset from the screen edges.
-- `full`: one bar running edge to edge.
+| widget          | shows                                                | mouse                                                       |
+| --------------- | ---------------------------------------------------- | ----------------------------------------------------------- |
+| `launcher`      | Arch logo                                            | click: app launcher                                         |
+| `workspaces`    | this monitor's workspaces                            | click: switch · scroll: next/previous                       |
+| `windows`       | open apps; the focused one with its title            | click: focus · middle: close · scroll: cycle                |
+| `title`         | focused window's icon and title                      | —                                                           |
+| `clock`         | time and date                                        | click: calendar                                             |
+| `media`         | cover, track and artist; hidden with no player       | click: play/pause · scroll: skip · middle: raise the player |
+| `volume`        | output volume                                        | click: mute · scroll: volume · middle: control center       |
+| `stats`         | CPU, memory, GPU, temperature                        | —                                                           |
+| `battery`       | charge; hidden without a laptop battery              | hover: time left                                            |
+| `caffeine`      | idle inhibitor                                       | click: keep the screen awake                                |
+| `tray`          | system tray icons                                    | click: activate · right: menu · middle: secondary           |
+| `status`        | network, Bluetooth, volume and battery in one button | click: control center · scroll: volume                      |
+| `connectivity`  | Wi-Fi/Ethernet and Bluetooth state                   | click: Wi-Fi & Bluetooth panel                              |
+| `keyboard`      | keyboard layout; hidden with only one                | click: next layout                                          |
+| `submap`        | the active Hyprland submap; hidden otherwise         | click: leave it                                             |
+| `notifications` | bell with a count                                    | click: notification history                                 |
+| `clipboard`     | clipboard icon                                       | click: clipboard history                                    |
+| `wallpaper`     | wallpaper icon                                       | click: wallpaper picker                                     |
+| `power`         | power icon                                           | click: power menu                                           |
 
-Without `margin`, the gap around the bar is Hyprland's `general:gaps_out`, so the bar lines up with your tiled windows, and it follows the setting when Hyprland reloads.
+<details>
+<summary><b>Widget options</b>, with their defaults</summary>
 
-Pick widgets for each section by name. Each name loads `modules/bar/widgets/<Name>.qml`, so adding your own widget is a matter of dropping a file there and listing it. Buttons that open a panel stay lit while it's open, and the panel hangs right beneath them. Most widgets show a tooltip when you hover them.
+<br>
 
-| name | shows | mouse |
-|---|---|---|
-| `launcher` | Arch logo | click: app launcher |
-| `workspaces` | this monitor's workspaces; see `style` below | click: switch · scroll: next/previous |
-| `windows` | open apps; the focused one with its title | click: focus · middle: close · scroll: cycle |
-| `title` | focused window's icon and title | — |
-| `clock` | time and date | click: calendar |
-| `media` | cover, track and artist; hidden with no player | click: play/pause · scroll: previous/next · middle: raise the player |
-| `volume` | output volume | click: mute · scroll: volume · middle: control center |
-| `stats` | CPU, memory, GPU, temperature | — |
-| `battery` | charge; hidden without a laptop battery | hover: time left |
-| `caffeine` | idle inhibitor | click: keep the screen awake |
-| `tray` | system tray icons | click: activate · right: menu · middle: secondary |
-| `status` | network, Bluetooth, volume and battery icons together | click: control center · scroll: volume |
-| `connectivity` | Wi-Fi/Ethernet and Bluetooth state | click: Wi-Fi & Bluetooth panel |
-| `keyboard` | keyboard layout; hidden with only one | click: next layout |
-| `submap` | the active Hyprland submap; hidden otherwise | click: leave it |
-| `notifications` | bell with a count | click: notification history |
-| `clipboard` | clipboard icon | click: clipboard history |
-| `wallpaper` | wallpaper icon | click: wallpaper picker |
-| `power` | power icon | click: power menu |
-
-### Widget options
-
-Each widget reads its own `[widgets.<name>]` table. Every widget accepts `color`, `background` (see [Colors](#colors)) and `right_click`, a shell command run on right-click:
+Every widget reads its own `[widgets.<name>]` table and accepts `color`, `background` (see [Colors](#-colors)) and `right_click`, a shell command run on right-click:
 
 ```toml
 [widgets.stats]
 right_click = "kitty -e btop"
 ```
-
-Options specific to one widget, with their defaults:
 
 ```toml
 [widgets.launcher]
@@ -99,12 +152,12 @@ icon = "arch"         # "arch", "owl", or any glyph (clipboard, wallpaper and po
 [widgets.workspaces]
 style = "dots"        # "dots", "numbers", or "icons" (the apps on each workspace)
 count = 0             # always show workspaces 1..count, even empty ones
-special = true        # a star for an open special workspace (scratchpad); click it to tuck it away
+special = true        # a star for an open special workspace; click it to tuck it away
 
 [widgets.windows]
-scope = "workspace"   # which windows: "workspace", "monitor" or "all"
-titles = "active"     # whose title shows: "none", "active" or "all"; hovering always shows it
-max_title = 24        # characters before the title is cut
+scope = "workspace"   # "workspace", "monitor" or "all"
+titles = "active"     # "none", "active" or "all"; hovering always shows it
+max_title = 24
 
 [widgets.title]
 max_title = 48
@@ -112,56 +165,69 @@ max_title = 48
 [widgets.clock]
 time = "hh:mm"        # Qt date formats
 date = "ddd d MMM"    # "" hides the date
-# format = "ddd d MMM  ·  hh:mm"   # older single-label form, still works
+# format = "ddd d MMM  ·  hh:mm"   # the older single-label form still works
 
 [widgets.media]
 max_title = 32
 
 [widgets.volume]
 step = 5              # % per scroll notch or volume key
-max = 100             # volume cap in %, can go above 100
+max = 100             # cap in %, can go above 100
 percent = true        # show the number next to the icon
 
 [widgets.stats]
-show = ["cpu", "mem"] # any of "cpu", "mem", "gpu", "temp"
-                      # each turns tertiary above 70% and error above 90%
+show = ["cpu", "mem"] # any of "cpu", "mem", "gpu", "temp"; tertiary above 70%, error above 90%
 
 [widgets.battery]
 low = 15              # % at which it turns red
 ```
 
-## Panels
+</details>
 
-Panels that belong to a bar widget drop out of the bar beneath it; the rest open in the middle of the screen. A click outside or Esc closes any of them. While a panel hangs from the bar, clicking another bar widget switches straight to its panel.
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
 
-| panel | what's in it | opened by |
-|---|---|---|
-| `control` | quick toggles (Wi-Fi, Bluetooth, do not disturb, keep awake, power mode, game mode), volume and microphone sliders with a device picker, what's playing, batteries of connected devices | `status` widget |
-| `notifications` | notification history, do not disturb, clear all | `notifications` widget |
-| `calendar` | the month, today marked; scroll or the arrows change month | `clock` widget |
-| `connectivity` | Wi-Fi networks (click to join, with a password prompt) and Bluetooth devices | `connectivity` widget, or the arrows on the control center's tiles |
-| `launcher` | apps, the ones you use most first; type a sum such as `12*4` and Enter copies the answer | `launcher` widget, `SUPER+D` |
-| `clipboard` | clipboard history, with thumbnails for images | `clipboard` widget, `SUPER+V` |
-| `emoji` | emoji search, recent picks first | `SUPER+ALT+E` |
-| `wallpaper` | the images in `[wallpaper] dir` | `wallpaper` widget, control center, `SUPER+CTRL+W` |
-| `power` | lock, suspend, log out, restart, shut down | `power` widget, `SUPER+SHIFT+Q` |
+## 🗂️ Panels
 
-In the control center, click a slider's icon to mute, and the arrow beside it to switch the output or input device. Game mode turns off Hyprland's animations, blur, shadows, gaps and rounding; turning it off reloads your Hyprland config to bring them back. Power mode needs power-profiles-daemon.
+Panels that belong to a bar widget slide out of the bar beneath it; the rest open in the middle of the screen. A click outside or <kbd>Esc</kbd> closes any of them, and while a panel hangs from the bar, clicking another bar widget switches straight to its panel.
 
-Inside a panel, the arrow keys move, Enter picks, and Esc closes it. The emoji picker copies the emoji you pick with `wl-copy`; type words from its name (e.g. "fire", "heart eyes") to filter. In the clipboard, Delete with the cursor at the end of the search text removes the selected entry. The wallpaper picker closes once the wallpaper is applied.
+| panel              | what's in it                                                                                         | opened by                                                                         |
+| ------------------ | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 🎛️ `control`       | toggles, volume and mic sliders with a device picker, what's playing, batteries of connected devices | `status` widget                                                                   |
+| 🔔 `notifications` | history, do not disturb, clear all                                                                   | `notifications` widget, <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>            |
+| 📅 `calendar`      | the month with today marked; scroll to change month                                                  | `clock` widget                                                                    |
+| 📶 `connectivity`  | Wi-Fi networks (with a password prompt) and Bluetooth devices                                        | `connectivity` widget, the control center's arrows, <kbd>Super</kbd>+<kbd>N</kbd> |
+| 🚀 `launcher`      | apps, the ones you use most first; type a sum like `12*4` and Enter copies the answer                | `launcher` widget, <kbd>Super</kbd>+<kbd>D</kbd>                                  |
+| 📋 `clipboard`     | history, with thumbnails for images                                                                  | `clipboard` widget, <kbd>Super</kbd>+<kbd>V</kbd>                                 |
+| 😀 `emoji`         | search by name or keyword, recent picks first                                                        | <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>E</kbd>                                      |
+| 🖼️ `wallpaper`     | the images in `[wallpaper] dir`                                                                      | `wallpaper` widget, control center, <kbd>Super</kbd>+<kbd>Ctrl</kbd>+<kbd>W</kbd> |
+| ⏻ `power`          | lock, suspend, log out, restart, shut down                                                           | `power` widget, <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>Q</kbd>                    |
 
-Panels take `color` (their accent) and `background` too, in `[widgets.<panel>]`.
+<details>
+<summary><b>Tips inside the panels</b></summary>
 
-## Notifications and the OSD
+<br>
 
-This shell is the notification server. New notifications pop up below the bar and also go to the history. A popup counts down along its bottom edge (hovering pauses it), can be swiped sideways to put it away, and runs the app's default action when clicked. Critical ones stay until you dismiss them. Do not disturb (bell button in the history, or the control center) keeps popups back.
+- **Control center:** click a slider's icon to mute, and the arrow beside it to switch the output or input device. Game mode turns off Hyprland's animations, blur, shadows, gaps and rounding; turning it off reloads your Hyprland config to bring them back. Power mode needs power-profiles-daemon.
+- **Everywhere:** the arrow keys move, Enter picks, Esc closes.
+- **Emoji:** type words from the name ("fire", "heart eyes"); the pick is copied with `wl-copy`.
+- **Clipboard:** Delete removes the selected entry while the cursor is at the end of the search text.
+- **Wallpaper:** a carousel; the one in the middle is the one you'll get, and the panel's highlights take its colour. Arrows, the wheel or a click move along it, Enter applies. Type to search by name; <kbd>Tab</kbd> or the chips filter by colour (an image shows under its main colour and its second one, except that black, white and grey only count as the main colour); <kbd>Ctrl</kbd>+<kbd>S</kbd> sorts by name or newest; <kbd>Ctrl</kbd>+<kbd>R</kbd> applies a random one from what's shown. The picker closes once the wallpaper is applied. `wallpaper-index.py` keeps thumbnails and colours in `~/.cache/hecate/wallpapers.db` and only processes images added or changed since the last time, so a big folder opens instantly after the first run. Colours need Pillow (`python-pillow`); without it the chips, the palette and the changing highlight are off, a one-time notification asks you to install it, and everything else works. Delete the database to rebuild it.
+- Panels take `color` (their accent) and `background` in `[widgets.<panel>]`.
 
-When the volume or microphone changes, whether from the keys, an app or the control center, a small pill shows the new level.
+</details>
+
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
+
+## 🔔 Notifications and the OSD
+
+This shell is the notification server, so don't run swaync or dunst alongside it. New notifications pop up below the bar and land in the history. A popup counts down along its bottom edge (hover to pause), swipes away sideways, and runs the app's default action when clicked. Critical ones stay until dismissed, and do not disturb holds the rest back.
+
+When the volume or microphone changes, from the keys, an app or the control center, a small glass pill shows the new level.
 
 ```toml
 [widgets.notifications]
 popup = "top-right"   # "top-right", "top", "top-left", "bottom-right", "bottom" or "bottom-left"
-timeout = 5           # seconds a popup stays (an app can ask for longer)
+timeout = 5           # seconds; an app can ask for longer
 max = 4               # popups shown at once
 
 [widgets.osd]
@@ -169,27 +235,39 @@ position = "bottom"   # "bottom" or "top"
 enabled = true
 ```
 
-## Desktop widgets
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
 
-Cards that sit on the wallpaper, behind your windows. They're arranged in two columns, top to bottom, and each name loads `modules/desktop/widgets/<Name>.qml`.
+## 🖥️ Desktop widgets
+
+Glass cards on the wallpaper, behind your windows, in two columns. The default is the first six; `keybinds`, `todo`, `updates` and `network` are there to add to either column. Each name loads `modules/desktop/widgets/<Name>.qml`.
 
 ```toml
 [desktop]
-monitor = ""                          # output name such as "HDMI-A-1"; empty = first monitor
+monitor = ""                          # e.g. "HDMI-A-1"; empty = the first monitor
 left  = ["clock", "weather", "audio"]
 right = ["system", "github", "apps"]
+# also available: keybinds, todo, updates, network
 ```
 
-| name | shows | needs |
-|---|---|---|
-| `clock` | hour and minute rings, date, day and year progress | — |
-| `weather` | current conditions, the next 12 hours, a 5-day forecast with each day's range | internet ([Open-Meteo](https://open-meteo.com), no API key) |
-| `audio` | the active media player: cover art, seek bar, controls, and a visualizer while audio plays | an MPRIS player, `cava` |
-| `system` | CPU, memory and GPU gauges, per-thread load, VRAM, disk, GPU power and fan | — (reads `/proc` and sysfs; GPU details are AMD only) |
-| `github` | your contribution calendar, as many weeks as fit; hover a day for its count | a GitHub token |
-| `apps` | launcher tiles | — |
+| card       | shows                                                                 | needs                                                       |
+| ---------- | --------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `clock`    | hour and minute rings, the date, day and year progress                | —                                                           |
+| `weather`  | now, the next 12 hours, 5 days with each day's range                  | internet ([Open-Meteo](https://open-meteo.com), no API key) |
+| `audio`    | the player: cover art, seek bar, controls, a visualizer while playing | an MPRIS player, `cava`                                     |
+| `system`   | CPU, memory and GPU gauges, per-thread load, VRAM, disk, GPU power    | — (GPU details are AMD only)                                |
+| `github`   | your contribution calendar; hover a day for its count                 | a GitHub token                                              |
+| `apps`     | launcher tiles                                                        | —                                                           |
+| `keybinds` | your Hyprland binds as key caps, a category per page                  | the `--/` and `-- description` markers in `keybinds.lua`    |
+| `todo`     | a checklist: tick, add and remove tasks                               | — (a markdown file, `~/.local/share/hecate/todo.md`)        |
+| `updates`  | pending updates with versions, and the latest Arch news               | `checkupdates` + `paru`/`yay` (Arch) or `dnf`               |
+| `network`  | download and upload speed, a graph of the last minute                 | —                                                           |
 
-Options go in `[desktop.<name>]`. Every card also accepts `color` and `background`.
+<details>
+<summary><b>Card options</b></summary>
+
+<br>
+
+Every card also accepts `color` and `background`.
 
 ```toml
 [desktop.clock]
@@ -201,70 +279,121 @@ units = "metric"     # or "imperial"
 
 [desktop.github]
 user = "Nurysso"
-token_file = "~/.config/tokens/gpat.txt"   # a token with the read:user scope, nothing else in the file
+token_file = "~/.config/tokens/gpat.txt"   # a token with only the read:user scope
 
 [desktop.apps]
-apps = ["firefox", "kitty", "org.gnome.Nautilus"]   # desktop entry ids or shell commands
+apps = ["firefox", "kitty", "dolphin"]   # desktop entry ids or shell commands
+
+[desktop.keybinds]
+file = "~/.config/hypr/configs/keybinds.lua"
+rows = 8                      # binds per page; the header arrows flip pages
+rotate = 0                    # seconds between pages, 0 = only when you click
+categories = ["Applications"] # only these "--/" categories (default: all)
+
+[desktop.todo]
+file = "~/.local/share/hecate/todo.md"   # "- [ ] task" / "- [x] task" lines, editable by hand
+max = 8                                  # tasks shown
+
+[desktop.updates]
+interval = 60                 # minutes between checks
+packages = 5                  # packages listed
+news = true                   # Arch news headlines, click one to open it
+news_count = 3
+command = "kitty -e ~/.config/hecate/scripts/install-updates.sh"   # what the Update button runs
+
+[desktop.network]
+seconds = 60                  # history shown, 10 to 300
 ```
 
-To find an app's desktop entry id, look in `/usr/share/applications`: the id is the file name without `.desktop`.
+A desktop entry id is the file name in `/usr/share/applications` without `.desktop`.
 
-## Colors
+</details>
 
-`color` and `background` accept either:
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
 
-- an M3 color name, which keeps following the wallpaper, or
-- any fixed color, such as `"#ff8800"` or `"tomato"`.
+## ⚙️ Configure everything
 
-Without an override, colors come from the theme. Backgrounds keep the glass look: they're drawn at `[theme] opacity`.
+Everything lives in `~/.config/hecate/hecate.toml`. The shell rereads it when you save and rebuilds only what changed. Anything you leave out uses the defaults shown in this README. A value it can't use falls back to its default and says so in `qs log`; a TOML syntax error keeps the last good settings.
+
+> [!TIP]
+> Try settings without touching your own file: `HECATE_CONFIG=/path/to/test.toml quickshell`
+
+```toml
+[wallpaper]
+dir = "~/Pictures/Wallpapers"   # top level only, no subfolders
+```
+
+### 🎨 Colors
+
+`color` and `background` take an M3 color name, which keeps following the wallpaper, or any fixed color such as `"#ff8800"` or `"tomato"`. Backgrounds stay glassy: they're drawn at `[theme] opacity`.
 
 ```toml
 [widgets.power]
-color = "error"               # icon or accent color
-background = "#2b1a1a"        # button, panel or card background
+color = "error"
+background = "#2b1a1a"
 ```
 
-M3 color names: `primary` `on_primary` `primary_container` `on_primary_container`, the same four for `secondary`, `tertiary` and `error`, plus `background` `on_background` `surface` `on_surface` `surface_variant` `on_surface_variant` `surface_container_lowest` `surface_container_low` `surface_container` `surface_container_high` `surface_container_highest` `outline` `outline_variant` `inverse_surface` `inverse_on_surface` `inverse_primary` `shadow` `scrim`.
+<details>
+<summary><b>All M3 color names</b></summary>
 
-## Wallpaper and theming
+<br>
 
-`~/.config/hecate/scripts/set-wallpaper.sh <image>` is the only thing that changes the wallpaper. The picker calls it, and you can run it yourself. It:
+`primary` `on_primary` `primary_container` `on_primary_container`, the same four for `secondary`, `tertiary` and `error`, plus `background` `on_background` `surface` `on_surface` `surface_variant` `on_surface_variant` `surface_container_lowest` `surface_container_low` `surface_container` `surface_container_high` `surface_container_highest` `outline` `outline_variant` `inverse_surface` `inverse_on_surface` `inverse_primary` `shadow` `scrim`
 
-1. points `~/.cache/hecate/wallpaper` at the image and fades to it with `awww img`. On login, Hyprland's autostart starts `awww-daemon` on black and fades that link back in, so the desktop rises out of hecate-sddm's fade.
-2. in `dynamic` mode, runs `matugen image` and writes the colors to `~/.cache/hecate/theme.json`.
+</details>
 
-The shell watches `theme.json` and fades to the new colors. Any templates in `~/.config/matugen/config.toml` are rendered on the same run.
+### 🌄 Wallpaper and theming
 
-## Keys, shortcuts and IPC
+`~/.config/hecate/scripts/set-wallpaper.sh <image>` is the only thing that changes the wallpaper; the picker calls it and so can you. It points `~/.cache/hecate/wallpaper` at the image and fades to it with `awww`. In `dynamic` mode it then runs matugen and writes `~/.cache/hecate/theme.json`, which the shell watches and fades to.
 
-| keys | opens |
-|---|---|
-| `SUPER+D` | app launcher |
-| `SUPER+V` | clipboard history |
-| `SUPER+ALT+E` | emoji picker |
-| `SUPER+SHIFT+N` | notifications |
-| `SUPER+N` | Wi-Fi & Bluetooth |
-| `SUPER+SHIFT+Q` | power menu |
-| `SUPER+CTRL+W` | wallpaper picker |
+<img src="https://github.com/user-attachments/assets/1bf1b82e-16cd-4119-873c-097ee1d8df9f" width="100%" alt="The shell on three wallpapers: blue sky, pixel-art meadow and pink clouds, with the desktop cards recolored to match">
 
-The volume, microphone and media keys are handled by the shell too.
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
 
-Hecate's binds reach the shell through Hyprland's global shortcuts, so a key press costs no process at all. The shell registers these under the app id `hecate`:
+## ⚡ Built for Hyprland
 
-- each panel by name: `launcher`, `control`, `notifications`, `calendar`, `connectivity`, `power`, `clipboard`, `emoji`, `wallpaper` (toggles it)
-- `volume-up`, `volume-down`, `volume-mute`, `mic-mute`
-- `media-play-pause`, `media-next`, `media-previous`, `media-stop`
-- `dnd`, `caffeine`
+The shell speaks to Hyprland over the same socket `hyprctl` uses and listens to its events instead of polling.
 
-Bind them in `configs/keybinds.lua`:
+|                            |                                                                                                                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Global shortcuts**       | Binds reach the shell through Hyprland's global-shortcuts protocol, so a key press doesn't start a process.                                                                        |
+| **Either config language** | `services/Hypr.qml` checks whether Hyprland runs a Lua config and sends `hl.dsp.*` calls or classic dispatchers to match. Custom widgets should use `Hypr.dispatch(lua, classic)`. |
+| **Its own layer rules**    | On start, and after every config reload, `hyprctl eval` turns off Hyprland's animations for the `hecate-*` windows, which animate themselves. Nothing to add to your config.       |
+| **Shaped blur**            | The `ext-background-effect` protocol hands Hyprland each surface's exact shape. It uses your `decoration:blur` settings.                                                           |
+| **Gaps**                   | The bar's margin follows `general:gaps_out` unless `[bar] margin` is set.                                                                                                          |
+| **Events**                 | Keyboard layout, submap and special workspaces come from `activelayout`, `submap` and `activespecial`, after one query at start.                                                   |
+
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
+
+## ⌨️ Keys, shortcuts and IPC
+
+| keys                                           | does                                          |
+| ---------------------------------------------- | --------------------------------------------- |
+| <kbd>Super</kbd>+<kbd>D</kbd>                  | app launcher                                  |
+| <kbd>Super</kbd>+<kbd>V</kbd>                  | clipboard history                             |
+| <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>E</kbd>   | emoji picker                                  |
+| <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd> | notifications                                 |
+| <kbd>Super</kbd>+<kbd>N</kbd>                  | Wi-Fi & Bluetooth                             |
+| <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>Q</kbd> | power menu                                    |
+| <kbd>Super</kbd>+<kbd>Ctrl</kbd>+<kbd>W</kbd>  | wallpaper picker                              |
+| volume, mic and media keys                     | handled by the shell, with the on-screen pill |
+
+The shell registers these global shortcuts under the app id `hecate`:
+
+- each panel by name, toggling it: `launcher` `control` `notifications` `calendar` `connectivity` `power` `clipboard` `emoji` `wallpaper`
+- `volume-up` `volume-down` `volume-mute` `mic-mute`
+- `media-play-pause` `media-next` `media-previous` `media-stop`
+- `dnd` `caffeine`
+
+Bind one in `configs/keybinds.lua`:
 
 ```lua
 hl.bind("SUPER + A", hl.dsp.global("hecate:control"))
 ```
 
-They're also there from scripts and the command line:
+Or drive the shell from scripts:
 
-```
+```sh
 qs ipc call hecate toggle <panel>      # or: open <panel>, close
 qs ipc call hecate volume +5           # -5, or mute
 qs ipc call hecate mic                 # mute or unmute the microphone
@@ -273,54 +402,77 @@ qs ipc call hecate dnd                 # do not disturb on/off
 qs ipc call hecate caffeine            # keep awake on/off
 ```
 
-## How it works with Hyprland
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
 
-The shell talks to Hyprland over its IPC socket (the one `hyprctl` uses) and listens to its events, rather than polling:
+## 📦 Requirements
 
-- **Dispatching.** Hecate's Hyprland config is Lua, which only accepts Lua-style dispatches such as `hl.dsp.focus({ workspace = "2" })`. `services/Hypr.qml` checks which language Hyprland is running and sends the right form, so workspace switching keeps working with a classic `hyprland.conf` too. Custom widgets should go through it (`Hypr.dispatch(lua, classic)`).
-- **Layer rules.** The shell animates its own windows, so on start (and again whenever Hyprland reloads its config, which clears them) it runs `hyprctl eval` to turn off Hyprland's layer animations for the `hecate-*` namespaces. Nothing needs adding to your Hyprland config.
-- **Blur.** Each surface tells Hyprland its exact shape through the `ext-background-effect` protocol, so the blur follows the rounded glass, even while a panel slides out. It uses Hyprland's `decoration:blur` settings.
-- **Gaps.** The bar's margin follows `general:gaps_out` (unless `[bar] margin` is set) and updates when the config reloads or game mode changes it.
-- **Keyboard layouts, submaps and special workspaces** come from Hyprland's `activelayout`, `submap` and `activespecial` events, after one `hyprctl` query at start.
+|              |                                                                                                                                                                               |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Needed**   | `quickshell` 0.3+, Hyprland 0.55+ (Lua config), `awww`, `matugen`, `jq`, `python` 3.11+, `cliphist`, `wl-clipboard`                                                           |
+| **Fonts**    | Symbols Nerd Font for icons, Inter (`inter-font`) for text, an emoji font such as `noto-fonts-emoji`                                                                          |
+| **Optional** | NetworkManager (Wi-Fi), BlueZ (Bluetooth), PipeWire (volume), UPower (batteries), power-profiles-daemon (power mode), `cava` (visualizer), `python-pillow` (wallpaper colors) |
 
-## Requirements
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
 
-- `quickshell` 0.3 or newer, Hyprland 0.55 or newer (Lua config), `awww`, `matugen`, `jq`
-- `python` 3.11 or newer (reads the TOML)
-- `cliphist` and `wl-clipboard` (the emoji picker also needs an emoji font such as `noto-fonts-emoji`)
-- a Symbols Nerd Font, and Inter (`inter-font`) for text
-- optional: NetworkManager for the Wi-Fi panel and BlueZ for Bluetooth (without them the panel says so), PipeWire for volume, UPower for `battery`, power-profiles-daemon for the power mode toggle, `cava` for the audio visualizer
+## 🩺 Troubleshooting
 
-Don't run swaync or any other notification daemon: this shell is the notification server.
+<details>
+<summary><b>A change to a <code>.qml</code> file doesn't show up</b></summary>
+<br>
+Quickshell reloads on save, but its file watcher can lose track after files are replaced in bulk (for example by <code>cp -r</code>). Restart it: <code>pkill -x quickshell; quickshell & disown</code>.
+</details>
 
-## Troubleshooting
+<details>
+<summary><b>Where's the log?</b></summary>
+<br>
+<code>qs log</code> prints the running shell's log: QML errors with file and line, and any hecate.toml value that was ignored.
+</details>
 
-**A change to a `.qml` file doesn't show up.** Quickshell reloads on save, but its file watcher can lose track after files are replaced in bulk (for example by `cp -r`). Restart it: `pkill -x quickshell; quickshell & disown`.
+<details>
+<summary><b>No blur</b></summary>
+<br>
+Check <code>decoration:blur:enabled</code> in Hyprland (game mode turns it off) and <code>[theme] blur</code>. Without blur, <code>[theme] opacity</code> defaults to a more solid 0.94.
+</details>
 
-**The log.** `qs log` prints the running shell's log, including QML errors with file and line, and any hecate.toml value that was ignored.
+<details>
+<summary><b>A bar widget is missing</b></summary>
+<br>
+A typo in its name is reported in <code>qs log</code>. Some widgets hide when there's nothing to show: <code>media</code> without a player, <code>battery</code> on a desktop, <code>tray</code> when empty, <code>keyboard</code> with one layout, <code>submap</code> outside a submap.
+</details>
 
-**No blur.** Check `decoration:blur:enabled` in Hyprland (game mode turns it off) and `[theme] blur`. Without blur, `[theme] opacity` defaults to a more solid 0.94.
+<details>
+<summary><b>The wallpaper picker is empty</b></summary>
+<br>
+It only lists images directly inside <code>[wallpaper] dir</code>, not in subfolders.
+</details>
 
-**A bar widget is missing.** If its name has a typo, `qs log` says which one. Some widgets hide themselves when there's nothing to show: `media` without a player, `battery` on a desktop, `tray` when empty, `keyboard` with one layout, `submap` outside a submap.
+<details>
+<summary><b>Clicking a workspace in a custom widget does nothing</b></summary>
+<br>
+A Lua config rejects a plain <code>workspace 2</code> dispatch. Go through <code>Hypr.dispatch</code>, which sends the right form.
+</details>
 
-**The wallpaper picker is empty.** It only lists images directly inside `[wallpaper] dir`, not in subfolders.
+<img src="../../.github/readme/divider.svg" width="100%" alt="">
 
-**Clicking a workspace does nothing.** Custom widgets that dispatch should go through `Hypr.dispatch`; a plain `workspace 2` dispatch is rejected by a Lua config.
-
-**Trying settings without touching your own file.** `HECATE_CONFIG=/path/to/test.toml quickshell` runs the shell on another hecate.toml.
-
-## Layout of this folder
+## 🗺️ Inside this folder
 
 ```
 shell.qml        entry point: windows, IPC and global shortcuts
-config/          Config (reads hecate.toml), Theme (colors, sizes, glass, motion, icons), GlobalStates (open panel, toggles)
-components/      building blocks: Panel, Glass, Pill, Card, Slider, QuickToggle, Tile, SearchField, Tooltip, ...
-services/        shared state: Hypr (Hyprland), Audio, Players (media), Notifs (notification server), Net,
-                 Cliphist, Emojis, Launches (launcher history), SysStats (CPU/memory/GPU/disk)
+config/          Config (reads hecate.toml) · Theme (colors, sizes, glass, motion, icons) · GlobalStates
+components/      Panel · Glass · Pill · Card · Slider · QuickToggle · Tile · SearchField · Tooltip · …
+services/        Hypr (Hyprland) · Audio · Players · Notifs · Net · Cliphist · Emojis · Launches · SysStats
 modules/
-  bar/           the bar, and bar/widgets with one file per bar widget
+  bar/           the bar, and bar/widgets with one file per widget
   desktop/       the desktop layer, desktop/widgets with one file per card, and cava.conf
-  notifications/ popups, history and the card both use
-  osd/           the volume and microphone display
+  notifications/ popups, history, and the card both use
+  osd/           the volume and microphone pill
   control/ calendar/ launcher/ connectivity/ power/ clipboard/ emoji/ wallpaper/   the panels
 ```
+
+<br>
+
+<div align="center">
+
+<sub>Part of <a href="../../README.md">Hecate</a> · made with Quickshell, Hyprland and matugen</sub>
+
+</div>

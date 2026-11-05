@@ -372,7 +372,7 @@ build_package_list() {
     cliphist wl-clipboard xdg-user-dirs grim slurp tesseract tesseract-data-eng libnotify
     pipewire pipewire-pulse wireplumber pavucontrol playerctl cava brightnessctl
     networkmanager network-manager-applet bluez bluez-utils blueman polkit-kde-agent
-    sysstat lm_sensors batsignal
+    sysstat lm_sensors batsignal libvips
     qt6-base qt6-declarative qt6-wayland
     # app-theme.py recolors Materia-dark (GTK) and MateriaDark (Kvantum); kde-gtk-config ships the colorreload GTK module
     materia-gtk-theme kvantum kvantum-theme-materia qt6ct-kde kde-gtk-config breeze-icons vimix-cursors
@@ -669,6 +669,7 @@ TOOLS=(
   "opt|mpstat|sysstat|per-core CPU stats"
   "opt|sensors|lm_sensors|temperature readings"
   "opt|batsignal|batsignal|low battery warnings"
+  "opt|vipsthumbnail|libvips|fast wallpaper picker thumbnails"
   "opt|tesseract|tesseract|OCR screenshots"
   "opt|notify-send|libnotify|notifications from the scripts"
   "opt|hyprpicker|hyprpicker|the color picker keybind"
