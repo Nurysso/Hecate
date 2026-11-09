@@ -33,8 +33,8 @@ PanelWindow {
                 readonly property Region blur: Region { item: loader; radius: Theme.radiusLarge }
                 readonly property bool faded: opacity > 0.3   // flips once during the fade-in
                 source: Qt.resolvedUrl(`widgets/${modelData[0].toUpperCase()}${modelData.slice(1)}.qml`)
-                opacity: 0
-                Behavior on opacity { Anim { duration: Theme.ms(900); easing.type: Easing.InOutQuad } }   // in step with the wallpaper's fade-in
+                opacity: Theme.behindReveal ? 1 : 0
+                Behavior on opacity { Anim { duration: Theme.ms(900); easing.type: Easing.InOutQuad } }
                 Timer { running: true; interval: 150 + loader.index * 90; onTriggered: loader.opacity = 1 }
                 Component.onCompleted: root.cards = [...root.cards, loader]
                 Component.onDestruction: root.cards = root.cards.filter(l => l !== loader)

@@ -84,6 +84,9 @@ hl.layer_rule({ animation = "fade", match = { namespace = "hyprpicker" } })     
 hl.layer_rule({ animation = "fade", match = { namespace = "selection" } })       -- slurp
 hl.layer_rule({ animation = "fade", match = { namespace = "wayfreeze" } })
 
+-- The shell animates its own surfaces. Here as well as in services/Hypr.qml because the login reveal maps before that runs.
+hl.layer_rule({ no_anim = true, match = { namespace = "^hecate-.*" } })
+
 -- Fuzzel
 hl.layer_rule({ animation = "popin 80%", match = { namespace = "launcher" } })
 hl.layer_rule({ blur = true,             match = { namespace = "launcher" } })

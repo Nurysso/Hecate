@@ -79,9 +79,9 @@ Variants {
             anchors.bottomMargin: Theme.barBottom ? Theme.barMargin : 0
             anchors.leftMargin: Theme.barMargin
             anchors.rightMargin: Theme.barMargin
-            opacity: 0
+            opacity: Theme.behindReveal ? 1 : 0
             Component.onCompleted: opacity = 1
-            Behavior on opacity { Anim { duration: Theme.ms(900); easing.type: Easing.InOutQuad } }   // in step with the wallpaper's fade-in
+            Behavior on opacity { Anim { duration: Theme.ms(900); easing.type: Easing.InOutQuad } }
 
             Glass {
                 id: base

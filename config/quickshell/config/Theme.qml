@@ -63,6 +63,8 @@ Singleton {
     // Motion: M3 emphasized curves; [theme] animation_speed divides durations, animations = false zeroes them
     readonly property real speed: Config.theme.animations ? Config.theme.speed : 0
     function ms(n) { return speed > 0 ? Math.round(n / speed) : 0 }
+    // Started by the login reveal: the bar and cards are ready when it opens, so they don't fade in behind it
+    readonly property bool behindReveal: Quickshell.env("HECATE_REVEAL") === "1"
     readonly property int anim: ms(380)
     readonly property int animFast: ms(200)
     readonly property int animSlow: ms(700)

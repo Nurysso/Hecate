@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.0
+import QtQuick.Window 2.15
 import SddmComponents 2.0
 
 import Qt5Compat.GraphicalEffects
@@ -8,7 +9,7 @@ Rectangle {
     id: root
     width: 640
     height: 480
-    color: "black"
+    color: root.fadeColor
 
     // Config properties
     readonly property color textColor: config.stringValue("basicTextColor")
@@ -34,9 +35,12 @@ Rectangle {
     // ---- Fade settings (all overridable from theme.conf) ----
     // fadeEnabled=false disables the login fade entirely
     readonly property bool fadeEnabled: config.stringValue("fadeEnabled") !== "false"
-    // ms the screen takes to fade to the fade color after pressing Enter (0 = instant)
-    readonly property int fadeDuration: fadeEnabled ? cfgInt("fadeDuration", 220) : 0
-    // extra ms to hold on the faded screen before the login request is sent
+    // The session takes the screen soon after the password is accepted (usually 160-300 ms, 42 ms at the
+    // quickest). A greeter still drawing or shutting down then gets stuck, and shutting down takes about 50 ms.
+    readonly property int fadeLimit: 80
+    // ms the screen takes to fade to the fade color once the password is accepted (0 = instant)
+    readonly property int fadeDuration: fadeEnabled ? Math.min(cfgInt("fadeDuration", fadeLimit), fadeLimit) : 0
+    // extra ms to stay on the faded screen before the greeter closes
     readonly property int fadeHold: fadeEnabled ? cfgInt("fadeHold", 0) : 0
     // ms for the greeter to fade in from the fade color when it starts (0 = off)
     readonly property int introFadeDuration: fadeEnabled ? cfgInt("introFadeDuration", 0) : 0
@@ -52,8 +56,44 @@ Rectangle {
     // current duration used by the overlay (switched during the intro fade)
     property int overlayDuration: fadeDuration
 
-    property string pendingPassword: ""
     property bool loggingIn: false
+
+    // SDDM closes its window the moment a login succeeds, which leaves no time to fade. It doesn't know about
+    // this one, so on X11 the whole UI lives here and can play the fade before closing itself. Elsewhere
+    // (a Wayland greeter) windows can't be placed or focused like this: the UI stays in SDDM's window
+    // and a correct password cuts straight to black.
+    readonly property bool useStage: Qt.platform.pluginName === "xcb"
+    readonly property Item uiParent: useStage ? stage.contentItem : root
+
+    Window {
+        id: stage
+        readonly property var geometry: screenModel.geometry(screenModel.primary)
+        x: geometry.x
+        y: geometry.y
+        width: geometry.width
+        height: geometry.height
+        flags: Qt.FramelessWindowHint
+        color: root.fadeColor
+        transientParent: null   // a window with a parent is closed with it, and doesn't keep the greeter alive
+        onActiveChanged: if (active) passwordInput.forceActiveFocus()
+    }
+
+    // SDDM's window opens over anything shown before it and takes focus on the primary screen, so the
+    // stage goes up once SDDM has finished showing its window, and takes focus back whenever it gets it
+    function liftStage() {
+        stage.show();
+        stage.raise();
+    }
+    Window.onVisibilityChanged: {
+        if (useStage && root.Window.visibility !== Window.Hidden)
+            Qt.callLater(liftStage);
+    }
+    Window.onActiveChanged: {
+        if (useStage && root.Window.active) {
+            liftStage();
+            stage.requestActivate();
+        }
+    }
 
     // Helpers
     function usersCycleSelectPrev() {
@@ -109,21 +149,16 @@ Rectangle {
         if (loggingIn)
             return;
         loggingIn = true;
-        pendingPassword = password;
         passwordInput.enabled = false;
-        fadeOverlay.opacity = 1;
-        loginTimer.start();
+        var user = userModel.data(userModel.index(currentUsersIndex, 0), usernameRole);
+        sddm.login(user, password, currentSessionsIndex);
     }
 
-    // Login timer: waits for the fade, then sends the request
+    // The fade has finished: closing the last window ends the greeter
     Timer {
-        id: loginTimer
-        interval: root.fadeDuration + root.fadeHold
-        onTriggered: {
-            var user = userModel.data(userModel.index(root.currentUsersIndex, 0), root.usernameRole);
-            sddm.login(user, root.pendingPassword, root.currentSessionsIndex);
-            root.pendingPassword = "";
-        }
+        id: closeTimer
+        interval: Math.min(root.fadeDuration + root.fadeHold, root.fadeLimit)
+        onTriggered: stage.close()
     }
 
     // SDDM signals
@@ -132,8 +167,6 @@ Rectangle {
 
         function onLoginFailed() {
             root.loggingIn = false;
-            root.pendingPassword = "";
-            fadeOverlay.opacity = 0;
             passwordInput.enabled = true;
             passwordInput.clear();
             passwordInput.forceActiveFocus();
@@ -145,17 +178,15 @@ Rectangle {
             animateBorder.stop();
             backgroundBorder.border.width = 0;
             fadeOverlay.opacity = 1;
+            closeTimer.start();
         }
     }
 
     // Main UI
     Item {
         id: mainFrame
-        property variant geometry: screenModel.geometry(screenModel.primary)
-        x: geometry.x
-        y: geometry.y
-        width: geometry.width
-        height: geometry.height
+        parent: root.uiParent
+        anchors.fill: parent
 
         Shortcut {
             sequences: ["Alt+U", "F2"]
@@ -262,6 +293,8 @@ Rectangle {
             }
             echoMode: config.boolValue("passwordMask") ? TextInput.Password : TextInput.Normal
             color: config.stringValue("passwordTextColor") || root.textColor
+            opacity: root.loggingIn ? 0.4 : 1   // waiting for the answer; PAM can hold a wrong password for seconds
+            Behavior on opacity { NumberAnimation { duration: 120 } }
             selectionColor: root.textColor
             selectedTextColor: "#000000"
             clip: true
@@ -376,19 +409,18 @@ Rectangle {
         Component.onCompleted: passwordInput.forceActiveFocus()
     }
 
-    // Optional hidden cursor
-    Loader {
-        active: config.boolValue("hideCursor") || false
+    // The cursor: SDDM only sets one on its own window
+    MouseArea {
+        parent: root.uiParent
         anchors.fill: parent
-        sourceComponent: MouseArea {
-            enabled: false
-            cursorShape: Qt.BlankCursor
-        }
+        enabled: false
+        cursorShape: config.boolValue("hideCursor") ? Qt.BlankCursor : Qt.ArrowCursor
     }
 
     // Fade-to-black overlay (direct child of root, above everything)
     Rectangle {
         id: fadeOverlay
+        parent: root.uiParent
         anchors.fill: parent
         z: 100
         color: root.fadeColor
