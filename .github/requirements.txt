@@ -1,0 +1,5 @@
+# For the README's SVGs: pip install -r .github/requirements.txt && python .github/readme/generate.py
+#
+# generate.py also reads these fonts from their Arch paths, which pip can't install:
+#   sudo pacman -S noto-fonts ttf-jetbrains-mono-nerd
+fonttools>=4.68,<5

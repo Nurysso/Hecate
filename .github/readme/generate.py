@@ -4,10 +4,10 @@
 GitHub strips CSS from READMEs, so the styling lives in these images. Text is
 converted to outlines, so they look the same without Noto Sans installed.
 
-    pip install fonttools
+    pip install -r .github/requirements.txt
     python .github/readme/generate.py
 
-Needs Noto Sans and JetBrains Mono. Re-run after bumping version.txt. PALETTE is
+Needs Noto Sans and JetBrains Mono (see requirements.txt). Re-run after bumping version.txt. PALETTE is
 a copy of ~/.cache/hecate/theme.json for the wallpaper in the screenshots; it is
 frozen on purpose, so changing wallpaper doesn't change the README.
 """

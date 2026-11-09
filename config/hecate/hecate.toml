@@ -2,7 +2,7 @@
 # This file manages your Hecate installation settings
 
 [metadata]
-version = "0.6.0  magnificent possum"
+version = "0.6.1  magnificent possum"
 install_date = "2025-10-15"
 last_update = "2025-10-15"
 repo_url = "https://github.com/Nurysso/Hecate.git"
@@ -28,6 +28,7 @@ term = "kitty"
 browser = "firefox"
 shell = "fish"
 profile = "minimal"
+# sddm_switch = "no"  # set when you decline hecate-sddm during an update; remove it to be asked again
 
 # Quickshell: see config/quickshell/README.md
 

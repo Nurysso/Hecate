@@ -294,6 +294,7 @@ update_hecate() {
 
     # Run update script
     gum style --foreground "$C_TEXT" "Running update script..."
+    local old_version=$(get_current_version)
     bash "$update_script"
 
     # Clean up
@@ -301,6 +302,11 @@ update_hecate() {
 
     # Get new version after update
     local new_version=$(get_current_version)
+
+    # Cancelled, or already on the latest version
+    if [ "$new_version" = "$old_version" ]; then
+      return 0
+    fi
 
     echo ""
     gum style \
