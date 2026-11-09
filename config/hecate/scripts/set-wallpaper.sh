@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Usage: set-wallpaper.sh <image>
-# Sets the wallpaper through awww (fading into it) and, when [theme] mode = "dynamic",
+# Sets the wallpaper through awww (a circle growing from the middle of the screen) and, when [theme] mode = "dynamic",
 # regenerates the M3 palette with matugen into ~/.cache/hecate/theme.json (watched by Quickshell).
 set -euo pipefail
 
@@ -9,8 +9,8 @@ cache="$HOME/.cache/hecate"
 toml="$HOME/.config/hecate/hecate.toml"
 mkdir -p "$cache"
 
-ln -sfn "$wall" "$cache/wallpaper" # Hyprland autostart fades this back in on login
-awww img "$wall" -t fade --transition-duration 0.9 --transition-bezier .45,0,.55,1 --transition-fps 60 \
+ln -sfn "$wall" "$cache/wallpaper" # start-desktop.sh brings this back on login
+awww img "$wall" -t center --transition-duration 0.9 --transition-bezier .45,0,.55,1 --transition-fps 60 --transition-step 45 \
     || echo "set-wallpaper: awww-daemon not running, colors still updated" >&2
 
 mode=$(python3 -c 'import sys,tomllib; print(tomllib.load(open(sys.argv[1],"rb")).get("theme",{}).get("mode","dynamic"))' "$toml" 2>/dev/null || echo dynamic)

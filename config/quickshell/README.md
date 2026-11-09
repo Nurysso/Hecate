@@ -344,7 +344,7 @@ background = "#2b1a1a"
 
 ### 🌄 Wallpaper and theming
 
-`~/.config/hecate/scripts/set-wallpaper.sh <image>` is the only thing that changes the wallpaper; the picker calls it and so can you. It points `~/.cache/hecate/wallpaper` at the image and fades to it with `awww`. In `dynamic` mode it then runs matugen and writes `~/.cache/hecate/theme.json`, which the shell watches and fades to.
+`~/.config/hecate/scripts/set-wallpaper.sh <image>` is the only thing that changes the wallpaper; the picker calls it and so can you. It points `~/.cache/hecate/wallpaper` at the image and moves to it with `awww`, in a circle growing from the middle of the screen. In `dynamic` mode it then runs matugen and writes `~/.cache/hecate/theme.json`, which the shell watches and fades to.
 
 <img src="https://github.com/user-attachments/assets/1bf1b82e-16cd-4119-873c-097ee1d8df9f" width="100%" alt="The shell on three wallpapers: blue sky, pixel-art meadow and pink clouds, with the desktop cards recolored to match">
 
@@ -467,6 +467,7 @@ modules/
   notifications/ popups, history, and the card both use
   osd/           the volume and microphone pill
   control/ calendar/ launcher/ connectivity/ power/ clipboard/ emoji/ wallpaper/   the panels
+reveal/          the login circle: its own short-lived instance, run by hecate/scripts/start-desktop.sh
 ```
 
 <br>

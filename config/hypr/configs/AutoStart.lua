@@ -15,9 +15,8 @@ hl.on("hyprland.start", function()
 	local localBin = HOME .. "/.local/bin"
 	local scriptsDir = HOME .. "/.config/hypr/scripts"
 
-	-- Wallpaper: awww starts on black (where hecate-sddm's fade ends), then fades in the last one set-wallpaper.sh picked.
-	-- QuickShell (bar, panels, notification daemon) starts once that 0.9s fade is done, so it fades in second.
-	hl.exec_cmd("bash -c 'awww-daemon --no-cache & until awww query >/dev/null 2>&1; do sleep 0.05; done; awww clear 000000; awww img ~/.cache/hecate/wallpaper -t fade --transition-duration 0.9 --transition-bezier .45,0,.55,1 --transition-fps 60; sleep 0.9; pgrep -x quickshell >/dev/null || exec quickshell'")
+	-- Wallpaper and QuickShell (bar, panels, notification daemon): a circle from the middle of the screen reveals them together.
+	hl.exec_cmd(HOME .. "/.config/hecate/scripts/start-desktop.sh")
 	hl.exec_cmd("batsignal")
 
 
